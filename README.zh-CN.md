@@ -1,8 +1,15 @@
 # Cocos Creator MCP 服务器插件
 
+**[📖 English](README.md)**  **[📖 中文](README.zh-CN.md)**
+
 一个适用于 Cocos Creator 3.8+ 的综合性 MCP（模型上下文协议）服务器插件，使 AI 助手能够通过标准化协议与 Cocos Creator 编辑器进行交互。一键安装和使用，省去所有繁琐环境和配置。已经测试过Claude客户端Claude CLI和Cursor，其他的编辑器理论上也完美支持。
 
 **🚀 现在提供 9 个类别的 80 个工具，实现95%的编辑器控制！（暂时无法操控预制体）**
+
+##快速链接
+
+- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 80 tools
+- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有80个工具的详细文档
 
 ## 快速使用
 
@@ -49,8 +56,9 @@ claude mcp add --transport http http://localhost:3000/mcp（使用你自己配�
 
 **效果：**
 
-![image-20250717174157957](./image/入口.png)
-
+<img width="1166" height="693" alt="image" src="https://github.com/user-attachments/assets/ecc30596-2e81-4123-b3fd-9e2cf08e5863" />
+<img width="470" height="622" alt="image" src="https://github.com/user-attachments/assets/504fa39b-4f43-4cc4-a912-28654c488072" />
+<img width="466" height="499" alt="image" src="https://github.com/user-attachments/assets/e5f73aa2-068f-457f-94fd-02f52084d6f4" />
 
 ## 功能特性
 
