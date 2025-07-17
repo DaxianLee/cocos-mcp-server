@@ -10,7 +10,8 @@ A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8
 
 - **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 80 tools
 - **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有80个工具的详细文档
-- **[🧪 Testing Guide](TEST_GUIDE.md)** - How to test the MCP server
+
+
 **Claude cli configuration:**
 
 ```
