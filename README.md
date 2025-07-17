@@ -1,5 +1,5 @@
 # Cocos Creator MCP Server Plugin
-
+**[📖 English](README.md)** **[📖 中文](README.zh-CN.md)**
 A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8+, enabling AI assistants to interact with the Cocos Creator editor through standardized protocols. One-click installation and use, eliminating all cumbersome environments and configurations. Claude clients Claude CLI and Cursor have been tested, and other editors are also perfectly supported in theory.
 
 **🚀 Now provides 80 tools in 9 categories, achieving 95% editor control! (Prefabs cannot be manipulated for the time being)**
@@ -51,6 +51,9 @@ claude mcp add --transport http http://localhost:3000/mcp (use the port number y
 }
 
 ```
+<img width="1166" height="693" alt="image" src="https://github.com/user-attachments/assets/ecc30596-2e81-4123-b3fd-9e2cf08e5863" />
+<img width="470" height="622" alt="image" src="https://github.com/user-attachments/assets/504fa39b-4f43-4cc4-a912-28654c488072" />
+<img width="466" height="499" alt="image" src="https://github.com/user-attachments/assets/e5f73aa2-068f-457f-94fd-02f52084d6f4" />
 
 ## Features
 
