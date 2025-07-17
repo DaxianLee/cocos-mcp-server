@@ -1,0 +1,102 @@
+{
+    "$schema": "./@types/schema/package/index.json",
+    "package_version": 2,
+    "name": "cocos-mcp-server",
+    "version": "1.0.0",
+    "author": "Cocos Creator",
+    "editor": ">=3.8.6",
+    "scripts": {
+        "preinstall": "node ./scripts/preinstall.js",
+        "build": "tsc",
+        "watch": "tsc -w"
+    },
+    "description": "i18n:cocos-mcp-server.description",
+    "main": "./dist/main.js",
+    "dependencies": {
+        "fs-extra": "^11.3.0",
+        "uuid": "^9.0.1"
+    },
+    "devDependencies": {
+        "@cocos/creator-types": "^3.8.6",
+        "@types/fs-extra": "^9.0.5",
+        "@types/node": "^18.17.1",
+        "@types/uuid": "^9.0.8",
+        "typescript": "^5.8.2"
+    },
+    "panels": {
+        "default": {
+            "title": "i18n:cocos-mcp-server.panel_title",
+            "type": "dockable",
+            "main": "dist/panels/default",
+            "icon": "./static/icon.png",
+            "size": {
+                "min-width": 400,
+                "min-height": 300,
+                "width": 600,
+                "height": 500
+            }
+        }
+    },
+    "contributions": {
+        "menu": [
+            {
+                "path": "i18n:menu.extension/Cocos MCP Server",
+                "label": "i18n:cocos-mcp-server.open_panel",
+                "message": "open-panel"
+            }
+        ],
+        "messages": {
+            "open-panel": {
+                "methods": [
+                    "openPanel"
+                ]
+            },
+            "start-server": {
+                "methods": [
+                    "startServer"
+                ]
+            },
+            "stop-server": {
+                "methods": [
+                    "stopServer"
+                ]
+            },
+            "get-server-status": {
+                "methods": [
+                    "getServerStatus"
+                ]
+            },
+            "update-settings": {
+                "methods": [
+                    "updateSettings"
+                ]
+            },
+            "getToolsList": {
+                "methods": [
+                    "getToolsList"
+                ]
+            },
+            "get-server-settings": {
+                "methods": [
+                    "getServerSettings"
+                ]
+            }
+        },
+        "scene": {
+            "script": "./dist/scene.js",
+            "methods": [
+                "createNewScene",
+                "addComponentToNode",
+                "removeComponentFromNode",
+                "getNodeInfo",
+                "getAllNodes",
+                "findNodeByName",
+                "setNodeProperty",
+                "setComponentProperty",
+                "getCurrentSceneInfo",
+                "getSceneHierarchy",
+                "createPrefabFromNode"
+            ]
+        }
+    }
+}

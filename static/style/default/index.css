@@ -1,0 +1,65 @@
+.mcp-server-panel {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+header h2 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+}
+
+section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: var(--color-normal-fill-emphasis);
+    border-radius: 4px;
+}
+
+section h3 {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.status-value {
+    font-weight: 600;
+}
+
+.status-value.running {
+    color: var(--color-success-fill);
+}
+
+.status-value.stopped {
+    color: var(--color-warn-fill);
+}
+
+.server-controls {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.server-controls ui-button {
+    min-width: 150px;
+}
+
+.connection-details {
+    margin-top: 10px;
+}
+
+footer {
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+ui-prop {
+    margin-bottom: 10px;
+}

@@ -1,0 +1,64 @@
+<div class="mcp-server-panel">
+    <header>
+        <h2 id="panelTitle"></h2>
+    </header>
+    
+    <section class="server-status">
+        <h3 id="serverStatusLabel"></h3>
+        <div class="status-info">
+            <ui-prop>
+                <ui-label id="serverStatusLabelProp" slot="label"></ui-label>
+                <ui-label id="serverStatusValue" slot="content" class="status-value" :class="statusClass"></ui-label>
+            </ui-prop>
+            <ui-prop v-if="serverRunning">
+                <ui-label id="connectedLabel" slot="label"></ui-label>
+                <ui-label id="connectedClients" slot="content"></ui-label>
+            </ui-prop>
+        </div>
+    </section>
+
+    <section class="server-controls">
+        <ui-button id="toggleServerBtn" @click="toggleServer" :disabled="isProcessing" class="primary"></ui-button>
+    </section>
+
+    <section class="server-settings">
+        <h3 id="settingsLabel"></h3>
+        <ui-prop>
+            <ui-label id="portLabel" slot="label"></ui-label>
+            <ui-num-input id="portInput" slot="content" 
+                :min="1024" :max="65535" :step="1"
+                :disabled="serverRunning">
+            </ui-num-input>
+        </ui-prop>
+        <ui-prop>
+            <ui-label id="autoStartLabel" slot="label"></ui-label>
+            <ui-checkbox id="autoStartInput" slot="content"></ui-checkbox>
+        </ui-prop>
+        <ui-prop>
+            <ui-label id="debugLogLabel" slot="label"></ui-label>
+            <ui-checkbox id="debugLogInput" slot="content"></ui-checkbox>
+        </ui-prop>
+        <ui-prop>
+            <ui-label id="maxConnectionsLabel" slot="label"></ui-label>
+            <ui-num-input id="maxConnInput" slot="content" 
+                :min="1" :max="100" :step="1">
+            </ui-num-input>
+        </ui-prop>
+    </section>
+
+    <section class="server-info" v-if="serverRunning">
+        <h3 id="connectionInfoLabel"></h3>
+        <div class="connection-details">
+            <ui-prop>
+                <ui-label id="httpUrlLabel" slot="label"></ui-label>
+                <ui-input id="httpUrlInput" slot="content" :value="httpUrl" readonly>
+                    <ui-button id="copyBtn" slot="suffix" @click="copyUrl"></ui-button>
+                </ui-input>
+            </ui-prop>
+        </div>
+    </section>
+
+    <footer>
+        <ui-button id="saveSettingsBtn" @click="saveSettings" :disabled="!settingsChanged"></ui-button>
+    </footer>
+</div>

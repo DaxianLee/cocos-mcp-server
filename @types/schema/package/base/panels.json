@@ -1,0 +1,81 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "description": "面板数据 / Panel data",
+    "additionalProperties": false,
+    "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+            "type": "object",
+            "description": "面板名 / Panel name",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "default": "Default Panel",
+                    "description": "面板标题，支持 i18n:key / Panel title, support for i18n:key (required)"
+                },
+                "main": {
+                    "type": "string",
+                    "default": "dist/panels/default/index.js",
+                    "description": "入口函数 / Entry function (required)"
+                },
+                "icon": {
+                    "type": "string",
+                    "description": "面板图标存放相对目录 / Relative directory for panel icon storage"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["dockable", "simple"],
+                    "default": "dockable",
+                    "description": "面板类型（dockable | simple） / Panel type (dockable | simple)"
+                },
+                "flags": {
+                    "type": "object",
+                    "properties": {
+                        "resizable": {
+                            "type": "boolean",
+                            "default": true,
+                            "description": "是否可以改变大小，默认 true / Whether the size can be changed, default true"
+                        },
+                        "save": {
+                            "type": "boolean",
+                            "default": true,
+                            "description": "是否需要保存，默认 false / Whether to save, default false"
+                        },
+                        "alwaysOnTop": {
+                            "type": "boolean",
+                            "default": true,
+                            "description": "是否保持顶层显示，默认 false / Whether to keep the top level display, default false"
+                        }
+                    }
+                },
+                "size": {
+                    "type": "object",
+                    "description": "面板大小信息 / Panel size information",
+                    "properties": {
+                        "min-width": {
+                            "type": "number",
+                            "default": 200,
+                            "description": "面板最小宽度 / Minimum panel width"
+                        },
+                        "min-height": {
+                            "type": "number",
+                            "default": 200,
+                            "description": "面板最小高度 / Minimum panel height"
+                        },
+                        "width": {
+                            "type": "number",
+                            "default": 400,
+                            "description": " 面板默认宽度 / Panel Default Width"
+                        },
+                        "height": {
+                            "type": "number",
+                            "default": 600,
+                            "description": "面板默认高度 / Panel Default Height"
+                        }
+                    }
+                }
+            },
+            "required": ["title", "main"]
+        }
+    }
+}
