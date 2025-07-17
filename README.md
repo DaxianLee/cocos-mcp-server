@@ -1,5 +1,7 @@
 # Cocos Creator MCP Server Plugin
 **[📖 English](README.md)** **[📖 中文](README.zh-CN.md)**
+
+
 A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8+, enabling AI assistants to interact with the Cocos Creator editor through standardized protocols. One-click installation and use, eliminating all cumbersome environments and configurations. Claude clients Claude CLI and Cursor have been tested, and other editors are also perfectly supported in theory.
 
 **🚀 Now provides 80 tools in 9 categories, achieving 95% editor control! (Prefabs cannot be manipulated for the time being)**
@@ -292,14 +294,6 @@ The plugin is fully written in TypeScript with:
 - Comprehensive type definitions for all APIs
 - IntelliSense support for development
 - Automatic compilation to JavaScript
-
-## Testing
-
-The project includes comprehensive testing tools:
-
-- **[Manual Testing Guide](TEST_GUIDE.md)** - Step-by-step testing procedures
-- **Automated Test Scripts**: `test-mcp-server.js`, `test-all-features.sh`, `test_mcp_server.py`
-- **Comprehensive Test Suite**: `comprehensive-test.js` - Tests all 80 tools
 
 ### Running Tests
 
