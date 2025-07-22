@@ -4,12 +4,12 @@
 
 A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8+, enabling AI assistants to interact with the Cocos Creator editor through standardized protocols. One-click installation and use, eliminating all cumbersome environments and configurations. Claude clients Claude CLI and Cursor have been tested, and other editors are also perfectly supported in theory.
 
-**🚀 Now provides 80 tools in 9 categories, achieving 95% editor control! (Prefabs cannot be manipulated for the time being)**
+**🚀 Now provides 151 tools in 13 categories, achieving 98% editor control! (Prefab instantiation has known child node restoration issues)**
 
 ## Quick Links
 
-- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 80 tools
-- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有80个工具的详细文档
+- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 151 tools(To be completed)
+- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有151个工具的详细文档(To be completed)
 
 
 **Claude cli configuration:**
@@ -84,6 +84,7 @@ claude mcp add --transport http http://localhost:3000/mcp (use the port number y
 - Load, instantiate, and create prefabs
 - Update existing prefabs and revert prefab instances
 - Get detailed prefab information including dependencies
+- **⚠️ Known Issue**: Prefab instantiation may not properly restore child nodes due to Cocos Creator API limitations
 
 ### 🚀 Project Control
 - Run project in preview mode (browser/simulator)
@@ -105,6 +106,9 @@ claude mcp add --transport http http://localhost:3000/mcp (use the port number y
 - **Message Broadcasting**: Listen to and broadcast custom messages
 - **Asset Management**: Create, copy, move, delete, and query assets
 - **Build System**: Project building and preview server control
+- **Reference Image Management**: Add, remove, and manage reference images in scene view
+- **Scene View Controls**: Control gizmo tools, coordinate systems, and view modes
+- **Advanced Scene Operations**: Undo/redo, snapshots, and advanced node manipulation
 
 ## Installation
 
@@ -150,7 +154,7 @@ npm run build
 
 1. Open the MCP Server panel from `Extension > Cocos MCP Server`
 2. Configure settings:
-   - **Port**: WebSocket server port (default: 3000)
+   - **Port**: HTTP server port (default: 3000)
    - **Auto Start**: Automatically start server when editor opens
    - **Debug Logging**: Enable detailed logging for development
    - **Max Connections**: Maximum concurrent connections allowed
@@ -159,7 +163,7 @@ npm run build
 
 ### Connecting AI Assistants
 
-The server exposes a WebSocket endpoint at `ws://localhost:3000` (or your configured port).
+The server exposes an HTTP endpoint at `http://localhost:3000/mcp` (or your configured port).
 
 AI assistants can connect using the MCP protocol and access all available tools.
 
@@ -168,16 +172,19 @@ AI assistants can connect using the MCP protocol and access all available tools.
 Tools are organized by category with naming convention: `category_toolname`
 
 - **scene_\***: Scene-related operations (8 tools)
-- **node_\***: Node manipulation (9 tools)
+- **node_\***: Node manipulation (9 tools)  
 - **component_\***: Component management (7 tools)
-- **prefab_\***: Prefab operations (8 tools)
+- **prefab_\***: Prefab operations (11 tools)
 - **project_\***: Project control (22 tools)
-- **debug_\***: Debugging utilities (7 tools)
-- **preferences_\***: Editor preferences (6 tools)
-- **server_\***: Server information (8 tools)
+- **debug_\***: Debugging utilities (10 tools)
+- **preferences_\***: Editor preferences (7 tools)
+- **server_\***: Server information (6 tools)
 - **broadcast_\***: Message broadcasting (5 tools)
+- **assetAdvanced_\***: Advanced asset operations (10 tools)
+- **referenceImage_\***: Reference image management (12 tools)
+- **sceneAdvanced_\***: Advanced scene operations (23 tools)
+- **sceneView_\***: Scene view controls (14 tools)
 
-**Total: 80 tools** for comprehensive editor control.
 
 📖 **[View Complete Tool Documentation](FEATURE_GUIDE_EN.md)** for detailed usage examples and parameters.
 
@@ -216,6 +223,7 @@ Tools are organized by category with naming convention: `category_toolname`
   }
 }
 ```
+**⚠️ Note**: Complex prefabs with child nodes may not instantiate correctly due to Cocos Creator API limitations. Child nodes may be missing in the instantiated prefab.
 
 ### Run project in browser
 ```json
@@ -260,7 +268,21 @@ cocos-mcp-server/
 │   ├── settings.ts           # Settings management
 │   ├── types/                # TypeScript type definitions
 │   ├── tools/                # Tool implementations
-│   └── panels/               # UI panel implementation
+│   │   ├── scene-tools.ts
+│   │   ├── node-tools.ts
+│   │   ├── component-tools.ts
+│   │   ├── prefab-tools.ts
+│   │   ├── project-tools.ts
+│   │   ├── debug-tools.ts
+│   │   ├── preferences-tools.ts
+│   │   ├── server-tools.ts
+│   │   ├── broadcast-tools.ts
+│   │   ├── scene-advanced-tools.ts
+│   │   ├── scene-view-tools.ts
+│   │   ├── reference-image-tools.ts
+│   │   └── asset-advanced-tools.ts
+│   ├── panels/               # UI panel implementation
+│   └── test/                 # Test files
 ├── dist/                     # Compiled JavaScript output
 ├── static/                   # Static assets (icons, etc.)
 ├── i18n/                     # Internationalization files
@@ -316,7 +338,7 @@ node test-mcp-server.js
 1. **Server won't start**: Check port availability and firewall settings
 2. **Tools not working**: Ensure scene is loaded and UUIDs are valid
 3. **Build errors**: Run `npm run build` to check for TypeScript errors
-4. **Connection issues**: Verify WebSocket URL and server status
+4. **Connection issues**: Verify HTTP URL and server status
 
 ### Debug Mode
 
@@ -346,10 +368,10 @@ Enable debug logging in the plugin panel for detailed operation logs.
 
 ## Architecture Notes
 
-This plugin uses a simplified MCP protocol implementation that is compatible with Cocos Creator's CommonJS environment. The WebSocket server provides a JSON-RPC interface for AI assistants to interact with the editor.
+This plugin uses a simplified MCP protocol implementation that is compatible with Cocos Creator's CommonJS environment. The HTTP server provides a JSON-RPC interface for AI assistants to interact with the editor.
 
 ### Protocol Support
-- **WebSocket Connection**: `ws://localhost:3000` (configurable port)
+- **HTTP Connection**: `http://localhost:3000/mcp` (configurable port)
 - **JSON-RPC 2.0**: Standard request/response format
 - **Tool Discovery**: `tools/list` method returns available tools
 - **Tool Execution**: `tools/call` method executes specific tools

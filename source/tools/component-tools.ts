@@ -5,13 +5,13 @@ export class ComponentTools implements ToolExecutor {
         return [
             {
                 name: 'add_component',
-                description: 'Add a component to a specific node. The component will be added to the exact node specified by nodeUuid.',
+                description: 'Add a component to a specific node. IMPORTANT: You must provide the nodeUuid parameter to specify which node to add the component to.',
                 inputSchema: {
                     type: 'object',
                     properties: {
                         nodeUuid: {
                             type: 'string',
-                            description: 'Target node UUID. Use get_node_info or find_node_by_name to get the UUID of the desired node.'
+                            description: 'Target node UUID. REQUIRED: You must specify the exact node to add the component to. Use get_all_nodes or find_node_by_name to get the UUID of the desired node.'
                         },
                         componentType: {
                             type: 'string',

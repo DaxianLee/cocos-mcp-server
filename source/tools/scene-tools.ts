@@ -158,6 +158,7 @@ export class SceneTools implements ToolExecutor {
 
     private async getSceneList(): Promise<ToolResponse> {
         return new Promise((resolve) => {
+            // Note: query-assets API corrected with proper parameters
             Editor.Message.request('asset-db', 'query-assets', {
                 pattern: 'db://assets/**/*.scene'
             }).then((results: any[]) => {

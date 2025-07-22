@@ -5,7 +5,7 @@ export class NodeTools implements ToolExecutor {
         return [
             {
                 name: 'create_node',
-                description: 'Create a new node in the scene. If parentUuid is not provided, the node will be created at the current selection in the editor.',
+                description: 'Create a new node in the scene. IMPORTANT: You should always provide parentUuid to specify where to create the node. If parentUuid is not provided, the node will be created at the scene root.',
                 inputSchema: {
                     type: 'object',
                     properties: {
@@ -15,7 +15,7 @@ export class NodeTools implements ToolExecutor {
                         },
                         parentUuid: {
                             type: 'string',
-                            description: 'Parent node UUID. If not provided, node will be created at current editor selection. To create at scene root, first get the root node UUID.'
+                            description: 'Parent node UUID. STRONGLY RECOMMENDED: Always provide this parameter. Use get_current_scene or get_all_nodes to find parent UUIDs. If not provided, node will be created at scene root.'
                         },
                         nodeType: {
                             type: 'string',
@@ -194,14 +194,39 @@ export class NodeTools implements ToolExecutor {
 
     private async createNode(args: any): Promise<ToolResponse> {
         return new Promise(async (resolve) => {
-            // 如果指定了父节点，先验证父节点是否存在
-            if (args.parentUuid) {
+            let targetParentUuid = args.parentUuid;
+            
+            // 如果没有提供父节点UUID，获取场景根节点
+            if (!targetParentUuid) {
                 try {
-                    const parentNode = await Editor.Message.request('scene', 'query-node', args.parentUuid);
+                    const sceneInfo = await Editor.Message.request('scene', 'query-node-tree');
+                    if (sceneInfo && typeof sceneInfo === 'object' && 'uuid' in sceneInfo) {
+                        targetParentUuid = sceneInfo.uuid;
+                        console.log(`No parent specified, using scene root: ${targetParentUuid}`);
+                    } else if (Array.isArray(sceneInfo) && sceneInfo.length > 0 && sceneInfo[0].uuid) {
+                        // 如果返回的是数组，使用第一个元素（通常是场景根节点）
+                        targetParentUuid = sceneInfo[0].uuid;
+                        console.log(`No parent specified, using scene root: ${targetParentUuid}`);
+                    } else {
+                        // 备用方案：尝试获取当前场景
+                        const currentScene = await Editor.Message.request('scene', 'query-current-scene');
+                        if (currentScene && currentScene.uuid) {
+                            targetParentUuid = currentScene.uuid;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to get scene root, will use default behavior');
+                }
+            }
+
+            // 如果指定了父节点，先验证父节点是否存在
+            if (targetParentUuid) {
+                try {
+                    const parentNode = await Editor.Message.request('scene', 'query-node', targetParentUuid);
                     if (!parentNode) {
                         resolve({
                             success: false,
-                            error: `Parent node with UUID '${args.parentUuid}' not found`
+                            error: `Parent node with UUID '${targetParentUuid}' not found`
                         });
                         return;
                     }
@@ -219,25 +244,31 @@ export class NodeTools implements ToolExecutor {
                 type: args.nodeType || 'cc.Node'
             };
 
-            // 使用更明确的父节点指定方式
-            if (args.parentUuid) {
-                nodeData.parent = args.parentUuid;
-                // 尝试先创建节点，然后移动到指定父节点
-                Editor.Message.request('scene', 'create-node', nodeData).then((nodeUuid: any) => {
-                    // 如果创建成功但可能没有在正确的父节点下，尝试移动
-                    if (args.parentUuid && nodeUuid) {
-                        Editor.Message.request('scene', 'move-node', {
-                            uuid: nodeUuid,
-                            parent: args.parentUuid,
-                            index: args.siblingIndex !== undefined ? args.siblingIndex : -1
+            // 使用正确的create-node API参数结构
+            if (targetParentUuid) {
+                const createNodeOptions = {
+                    parent: targetParentUuid,
+                    name: args.name,
+                    components: args.nodeType && args.nodeType !== 'Node' ? [args.nodeType] : undefined
+                };
+                
+                Editor.Message.request('scene', 'create-node', createNodeOptions).then((nodeUuid: any) => {
+                    // 如果需要设置特定的兄弟索引，使用set-parent API
+                    if (args.siblingIndex !== undefined && args.siblingIndex >= 0 && nodeUuid) {
+                        Editor.Message.request('scene', 'set-parent', {
+                            parent: targetParentUuid,
+                            uuids: [nodeUuid],
+                            keepWorldTransform: false
                         }).then(() => {
                             resolve({
                                 success: true,
                                 data: {
                                     uuid: nodeUuid,
                                     name: args.name,
-                                    parentUuid: args.parentUuid,
-                                    message: `Node '${args.name}' created under specified parent`
+                                    parentUuid: targetParentUuid,
+                                    message: args.parentUuid 
+                                        ? `Node '${args.name}' created under specified parent`
+                                        : `Node '${args.name}' created at scene root (no parent specified)`
                                 }
                             });
                         }).catch(() => {
@@ -247,7 +278,7 @@ export class NodeTools implements ToolExecutor {
                                 data: {
                                     uuid: nodeUuid,
                                     name: args.name,
-                                    message: `Node '${args.name}' created but may not be under specified parent`,
+                                    message: `Node '${args.name}' created but may not be under intended parent`,
                                     warning: 'Failed to move node to specified parent'
                                 }
                             });
@@ -266,14 +297,20 @@ export class NodeTools implements ToolExecutor {
                     resolve({ success: false, error: err.message });
                 });
             } else {
-                // 没有指定父节点，使用默认行为
-                Editor.Message.request('scene', 'create-node', nodeData).then((result: any) => {
+                // 没有找到场景根节点，使用默认行为（创建在场景根节点）
+                const createNodeOptions = {
+                    name: args.name,
+                    components: args.nodeType && args.nodeType !== 'Node' ? [args.nodeType] : undefined
+                };
+                
+                Editor.Message.request('scene', 'create-node', createNodeOptions).then((result: any) => {
                     resolve({
                         success: true,
                         data: {
                             uuid: result,
                             name: args.name,
-                            message: `Node '${args.name}' created at current selection`
+                            message: `Node '${args.name}' created at default location (scene root not found)`,
+                            warning: 'Could not determine scene root, node created at default location'
                         }
                     });
                 }).catch((err: Error) => {
@@ -320,18 +357,51 @@ export class NodeTools implements ToolExecutor {
 
     private async findNodes(pattern: string, exactMatch: boolean = false): Promise<ToolResponse> {
         return new Promise((resolve) => {
-            Editor.Message.request('scene', 'query-nodes-by-name', {
-                name: pattern,
-                exactMatch: exactMatch
-            }).then((results: any[]) => {
-                const nodes = results.map(node => ({
-                    uuid: node.uuid,
-                    name: node.name,
-                    path: node.path
-                }));
+            // Note: 'query-nodes-by-name' API doesn't exist in official documentation
+            // Using tree traversal as primary approach
+            Editor.Message.request('scene', 'query-node-tree').then((tree: any) => {
+                const nodes: any[] = [];
+                
+                const searchTree = (node: any, currentPath: string = '') => {
+                    const nodePath = currentPath ? `${currentPath}/${node.name}` : node.name;
+                    
+                    const matches = exactMatch ? 
+                        node.name === pattern : 
+                        node.name.toLowerCase().includes(pattern.toLowerCase());
+                    
+                    if (matches) {
+                        nodes.push({
+                            uuid: node.uuid,
+                            name: node.name,
+                            path: nodePath
+                        });
+                    }
+                    
+                    if (node.children) {
+                        for (const child of node.children) {
+                            searchTree(child, nodePath);
+                        }
+                    }
+                };
+                
+                if (tree) {
+                    searchTree(tree);
+                }
+                
                 resolve({ success: true, data: nodes });
             }).catch((err: Error) => {
-                resolve({ success: false, error: err.message });
+                // 备用方案：使用场景脚本
+                const options = {
+                    name: 'cocos-mcp-server',
+                    method: 'findNodes',
+                    args: [pattern, exactMatch]
+                };
+                
+                Editor.Message.request('scene', 'execute-scene-script', options).then((result: any) => {
+                    resolve(result);
+                }).catch((err2: Error) => {
+                    resolve({ success: false, error: `Tree search failed: ${err.message}, Scene script failed: ${err2.message}` });
+                });
             });
         });
     }
@@ -493,10 +563,11 @@ export class NodeTools implements ToolExecutor {
 
     private async moveNode(nodeUuid: string, newParentUuid: string, siblingIndex: number = -1): Promise<ToolResponse> {
         return new Promise((resolve) => {
-            Editor.Message.request('scene', 'move-node', {
-                uuid: nodeUuid,
+            // Use correct set-parent API instead of move-node
+            Editor.Message.request('scene', 'set-parent', {
                 parent: newParentUuid,
-                index: siblingIndex
+                uuids: [nodeUuid],
+                keepWorldTransform: false
             }).then(() => {
                 resolve({
                     success: true,
@@ -510,6 +581,7 @@ export class NodeTools implements ToolExecutor {
 
     private async duplicateNode(uuid: string, includeChildren: boolean = true): Promise<ToolResponse> {
         return new Promise((resolve) => {
+            // Note: includeChildren parameter is accepted for future use but not currently implemented
             Editor.Message.request('scene', 'duplicate-node', uuid).then((result: any) => {
                 resolve({
                     success: true,

@@ -8,7 +8,7 @@ Cocos Creator MCP 服务器是一个全面的 Model Context Protocol (MCP) 服�
 
 ## 工具分类
 
-MCP 服务器提供了 **80 个工具**，按功能分为 9 个主要类别：
+MCP 服务器提供了 **151 个工具**，按功能分为 13 个主要类别：
 
 1. [场景操作工具 (Scene Tools)](#1-场景操作工具-scene-tools)
 2. [节点操作工具 (Node Tools)](#2-节点操作工具-node-tools)
@@ -19,6 +19,10 @@ MCP 服务器提供了 **80 个工具**，按功能分为 9 个主要类别：
 7. [偏好设置工具 (Preferences Tools)](#7-偏好设置工具-preferences-tools)
 8. [服务器工具 (Server Tools)](#8-服务器工具-server-tools)
 9. [广播工具 (Broadcast Tools)](#9-广播工具-broadcast-tools)
+10. [高级资源工具 (Asset Advanced Tools)](#10-高级资源工具-asset-advanced-tools)
+11. [参考图像工具 (Reference Image Tools)](#11-参考图像工具-reference-image-tools)
+12. [高级场景工具 (Scene Advanced Tools)](#12-高级场景工具-scene-advanced-tools)
+13. [场景视图工具 (Scene View Tools)](#13-场景视图工具-scene-view-tools)
 
 ---
 
@@ -155,9 +159,14 @@ MCP 服务器提供了 **80 个工具**，按功能分为 9 个主要类别：
 
 **参数**:
 - `name` (string, 必需): 节点名称
-- `parentUuid` (string, 可选): 父节点UUID，如果不提供则在当前编辑器选择位置创建
+- `parentUuid` (string, **强烈建议**): 父节点UUID。**重要**：强烈建议始终提供此参数。使用 `get_current_scene` 或 `get_all_nodes` 查找父节点UUID。如果不提供，节点将在场景根节点创建。
 - `nodeType` (string, 可选): 节点类型，可选值：`Node`、`2DNode`、`3DNode`，默认为 `Node`
 - `siblingIndex` (number, 可选): 同级索引，-1 表示添加到末尾，默认为 -1
+
+**重要提示**: 为了确保节点创建在预期位置，请始终提供 `parentUuid` 参数。您可以通过以下方式获取父节点UUID：
+- 使用 `scene_get_current_scene` 获取场景根节点UUID
+- 使用 `node_get_all_nodes` 查看所有节点及其UUID
+- 使用 `node_find_node_by_name` 查找特定节点的UUID
 
 **示例**:
 ```json
@@ -316,8 +325,13 @@ MCP 服务器提供了 **80 个工具**，按功能分为 9 个主要类别：
 向指定节点添加组件
 
 **参数**:
-- `nodeUuid` (string, 必需): 目标节点UUID
+- `nodeUuid` (string, **必需**): 目标节点UUID。**重要**：必须指定要添加组件的确切节点。使用 `get_all_nodes` 或 `find_node_by_name` 获取所需节点的UUID。
 - `componentType` (string, 必需): 组件类型（如 cc.Sprite、cc.Label、cc.Button）
+
+**重要提示**: 在添加组件之前，请确保：
+1. 先使用 `node_get_all_nodes` 或 `node_find_node_by_name` 找到目标节点的UUID
+2. 验证节点存在且UUID正确
+3. 选择合适的组件类型
 
 **示例**:
 ```json
@@ -442,6 +456,8 @@ MCP 服务器提供了 **80 个工具**，按功能分为 9 个主要类别：
 
 ## 4. 预制体操作工具 (Prefab Tools)
 
+**⚠️ 已知问题**: 使用标准 Cocos Creator API 进行预制体实例化时，可能无法正确恢复包含子节点的复杂预制体结构。虽然预制体创建功能可以正确保存所有子节点信息，但通过 `create-node` 配合 `assetUuid` 进行的实例化过程存在限制，可能导致实例化的预制体中缺少子节点。
+
 ### 4.1 prefab_get_prefab_list
 获取项目中所有预制体
 
@@ -493,6 +509,8 @@ MCP 服务器提供了 **80 个工具**，按功能分为 9 个主要类别：
   }
 }
 ```
+
+**⚠️ 功能限制**: 包含子节点的复杂预制体可能无法正确实例化。由于 Cocos Creator API 在标准 `create-node` 方法中使用 `assetUuid` 的限制，可能只创建根节点，子节点可能会丢失。这是当前实现的已知问题。
 
 ### 4.4 prefab_create_prefab
 从节点创建预制体
@@ -1053,6 +1071,61 @@ MCP 服务器提供了 **80 个工具**，按功能分为 9 个主要类别：
 {
   "tool": "debug_get_editor_info",
   "arguments": {}
+}
+```
+
+### 6.8 debug_get_project_logs
+从 temp/logs/project.log 文件获取项目日志
+
+**参数**:
+- `lines` (number, 可选): 从日志文件末尾读取的行数，默认值为100，范围：1-10000
+- `filterKeyword` (string, 可选): 按指定关键词过滤日志
+- `logLevel` (string, 可选): 按日志级别过滤，选项：`ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`，默认为 `ALL`
+
+**示例**:
+```json
+{
+  "tool": "debug_get_project_logs",
+  "arguments": {
+    "lines": 200,
+    "filterKeyword": "prefab",
+    "logLevel": "INFO"
+  }
+}
+```
+
+### 6.9 debug_get_log_file_info
+获取项目日志文件信息
+
+**参数**: 无
+
+**返回**: 文件大小、最后修改时间、行数和文件路径信息
+
+**示例**:
+```json
+{
+  "tool": "debug_get_log_file_info",
+  "arguments": {}
+}
+```
+
+### 6.10 debug_search_project_logs
+在项目日志中搜索特定模式或错误
+
+**参数**:
+- `pattern` (string, 必需): 搜索模式（支持正则表达式）
+- `maxResults` (number, 可选): 最大匹配结果数量，默认为20，范围：1-100
+- `contextLines` (number, 可选): 匹配结果周围显示的上下文行数，默认为2，范围：0-10
+
+**示例**:
+```json
+{
+  "tool": "debug_search_project_logs",
+  "arguments": {
+    "pattern": "error|failed|exception",
+    "maxResults": 10,
+    "contextLines": 3
+  }
 }
 ```
 

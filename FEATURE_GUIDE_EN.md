@@ -8,7 +8,7 @@ This document provides detailed information about all available MCP tools and th
 
 ## Tool Categories
 
-The MCP server provides **80 tools** organized into 9 main categories:
+The MCP server provides **151 tools** organized into 13 main categories:
 
 1. [Scene Tools](#1-scene-tools)
 2. [Node Tools](#2-node-tools)
@@ -19,6 +19,10 @@ The MCP server provides **80 tools** organized into 9 main categories:
 7. [Preferences Tools](#7-preferences-tools)
 8. [Server Tools](#8-server-tools)
 9. [Broadcast Tools](#9-broadcast-tools)
+10. [Asset Advanced Tools](#10-asset-advanced-tools)
+11. [Reference Image Tools](#11-reference-image-tools)
+12. [Scene Advanced Tools](#12-scene-advanced-tools)
+13. [Scene View Tools](#13-scene-view-tools)
 
 ---
 
@@ -442,6 +446,8 @@ Get list of available component types
 
 ## 4. Prefab Tools
 
+**⚠️ Known Issue**: Prefab instantiation using the standard Cocos Creator API may not properly restore complex prefab structures with child nodes. While prefab creation correctly saves all child node information, the instantiation process through `create-node` with `assetUuid` has limitations and may result in missing child nodes in the instantiated prefab.
+
 ### 4.1 prefab_get_prefab_list
 Get all prefabs in the project
 
@@ -493,6 +499,8 @@ Instantiate a prefab in the scene
   }
 }
 ```
+
+**⚠️ Limitation**: Complex prefabs with child nodes may not instantiate correctly. Only the root node may be created, and child nodes may be missing due to Cocos Creator API limitations in the standard `create-node` method with `assetUuid`. This is a known issue with the current implementation.
 
 ### 4.4 prefab_create_prefab
 Create a prefab from a node
@@ -1053,6 +1061,61 @@ Get editor and environment information
 {
   "tool": "debug_get_editor_info",
   "arguments": {}
+}
+```
+
+### 6.8 debug_get_project_logs
+Get project logs from temp/logs/project.log file
+
+**Parameters**:
+- `lines` (number, optional): Number of lines to read from the end of the log file, default is 100, range: 1-10000
+- `filterKeyword` (string, optional): Filter logs containing specific keyword
+- `logLevel` (string, optional): Filter by log level, options: `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`, default is `ALL`
+
+**Example**:
+```json
+{
+  "tool": "debug_get_project_logs",
+  "arguments": {
+    "lines": 200,
+    "filterKeyword": "prefab",
+    "logLevel": "INFO"
+  }
+}
+```
+
+### 6.9 debug_get_log_file_info
+Get information about the project log file
+
+**Parameters**: None
+
+**Returns**: File size, last modified time, line count, and file path information
+
+**Example**:
+```json
+{
+  "tool": "debug_get_log_file_info",
+  "arguments": {}
+}
+```
+
+### 6.10 debug_search_project_logs
+Search for specific patterns or errors in project logs
+
+**Parameters**:
+- `pattern` (string, required): Search pattern (supports regex)
+- `maxResults` (number, optional): Maximum number of matching results, default is 20, range: 1-100
+- `contextLines` (number, optional): Number of context lines to show around each match, default is 2, range: 0-10
+
+**Example**:
+```json
+{
+  "tool": "debug_search_project_logs",
+  "arguments": {
+    "pattern": "error|failed|exception",
+    "maxResults": 10,
+    "contextLines": 3
+  }
 }
 ```
 

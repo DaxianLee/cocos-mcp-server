@@ -1,4 +1,6 @@
 import { ToolDefinition, ToolResponse, ToolExecutor, ConsoleMessage, PerformanceStats, ValidationResult, ValidationIssue } from '../types';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class DebugTools implements ToolExecutor {
     private consoleMessages: ConsoleMessage[] = [];
@@ -123,6 +125,68 @@ export class DebugTools implements ToolExecutor {
                     type: 'object',
                     properties: {}
                 }
+            },
+            {
+                name: 'get_project_logs',
+                description: 'Get project logs from temp/logs/project.log file',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        lines: {
+                            type: 'number',
+                            description: 'Number of lines to read from the end of the log file (default: 100)',
+                            default: 100,
+                            minimum: 1,
+                            maximum: 10000
+                        },
+                        filterKeyword: {
+                            type: 'string',
+                            description: 'Filter logs containing specific keyword (optional)'
+                        },
+                        logLevel: {
+                            type: 'string',
+                            description: 'Filter by log level',
+                            enum: ['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE', 'ALL'],
+                            default: 'ALL'
+                        }
+                    }
+                }
+            },
+            {
+                name: 'get_log_file_info',
+                description: 'Get information about the project log file',
+                inputSchema: {
+                    type: 'object',
+                    properties: {}
+                }
+            },
+            {
+                name: 'search_project_logs',
+                description: 'Search for specific patterns or errors in project logs',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        pattern: {
+                            type: 'string',
+                            description: 'Search pattern (supports regex)'
+                        },
+                        maxResults: {
+                            type: 'number',
+                            description: 'Maximum number of matching results',
+                            default: 20,
+                            minimum: 1,
+                            maximum: 100
+                        },
+                        contextLines: {
+                            type: 'number',
+                            description: 'Number of context lines to show around each match',
+                            default: 2,
+                            minimum: 0,
+                            maximum: 10
+                        }
+                    },
+                    required: ['pattern']
+                }
             }
         ];
     }
@@ -143,6 +207,12 @@ export class DebugTools implements ToolExecutor {
                 return await this.validateScene(args);
             case 'get_editor_info':
                 return await this.getEditorInfo();
+            case 'get_project_logs':
+                return await this.getProjectLogs(args.lines, args.filterKeyword, args.logLevel);
+            case 'get_log_file_info':
+                return await this.getLogFileInfo();
+            case 'search_project_logs':
+                return await this.searchProjectLogs(args.pattern, args.maxResults, args.contextLines);
             default:
                 throw new Error(`Unknown tool: ${toolName}`);
         }
@@ -184,8 +254,10 @@ export class DebugTools implements ToolExecutor {
 
     private async executeScript(script: string): Promise<ToolResponse> {
         return new Promise((resolve) => {
-            Editor.Message.request('scene', 'execute-script', {
-                script: script
+            Editor.Message.request('scene', 'execute-scene-script', {
+                name: 'console',
+                method: 'eval',
+                args: [script]
             }).then((result: any) => {
                 resolve({
                     success: true,
@@ -347,5 +419,224 @@ export class DebugTools implements ToolExecutor {
         };
 
         return { success: true, data: info };
+    }
+
+    private async getProjectLogs(lines: number = 100, filterKeyword?: string, logLevel: string = 'ALL'): Promise<ToolResponse> {
+        try {
+            // Try multiple possible project paths
+            let logFilePath = '';
+            const possiblePaths = [
+                Editor.Project ? Editor.Project.path : null,
+                '/Users/lizhiyong/NewProject_3',
+                process.cwd(),
+            ].filter(p => p !== null);
+            
+            for (const basePath of possiblePaths) {
+                const testPath = path.join(basePath, 'temp/logs/project.log');
+                if (fs.existsSync(testPath)) {
+                    logFilePath = testPath;
+                    break;
+                }
+            }
+            
+            if (!logFilePath) {
+                return {
+                    success: false,
+                    error: `Project log file not found. Tried paths: ${possiblePaths.map(p => path.join(p, 'temp/logs/project.log')).join(', ')}`
+                };
+            }
+
+            // Read the file content
+            const logContent = fs.readFileSync(logFilePath, 'utf8');
+            const logLines = logContent.split('\n').filter(line => line.trim() !== '');
+            
+            // Get the last N lines
+            const recentLines = logLines.slice(-lines);
+            
+            // Apply filters
+            let filteredLines = recentLines;
+            
+            // Filter by log level if not 'ALL'
+            if (logLevel !== 'ALL') {
+                filteredLines = filteredLines.filter(line => 
+                    line.includes(`[${logLevel}]`) || line.includes(logLevel.toLowerCase())
+                );
+            }
+            
+            // Filter by keyword if provided
+            if (filterKeyword) {
+                filteredLines = filteredLines.filter(line => 
+                    line.toLowerCase().includes(filterKeyword.toLowerCase())
+                );
+            }
+            
+            return {
+                success: true,
+                data: {
+                    totalLines: logLines.length,
+                    requestedLines: lines,
+                    filteredLines: filteredLines.length,
+                    logLevel: logLevel,
+                    filterKeyword: filterKeyword || null,
+                    logs: filteredLines,
+                    logFilePath: logFilePath
+                }
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: `Failed to read project logs: ${error.message}`
+            };
+        }
+    }
+
+    private async getLogFileInfo(): Promise<ToolResponse> {
+        try {
+            // Try multiple possible project paths
+            let logFilePath = '';
+            const possiblePaths = [
+                Editor.Project ? Editor.Project.path : null,
+                '/Users/lizhiyong/NewProject_3',
+                process.cwd(),
+            ].filter(p => p !== null);
+            
+            for (const basePath of possiblePaths) {
+                const testPath = path.join(basePath, 'temp/logs/project.log');
+                if (fs.existsSync(testPath)) {
+                    logFilePath = testPath;
+                    break;
+                }
+            }
+            
+            if (!logFilePath) {
+                return {
+                    success: false,
+                    error: `Project log file not found. Tried paths: ${possiblePaths.map(p => path.join(p, 'temp/logs/project.log')).join(', ')}`
+                };
+            }
+
+            const stats = fs.statSync(logFilePath);
+            const logContent = fs.readFileSync(logFilePath, 'utf8');
+            const lineCount = logContent.split('\n').filter(line => line.trim() !== '').length;
+            
+            return {
+                success: true,
+                data: {
+                    filePath: logFilePath,
+                    fileSize: stats.size,
+                    fileSizeFormatted: this.formatFileSize(stats.size),
+                    lastModified: stats.mtime.toISOString(),
+                    lineCount: lineCount,
+                    created: stats.birthtime.toISOString(),
+                    accessible: fs.constants.R_OK
+                }
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: `Failed to get log file info: ${error.message}`
+            };
+        }
+    }
+
+    private async searchProjectLogs(pattern: string, maxResults: number = 20, contextLines: number = 2): Promise<ToolResponse> {
+        try {
+            // Try multiple possible project paths
+            let logFilePath = '';
+            const possiblePaths = [
+                Editor.Project ? Editor.Project.path : null,
+                '/Users/lizhiyong/NewProject_3',
+                process.cwd(),
+            ].filter(p => p !== null);
+            
+            for (const basePath of possiblePaths) {
+                const testPath = path.join(basePath, 'temp/logs/project.log');
+                if (fs.existsSync(testPath)) {
+                    logFilePath = testPath;
+                    break;
+                }
+            }
+            
+            if (!logFilePath) {
+                return {
+                    success: false,
+                    error: `Project log file not found. Tried paths: ${possiblePaths.map(p => path.join(p, 'temp/logs/project.log')).join(', ')}`
+                };
+            }
+
+            const logContent = fs.readFileSync(logFilePath, 'utf8');
+            const logLines = logContent.split('\n');
+            
+            // Create regex pattern (support both string and regex patterns)
+            let regex: RegExp;
+            try {
+                regex = new RegExp(pattern, 'gi');
+            } catch {
+                // If pattern is not valid regex, treat as literal string
+                regex = new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            }
+            
+            const matches: any[] = [];
+            let resultCount = 0;
+            
+            for (let i = 0; i < logLines.length && resultCount < maxResults; i++) {
+                const line = logLines[i];
+                if (regex.test(line)) {
+                    // Get context lines
+                    const contextStart = Math.max(0, i - contextLines);
+                    const contextEnd = Math.min(logLines.length - 1, i + contextLines);
+                    
+                    const contextLinesArray = [];
+                    for (let j = contextStart; j <= contextEnd; j++) {
+                        contextLinesArray.push({
+                            lineNumber: j + 1,
+                            content: logLines[j],
+                            isMatch: j === i
+                        });
+                    }
+                    
+                    matches.push({
+                        lineNumber: i + 1,
+                        matchedLine: line,
+                        context: contextLinesArray
+                    });
+                    
+                    resultCount++;
+                    
+                    // Reset regex lastIndex for global search
+                    regex.lastIndex = 0;
+                }
+            }
+            
+            return {
+                success: true,
+                data: {
+                    pattern: pattern,
+                    totalMatches: matches.length,
+                    maxResults: maxResults,
+                    contextLines: contextLines,
+                    logFilePath: logFilePath,
+                    matches: matches
+                }
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: `Failed to search project logs: ${error.message}`
+            };
+        }
+    }
+
+    private formatFileSize(bytes: number): string {
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let size = bytes;
+        let unitIndex = 0;
+        
+        while (size >= 1024 && unitIndex < units.length - 1) {
+            size /= 1024;
+            unitIndex++;
+        }
+        
+        return `${size.toFixed(2)} ${units[unitIndex]}`;
     }
 }

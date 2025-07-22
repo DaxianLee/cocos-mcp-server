@@ -4,73 +4,54 @@ export class ServerTools implements ToolExecutor {
     getTools(): ToolDefinition[] {
         return [
             {
-                name: 'get_server_info',
-                description: 'Get server information',
+                name: 'query_server_ip_list',
+                description: 'Query server IP list',
                 inputSchema: {
                     type: 'object',
                     properties: {}
                 }
             },
             {
-                name: 'broadcast_custom_message',
-                description: 'Broadcast a custom message',
+                name: 'query_sorted_server_ip_list',
+                description: 'Get sorted server IP list',
+                inputSchema: {
+                    type: 'object',
+                    properties: {}
+                }
+            },
+            {
+                name: 'query_server_port',
+                description: 'Query editor server current port',
+                inputSchema: {
+                    type: 'object',
+                    properties: {}
+                }
+            },
+            {
+                name: 'get_server_status',
+                description: 'Get comprehensive server status information',
+                inputSchema: {
+                    type: 'object',
+                    properties: {}
+                }
+            },
+            {
+                name: 'check_server_connectivity',
+                description: 'Check server connectivity and network status',
                 inputSchema: {
                     type: 'object',
                     properties: {
-                        message: {
-                            type: 'string',
-                            description: 'Message name'
-                        },
-                        data: {
-                            description: 'Message data (optional)'
+                        timeout: {
+                            type: 'number',
+                            description: 'Timeout in milliseconds',
+                            default: 5000
                         }
-                    },
-                    required: ['message']
+                    }
                 }
             },
             {
-                name: 'get_editor_version',
-                description: 'Get editor version information',
-                inputSchema: {
-                    type: 'object',
-                    properties: {}
-                }
-            },
-            {
-                name: 'get_project_name',
-                description: 'Get current project name',
-                inputSchema: {
-                    type: 'object',
-                    properties: {}
-                }
-            },
-            {
-                name: 'get_project_path',
-                description: 'Get current project path',
-                inputSchema: {
-                    type: 'object',
-                    properties: {}
-                }
-            },
-            {
-                name: 'get_project_uuid',
-                description: 'Get current project UUID',
-                inputSchema: {
-                    type: 'object',
-                    properties: {}
-                }
-            },
-            {
-                name: 'restart_editor',
-                description: 'Request to restart the editor',
-                inputSchema: {
-                    type: 'object',
-                    properties: {}
-                }
-            },
-            {
-                name: 'quit_editor',
-                description: 'Request to quit the editor',
+                name: 'get_network_interfaces',
+                description: 'Get available network interfaces',
                 inputSchema: {
                     type: 'object',
                     properties: {}
@@ -81,167 +62,199 @@ export class ServerTools implements ToolExecutor {
 
     async execute(toolName: string, args: any): Promise<ToolResponse> {
         switch (toolName) {
-            case 'get_server_info':
-                return await this.getServerInfo();
-            case 'broadcast_custom_message':
-                return await this.broadcastCustomMessage(args.message, args.data);
-            case 'get_editor_version':
-                return await this.getEditorVersion();
-            case 'get_project_name':
-                return await this.getProjectName();
-            case 'get_project_path':
-                return await this.getProjectPath();
-            case 'get_project_uuid':
-                return await this.getProjectUuid();
-            case 'restart_editor':
-                return await this.restartEditor();
-            case 'quit_editor':
-                return await this.quitEditor();
+            case 'query_server_ip_list':
+                return await this.queryServerIPList();
+            case 'query_sorted_server_ip_list':
+                return await this.querySortedServerIPList();
+            case 'query_server_port':
+                return await this.queryServerPort();
+            case 'get_server_status':
+                return await this.getServerStatus();
+            case 'check_server_connectivity':
+                return await this.checkServerConnectivity(args.timeout);
+            case 'get_network_interfaces':
+                return await this.getNetworkInterfaces();
             default:
                 throw new Error(`Unknown tool: ${toolName}`);
         }
     }
 
-    private async getServerInfo(): Promise<ToolResponse> {
+    private async queryServerIPList(): Promise<ToolResponse> {
         return new Promise((resolve) => {
-            try {
-                const info = {
-                    editorVersion: (Editor as any).versions?.editor || 'Unknown',
-                    cocosVersion: (Editor as any).versions?.cocos || 'Unknown',
-                    nodeVersion: process.version,
-                    platform: process.platform,
-                    arch: process.arch,
-                    projectName: Editor.Project.name,
-                    projectPath: Editor.Project.path,
-                    projectUuid: Editor.Project.uuid
-                };
-
+            Editor.Message.request('server', 'query-ip-list').then((ipList: string[]) => {
                 resolve({
                     success: true,
                     data: {
-                        server: info,
-                        message: 'Server information retrieved successfully'
+                        ipList: ipList,
+                        count: ipList.length,
+                        message: 'IP list retrieved successfully'
                     }
                 });
-            } catch (err: any) {
+            }).catch((err: Error) => {
                 resolve({ success: false, error: err.message });
-            }
+            });
         });
     }
 
-    private async broadcastCustomMessage(message: string, data?: any): Promise<ToolResponse> {
+    private async querySortedServerIPList(): Promise<ToolResponse> {
         return new Promise((resolve) => {
+            Editor.Message.request('server', 'query-sort-ip-list').then((sortedIPList: string[]) => {
+                resolve({
+                    success: true,
+                    data: {
+                        sortedIPList: sortedIPList,
+                        count: sortedIPList.length,
+                        message: 'Sorted IP list retrieved successfully'
+                    }
+                });
+            }).catch((err: Error) => {
+                resolve({ success: false, error: err.message });
+            });
+        });
+    }
+
+    private async queryServerPort(): Promise<ToolResponse> {
+        return new Promise((resolve) => {
+            Editor.Message.request('server', 'query-port').then((port: number) => {
+                resolve({
+                    success: true,
+                    data: {
+                        port: port,
+                        message: `Editor server is running on port ${port}`
+                    }
+                });
+            }).catch((err: Error) => {
+                resolve({ success: false, error: err.message });
+            });
+        });
+    }
+
+    private async getServerStatus(): Promise<ToolResponse> {
+        return new Promise(async (resolve) => {
             try {
-                if (data !== undefined) {
-                    Editor.Message.broadcast(message, data);
+                // Gather comprehensive server information
+                const [ipListResult, portResult] = await Promise.allSettled([
+                    this.queryServerIPList(),
+                    this.queryServerPort()
+                ]);
+
+                const status: any = {
+                    timestamp: new Date().toISOString(),
+                    serverRunning: true
+                };
+
+                if (ipListResult.status === 'fulfilled' && ipListResult.value.success) {
+                    status.availableIPs = ipListResult.value.data.ipList;
+                    status.ipCount = ipListResult.value.data.count;
                 } else {
-                    Editor.Message.broadcast(message);
+                    status.availableIPs = [];
+                    status.ipCount = 0;
+                    status.ipError = ipListResult.status === 'rejected' ? ipListResult.reason : ipListResult.value.error;
                 }
 
+                if (portResult.status === 'fulfilled' && portResult.value.success) {
+                    status.port = portResult.value.data.port;
+                } else {
+                    status.port = null;
+                    status.portError = portResult.status === 'rejected' ? portResult.reason : portResult.value.error;
+                }
+
+                // Add additional server info
+                status.mcpServerPort = 3000; // Our MCP server port
+                status.editorVersion = (Editor as any).versions?.cocos || 'Unknown';
+                status.platform = process.platform;
+                status.nodeVersion = process.version;
+
                 resolve({
                     success: true,
-                    data: {
-                        message: message,
-                        data: data,
-                        result: 'Message broadcasted successfully'
-                    }
+                    data: status
                 });
+
             } catch (err: any) {
-                resolve({ success: false, error: err.message });
+                resolve({
+                    success: false,
+                    error: `Failed to get server status: ${err.message}`
+                });
             }
         });
     }
 
-    private async getEditorVersion(): Promise<ToolResponse> {
-        return new Promise((resolve) => {
+    private async checkServerConnectivity(timeout: number = 5000): Promise<ToolResponse> {
+        return new Promise(async (resolve) => {
+            const startTime = Date.now();
+            
             try {
-                const version = {
-                    editor: (Editor as any).versions?.editor || 'Unknown',
-                    cocos: (Editor as any).versions?.cocos || 'Unknown',
-                    node: process.version
-                };
+                // Test basic Editor API connectivity
+                const testPromise = Editor.Message.request('server', 'query-port');
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Connection timeout')), timeout);
+                });
 
+                await Promise.race([testPromise, timeoutPromise]);
+                
+                const responseTime = Date.now() - startTime;
+                
                 resolve({
                     success: true,
                     data: {
-                        version: version,
-                        message: 'Editor version retrieved successfully'
+                        connected: true,
+                        responseTime: responseTime,
+                        timeout: timeout,
+                        message: `Server connectivity confirmed in ${responseTime}ms`
                     }
                 });
+
             } catch (err: any) {
-                resolve({ success: false, error: err.message });
+                const responseTime = Date.now() - startTime;
+                
+                resolve({
+                    success: false,
+                    data: {
+                        connected: false,
+                        responseTime: responseTime,
+                        timeout: timeout,
+                        error: err.message
+                    }
+                });
             }
         });
     }
 
-    private async getProjectName(): Promise<ToolResponse> {
-        return new Promise((resolve) => {
+    private async getNetworkInterfaces(): Promise<ToolResponse> {
+        return new Promise(async (resolve) => {
             try {
-                const name = Editor.Project.name;
+                // Get network interfaces using Node.js os module
+                const os = require('os');
+                const interfaces = os.networkInterfaces();
+                
+                const networkInfo = Object.entries(interfaces).map(([name, addresses]: [string, any]) => ({
+                    name: name,
+                    addresses: addresses.map((addr: any) => ({
+                        address: addr.address,
+                        family: addr.family,
+                        internal: addr.internal,
+                        cidr: addr.cidr
+                    }))
+                }));
+
+                // Also try to get server IPs for comparison
+                const serverIPResult = await this.queryServerIPList();
+                
                 resolve({
                     success: true,
                     data: {
-                        name: name,
-                        message: 'Project name retrieved successfully'
+                        networkInterfaces: networkInfo,
+                        serverAvailableIPs: serverIPResult.success ? serverIPResult.data.ipList : [],
+                        message: 'Network interfaces retrieved successfully'
                     }
                 });
-            } catch (err: any) {
-                resolve({ success: false, error: err.message });
-            }
-        });
-    }
 
-    private async getProjectPath(): Promise<ToolResponse> {
-        return new Promise((resolve) => {
-            try {
-                const path = Editor.Project.path;
+            } catch (err: any) {
                 resolve({
-                    success: true,
-                    data: {
-                        path: path,
-                        message: 'Project path retrieved successfully'
-                    }
+                    success: false,
+                    error: `Failed to get network interfaces: ${err.message}`
                 });
-            } catch (err: any) {
-                resolve({ success: false, error: err.message });
             }
-        });
-    }
-
-    private async getProjectUuid(): Promise<ToolResponse> {
-        return new Promise((resolve) => {
-            try {
-                const uuid = Editor.Project.uuid;
-                resolve({
-                    success: true,
-                    data: {
-                        uuid: uuid,
-                        message: 'Project UUID retrieved successfully'
-                    }
-                });
-            } catch (err: any) {
-                resolve({ success: false, error: err.message });
-            }
-        });
-    }
-
-    private async restartEditor(): Promise<ToolResponse> {
-        return new Promise((resolve) => {
-            resolve({
-                success: false,
-                error: 'Editor restart is not supported through MCP API',
-                instruction: 'Please restart the editor manually or use the editor menu: File > Restart Editor'
-            });
-        });
-    }
-
-    private async quitEditor(): Promise<ToolResponse> {
-        return new Promise((resolve) => {
-            resolve({
-                success: false,
-                error: 'Editor quit is not supported through MCP API',
-                instruction: 'Please quit the editor manually or use the editor menu: File > Quit'
-            });
         });
     }
 }

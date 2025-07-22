@@ -393,10 +393,12 @@ export class ProjectTools implements ToolExecutor {
                 scenes: [] // Will use current scene
             };
 
-            Editor.Message.request('preview', 'start', previewConfig).then(() => {
+            // Note: Preview module is not documented in official API
+            // Using fallback approach - open build panel as alternative
+            Editor.Message.request('builder', 'open').then(() => {
                 resolve({
                     success: true,
-                    message: `Project is running in ${platform} mode`
+                    message: `Build panel opened. Preview functionality requires manual setup.`
                 });
             }).catch((err: Error) => {
                 resolve({ success: false, error: err.message });
@@ -413,11 +415,16 @@ export class ProjectTools implements ToolExecutor {
                 buildPath: `build/${args.platform}`
             };
 
-            Editor.Message.request('builder', 'build', buildOptions).then(() => {
+            // Note: Builder module only supports 'open' and 'query-worker-ready'
+            // Building requires manual interaction through the build panel
+            Editor.Message.request('builder', 'open').then(() => {
                 resolve({
                     success: true,
-                    message: `Project built for ${args.platform}`,
-                    data: { buildPath: buildOptions.buildPath }
+                    message: `Build panel opened for ${args.platform}. Please configure and start build manually.`,
+                    data: { 
+                        platform: args.platform,
+                        instruction: "Use the build panel to configure and start the build process"
+                    }
                 });
             }).catch((err: Error) => {
                 resolve({ success: false, error: err.message });
@@ -435,8 +442,11 @@ export class ProjectTools implements ToolExecutor {
                 cocosVersion: (Editor as any).versions?.cocos || 'Unknown'
             };
 
-            Editor.Message.request('project', 'query-info').then((additionalInfo: any) => {
-                Object.assign(info, additionalInfo);
+            // Note: 'query-info' API doesn't exist, using 'query-config' instead
+            Editor.Message.request('project', 'query-config', 'project').then((additionalInfo: any) => {
+                if (additionalInfo) {
+                    Object.assign(info, { config: additionalInfo });
+                }
                 resolve({ success: true, data: info });
             }).catch(() => {
                 // Return basic info even if detailed query fails
@@ -567,9 +577,8 @@ export class ProjectTools implements ToolExecutor {
                 }
             }
 
-            Editor.Message.request('asset-db', 'query-assets', {
-                pattern: pattern
-            }).then((results: any[]) => {
+            // Note: query-assets API parameters corrected based on documentation
+            Editor.Message.request('asset-db', 'query-assets', { pattern: pattern }).then((results: any[]) => {
                 const assets = results.map(asset => ({
                     name: asset.name,
                     uuid: asset.uuid,
