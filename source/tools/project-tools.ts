@@ -331,6 +331,62 @@ export class ProjectTools implements ToolExecutor {
                     },
                     required: ['uuid']
                 }
+            },
+            {
+                name: 'find_asset_by_name',
+                description: 'Find assets by name (supports partial matching and multiple results)',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        name: {
+                            type: 'string',
+                            description: 'Asset name to search for (supports partial matching)'
+                        },
+                        exactMatch: {
+                            type: 'boolean',
+                            description: 'Whether to use exact name matching',
+                            default: false
+                        },
+                        assetType: {
+                            type: 'string',
+                            description: 'Filter by asset type',
+                            enum: ['all', 'scene', 'prefab', 'script', 'texture', 'material', 'mesh', 'audio', 'animation', 'spriteFrame'],
+                            default: 'all'
+                        },
+                        folder: {
+                            type: 'string',
+                            description: 'Folder to search in',
+                            default: 'db://assets'
+                        },
+                        maxResults: {
+                            type: 'number',
+                            description: 'Maximum number of results to return',
+                            default: 20,
+                            minimum: 1,
+                            maximum: 100
+                        }
+                    },
+                    required: ['name']
+                }
+            },
+            {
+                name: 'get_asset_details',
+                description: 'Get detailed asset information including spriteFrame sub-assets',
+                inputSchema: {
+                    type: 'object',
+                    properties: {
+                        assetPath: {
+                            type: 'string',
+                            description: 'Asset path (db://assets/...)'
+                        },
+                        includeSubAssets: {
+                            type: 'boolean',
+                            description: 'Include sub-assets like spriteFrame, texture',
+                            default: true
+                        }
+                    },
+                    required: ['assetPath']
+                }
             }
         ];
     }
@@ -381,6 +437,10 @@ export class ProjectTools implements ToolExecutor {
                 return await this.queryAssetUuid(args.url);
             case 'query_asset_url':
                 return await this.queryAssetUrl(args.uuid);
+            case 'find_asset_by_name':
+                return await this.findAssetByName(args);
+            case 'get_asset_details':
+                return await this.getAssetDetails(args.assetPath, args.includeSubAssets);
             default:
                 throw new Error(`Unknown tool: ${toolName}`);
         }
@@ -894,6 +954,145 @@ export class ProjectTools implements ToolExecutor {
             }).catch((err: Error) => {
                 resolve({ success: false, error: err.message });
             });
+        });
+    }
+
+    private async findAssetByName(args: any): Promise<ToolResponse> {
+        const { name, exactMatch = false, assetType = 'all', folder = 'db://assets', maxResults = 20 } = args;
+        
+        return new Promise(async (resolve) => {
+            try {
+                // Get all assets in the specified folder
+                const allAssetsResponse = await this.getAssets(assetType, folder);
+                if (!allAssetsResponse.success || !allAssetsResponse.data) {
+                    resolve({
+                        success: false,
+                        error: `Failed to get assets: ${allAssetsResponse.error}`
+                    });
+                    return;
+                }
+                
+                const allAssets = allAssetsResponse.data.assets as any[];
+                let matchedAssets: any[] = [];
+                
+                // Search for matching assets
+                for (const asset of allAssets) {
+                    const assetName = asset.name;
+                    let matches = false;
+                    
+                    if (exactMatch) {
+                        matches = assetName === name;
+                    } else {
+                        matches = assetName.toLowerCase().includes(name.toLowerCase());
+                    }
+                    
+                    if (matches) {
+                        // Get detailed asset info if needed
+                        try {
+                            const detailResponse = await this.getAssetInfo(asset.path);
+                            if (detailResponse.success) {
+                                matchedAssets.push({
+                                    ...asset,
+                                    details: detailResponse.data
+                                });
+                            } else {
+                                matchedAssets.push(asset);
+                            }
+                        } catch {
+                            matchedAssets.push(asset);
+                        }
+                        
+                        if (matchedAssets.length >= maxResults) {
+                            break;
+                        }
+                    }
+                }
+                
+                resolve({
+                    success: true,
+                    data: {
+                        searchTerm: name,
+                        exactMatch,
+                        assetType,
+                        folder,
+                        totalFound: matchedAssets.length,
+                        maxResults,
+                        assets: matchedAssets,
+                        message: `Found ${matchedAssets.length} assets matching '${name}'`
+                    }
+                });
+                
+            } catch (error: any) {
+                resolve({
+                    success: false,
+                    error: `Asset search failed: ${error.message}`
+                });
+            }
+        });
+    }
+    
+    private async getAssetDetails(assetPath: string, includeSubAssets: boolean = true): Promise<ToolResponse> {
+        return new Promise(async (resolve) => {
+            try {
+                // Get basic asset info
+                const assetInfoResponse = await this.getAssetInfo(assetPath);
+                if (!assetInfoResponse.success) {
+                    resolve(assetInfoResponse);
+                    return;
+                }
+                
+                const assetInfo = assetInfoResponse.data;
+                const detailedInfo: any = {
+                    ...assetInfo,
+                    subAssets: []
+                };
+                
+                if (includeSubAssets && assetInfo) {
+                    // For image assets, try to get spriteFrame and texture sub-assets
+                    if (assetInfo.type === 'cc.ImageAsset' || assetPath.match(/\.(png|jpg|jpeg|gif|tga|bmp|psd)$/i)) {
+                        // Generate common sub-asset UUIDs
+                        const baseUuid = assetInfo.uuid;
+                        const possibleSubAssets = [
+                            { type: 'spriteFrame', uuid: `${baseUuid}@f9941`, suffix: '@f9941' },
+                            { type: 'texture', uuid: `${baseUuid}@6c48a`, suffix: '@6c48a' },
+                            { type: 'texture2D', uuid: `${baseUuid}@6c48a`, suffix: '@6c48a' }
+                        ];
+                        
+                        for (const subAsset of possibleSubAssets) {
+                            try {
+                                // Try to get URL for the sub-asset to verify it exists
+                                const subAssetUrl = await Editor.Message.request('asset-db', 'query-url', subAsset.uuid);
+                                if (subAssetUrl) {
+                                    detailedInfo.subAssets.push({
+                                        type: subAsset.type,
+                                        uuid: subAsset.uuid,
+                                        url: subAssetUrl,
+                                        suffix: subAsset.suffix
+                                    });
+                                }
+                            } catch {
+                                // Sub-asset doesn't exist, skip it
+                            }
+                        }
+                    }
+                }
+                
+                resolve({
+                    success: true,
+                    data: {
+                        assetPath,
+                        includeSubAssets,
+                        ...detailedInfo,
+                        message: `Asset details retrieved. Found ${detailedInfo.subAssets.length} sub-assets.`
+                    }
+                });
+                
+            } catch (error: any) {
+                resolve({
+                    success: false,
+                    error: `Failed to get asset details: ${error.message}`
+                });
+            }
         });
     }
 }

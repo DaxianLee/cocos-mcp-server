@@ -24,6 +24,9 @@ export interface ToolResponse {
     message?: string;
     error?: string;
     instruction?: string;
+    warning?: string;
+    verificationData?: any;
+    updatedProperties?: string[];
 }
 
 export interface NodeInfo {

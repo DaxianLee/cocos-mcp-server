@@ -364,14 +364,30 @@ export class SceneTools implements ToolExecutor {
             ], null, 2);
             
             Editor.Message.request('asset-db', 'create-asset', fullPath, sceneContent).then((result: any) => {
-                resolve({
-                    success: true,
-                    data: {
-                        uuid: result.uuid,
-                        url: result.url,
-                        name: sceneName,
-                        message: `Scene '${sceneName}' created successfully`
-                    }
+                // Verify scene creation by checking if it exists
+                this.getSceneList().then((sceneList) => {
+                    const createdScene = sceneList.data?.find((scene: any) => scene.uuid === result.uuid);
+                    resolve({
+                        success: true,
+                        data: {
+                            uuid: result.uuid,
+                            url: result.url,
+                            name: sceneName,
+                            message: `Scene '${sceneName}' created successfully`,
+                            sceneVerified: !!createdScene
+                        },
+                        verificationData: createdScene
+                    });
+                }).catch(() => {
+                    resolve({
+                        success: true,
+                        data: {
+                            uuid: result.uuid,
+                            url: result.url,
+                            name: sceneName,
+                            message: `Scene '${sceneName}' created successfully (verification failed)`
+                        }
+                    });
                 });
             }).catch((err: Error) => {
                 resolve({ success: false, error: err.message });
