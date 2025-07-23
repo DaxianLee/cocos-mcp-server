@@ -389,7 +389,19 @@ export class ComponentTools implements ToolExecutor {
                 }
                 
                 // Step 3: 自动检测和转换属性值
-                const propertyInfo = this.analyzeProperty(targetComponent, property);
+                let propertyInfo;
+                try {
+                    console.log(`[ComponentTools] Analyzing property: ${property}`);
+                    propertyInfo = this.analyzeProperty(targetComponent, property);
+                } catch (analyzeError: any) {
+                    console.error(`[ComponentTools] Error in analyzeProperty:`, analyzeError);
+                    resolve({
+                        success: false,
+                        error: `Failed to analyze property '${property}': ${analyzeError.message}`
+                    });
+                    return;
+                }
+                
                 if (!propertyInfo.exists) {
                     resolve({
                         success: false,
@@ -486,6 +498,42 @@ export class ComponentTools implements ToolExecutor {
                             });
                         }
                     }
+                } else if (componentType === 'cc.UITransform' && (property === '_contentSize' || property === 'contentSize')) {
+                    // Special handling for UITransform contentSize - set width and height separately
+                    const width = Number(value.width) || 100;
+                    const height = Number(value.height) || 100;
+                    
+                    // Set width first
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: `__comps__.${rawComponentIndex}.width`,
+                        dump: { value: width }
+                    });
+                    
+                    // Then set height
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: `__comps__.${rawComponentIndex}.height`,
+                        dump: { value: height }
+                    });
+                } else if (componentType === 'cc.UITransform' && (property === '_anchorPoint' || property === 'anchorPoint')) {
+                    // Special handling for UITransform anchorPoint - set anchorX and anchorY separately
+                    const anchorX = Number(value.x) || 0.5;
+                    const anchorY = Number(value.y) || 0.5;
+                    
+                    // Set anchorX first
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: `__comps__.${rawComponentIndex}.anchorX`,
+                        dump: { value: anchorX }
+                    });
+                    
+                    // Then set anchorY  
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: `__comps__.${rawComponentIndex}.anchorY`,
+                        dump: { value: anchorY }
+                    });
                 } else {
                     // Normal property setting for non-asset properties
                     await Editor.Message.request('scene', 'set-property', {
@@ -600,6 +648,51 @@ export class ComponentTools implements ToolExecutor {
         };
     }
 
+    private isValidPropertyDescriptor(propData: any): boolean {
+        // 检查是否是有效的属性描述对象
+        if (typeof propData !== 'object' || propData === null) {
+            return false;
+        }
+        
+        try {
+            const keys = Object.keys(propData);
+            
+            // 避免遍历简单的数值对象（如 {width: 200, height: 150}）
+            const isSimpleValueObject = keys.every(key => {
+                const value = propData[key];
+                return typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean';
+            });
+            
+            if (isSimpleValueObject) {
+                return false;
+            }
+            
+            // 检查是否包含属性描述符的特征字段，不使用'in'操作符
+            const hasName = keys.includes('name');
+            const hasValue = keys.includes('value');
+            const hasType = keys.includes('type');
+            const hasDisplayName = keys.includes('displayName');
+            const hasReadonly = keys.includes('readonly');
+            
+            // 必须包含name或value字段，且通常还有type字段
+            const hasValidStructure = (hasName || hasValue) && (hasType || hasDisplayName || hasReadonly);
+            
+            // 额外检查：如果有default字段且结构复杂，避免深度遍历
+            if (keys.includes('default') && propData.default && typeof propData.default === 'object') {
+                const defaultKeys = Object.keys(propData.default);
+                if (defaultKeys.includes('value') && typeof propData.default.value === 'object') {
+                    // 这种情况下，我们只返回顶层属性，不深入遍历default.value
+                    return hasValidStructure;
+                }
+            }
+            
+            return hasValidStructure;
+        } catch (error) {
+            console.warn(`[isValidPropertyDescriptor] Error checking property descriptor:`, error);
+            return false;
+        }
+    }
+
     private analyzeProperty(component: any, propertyName: string): { exists: boolean; type: string; availableProperties: string[]; originalValue: any } {
         // 从复杂的组件结构中提取可用属性
         const availableProperties: string[] = [];
@@ -608,7 +701,7 @@ export class ComponentTools implements ToolExecutor {
         
         // 尝试多种方式查找属性：
         // 1. 直接属性访问
-        if (propertyName in component) {
+        if (Object.prototype.hasOwnProperty.call(component, propertyName)) {
             propertyValue = component[propertyName];
             propertyExists = true;
         }
@@ -619,11 +712,20 @@ export class ComponentTools implements ToolExecutor {
             if (component.properties.value && typeof component.properties.value === 'object') {
                 const valueObj = component.properties.value;
                 for (const [key, propData] of Object.entries(valueObj)) {
-                    if (typeof propData === 'object' && propData && 'value' in propData) {
+                    // 检查propData是否是一个有效的属性描述对象
+                    // 确保propData是对象且包含预期的属性结构
+                    if (this.isValidPropertyDescriptor(propData)) {
                         const propInfo = propData as any;
                         availableProperties.push(key);
                         if (key === propertyName) {
-                            propertyValue = propInfo.value;
+                            // 优先使用value属性，如果没有则使用propData本身
+                            try {
+                                const propKeys = Object.keys(propInfo);
+                                propertyValue = propKeys.includes('value') ? propInfo.value : propInfo;
+                            } catch (error) {
+                                // 如果检查失败，直接使用propInfo
+                                propertyValue = propInfo;
+                            }
                             propertyExists = true;
                         }
                     }
@@ -631,11 +733,18 @@ export class ComponentTools implements ToolExecutor {
             } else {
                 // 备用方案：直接从properties查找
                 for (const [key, propData] of Object.entries(component.properties)) {
-                    if (typeof propData === 'object' && propData && 'value' in propData) {
+                    if (this.isValidPropertyDescriptor(propData)) {
                         const propInfo = propData as any;
                         availableProperties.push(key);
                         if (key === propertyName) {
-                            propertyValue = propInfo.value;
+                            // 优先使用value属性，如果没有则使用propData本身
+                            try {
+                                const propKeys = Object.keys(propInfo);
+                                propertyValue = propKeys.includes('value') ? propInfo.value : propInfo;
+                            } catch (error) {
+                                // 如果检查失败，直接使用propInfo
+                                propertyValue = propInfo;
+                            }
                             propertyExists = true;
                         }
                     }
@@ -676,15 +785,21 @@ export class ComponentTools implements ToolExecutor {
         } else if (typeof propertyValue === 'boolean') {
             type = 'boolean';
         } else if (propertyValue && typeof propertyValue === 'object') {
-            if ('r' in propertyValue && 'g' in propertyValue && 'b' in propertyValue) {
-                type = 'color';
-            } else if ('x' in propertyValue && 'y' in propertyValue) {
-                type = propertyValue.z !== undefined ? 'vec3' : 'vec2';
-            } else if ('width' in propertyValue && 'height' in propertyValue) {
-                type = 'size';
-            } else if ('uuid' in propertyValue || '__uuid__' in propertyValue) {
-                type = 'asset';
-            } else {
+            try {
+                const keys = Object.keys(propertyValue);
+                if (keys.includes('r') && keys.includes('g') && keys.includes('b')) {
+                    type = 'color';
+                } else if (keys.includes('x') && keys.includes('y')) {
+                    type = propertyValue.z !== undefined ? 'vec3' : 'vec2';
+                } else if (keys.includes('width') && keys.includes('height')) {
+                    type = 'size';
+                } else if (keys.includes('uuid') || keys.includes('__uuid__')) {
+                    type = 'asset';
+                } else {
+                    type = 'object';
+                }
+            } catch (error) {
+                console.warn(`[analyzeProperty] Error checking property type for: ${JSON.stringify(propertyValue)}`);
                 type = 'object';
             }
         } else if (propertyValue === null || propertyValue === undefined) {
@@ -725,26 +840,44 @@ export class ComponentTools implements ToolExecutor {
                 
             case 'color':
                 if (typeof inputValue === 'object' && inputValue !== null) {
-                    // 如果输入是颜色对象，直接使用
-                    if ('r' in inputValue || 'g' in inputValue || 'b' in inputValue) {
-                        return {
-                            r: Number(inputValue.r) || 0,
-                            g: Number(inputValue.g) || 0,
-                            b: Number(inputValue.b) || 0,
-                            a: Number(inputValue.a) !== undefined ? Number(inputValue.a) : 255
-                        };
+                    // 先检查对象的值是否都是数字或字符串，避免对复杂对象使用'in'操作符
+                    try {
+                        // 如果输入是颜色对象，直接使用
+                        const inputKeys = Object.keys(inputValue);
+                        if (inputKeys.includes('r') || inputKeys.includes('g') || inputKeys.includes('b')) {
+                            return {
+                                r: Number(inputValue.r) || 0,
+                                g: Number(inputValue.g) || 0,
+                                b: Number(inputValue.b) || 0,
+                                a: Number(inputValue.a) !== undefined ? Number(inputValue.a) : 255
+                            };
+                        }
+                    } catch (error) {
+                        // 如果使用'in'操作符出错，说明不是有效的颜色对象
+                        console.warn(`[smartConvertValue] Invalid color input: ${JSON.stringify(inputValue)}`);
                     }
                 } else if (typeof inputValue === 'string') {
                     // 如果是字符串，尝试解析为十六进制颜色
                     return this.parseColorString(inputValue);
                 }
                 // 保持原值结构，只更新提供的值
-                return {
-                    r: Number(inputValue.r) || originalValue.r || 255,
-                    g: Number(inputValue.g) || originalValue.g || 255,
-                    b: Number(inputValue.b) || originalValue.b || 255,
-                    a: Number(inputValue.a) !== undefined ? Number(inputValue.a) : (originalValue.a || 255)
-                };
+                try {
+                    const inputKeys = typeof inputValue === 'object' && inputValue ? Object.keys(inputValue) : [];
+                    return {
+                        r: inputKeys.includes('r') ? Number(inputValue.r) : (originalValue.r || 255),
+                        g: inputKeys.includes('g') ? Number(inputValue.g) : (originalValue.g || 255),
+                        b: inputKeys.includes('b') ? Number(inputValue.b) : (originalValue.b || 255),
+                        a: inputKeys.includes('a') ? Number(inputValue.a) : (originalValue.a || 255)
+                    };
+                } catch (error) {
+                    // 如果有任何错误，返回原值或默认值
+                    return {
+                        r: originalValue.r || 255,
+                        g: originalValue.g || 255,
+                        b: originalValue.b || 255,
+                        a: originalValue.a || 255
+                    };
+                }
                 
             case 'vec2':
                 if (typeof inputValue === 'object' && inputValue !== null) {

@@ -221,7 +221,7 @@ export class ValidationTools implements ToolExecutor {
         // Required fields checking
         if (schema.required && Array.isArray(schema.required)) {
             for (const field of schema.required) {
-                if (!(field in data)) {
+                if (!Object.prototype.hasOwnProperty.call(data, field)) {
                     errors.push(`Missing required field: ${field}`);
                     suggestions.push(`Add required field "${field}"`);
                 }

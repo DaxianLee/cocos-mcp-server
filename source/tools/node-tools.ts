@@ -259,8 +259,8 @@ export class NodeTools implements ToolExecutor {
             if (!targetParentUuid) {
                 try {
                     const sceneInfo = await Editor.Message.request('scene', 'query-node-tree');
-                    if (sceneInfo && typeof sceneInfo === 'object' && 'uuid' in sceneInfo) {
-                        targetParentUuid = sceneInfo.uuid;
+                    if (sceneInfo && typeof sceneInfo === 'object' && !Array.isArray(sceneInfo) && Object.prototype.hasOwnProperty.call(sceneInfo, 'uuid')) {
+                        targetParentUuid = (sceneInfo as any).uuid;
                         console.log(`No parent specified, using scene root: ${targetParentUuid}`);
                     } else if (Array.isArray(sceneInfo) && sceneInfo.length > 0 && sceneInfo[0].uuid) {
                         // 如果返回的是数组，使用第一个元素（通常是场景根节点）
