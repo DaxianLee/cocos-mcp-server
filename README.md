@@ -15,7 +15,7 @@ A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8
 **Claude cli configuration:**
 
 ```
-claude mcp add --transport http http://localhost:3000/mcp (use the port number you configured yourself)
+claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp (use the port number you configured yourself)
 ```
 
 **Claude client configuration:**
@@ -29,7 +29,7 @@ claude mcp add --transport http http://localhost:3000/mcp (use the port number y
 
 "type": "http",
 
-"url": "http://localhost:3000/mcp"
+"url": "http://127.0.0.1:3000/mcp"
 
 }
 

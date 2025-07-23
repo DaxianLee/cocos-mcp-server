@@ -16,7 +16,7 @@
 **Claude cli配置：**
 
 ```
-claude mcp add --transport http http://localhost:3000/mcp（使用你自己配置的端口号）
+claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp（使用你自己配置的端口号）
 ```
 
 **Claude客户端配置：**
@@ -30,7 +30,7 @@ claude mcp add --transport http http://localhost:3000/mcp（使用你自己配�
 
  		"type": "http",
 
-		"url": "http://localhost:3000/mcp"
+		"url": "http://127.0.0.1:3000/mcp"
 
 		 }
 
