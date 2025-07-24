@@ -73,7 +73,11 @@ export class ComponentTools implements ToolExecutor {
             },
             {
                 name: 'set_component_property',
-                description: 'Set component property value - AI只需提供4个简单参数：节点UUID、组件名称、属性名称、属性值',
+                description: 'Set component property value - AI必须提供5个参数：节点UUID、组件名称、属性名称、属性类型、属性值\n' +
+                    '重要：对于引用类型属性：\n' +
+                    '• 节点引用(propertyType: "node"): value传入目标节点的UUID字符串\n' +
+                    '• 组件引用(propertyType: "component"): value传入目标组件的UUID字符串\n' +
+                    '• 资源引用(propertyType: "spriteFrame/prefab/asset"): value传入资源UUID字符串',
                 inputSchema: {
                     type: 'object',
                     properties: {
@@ -84,17 +88,44 @@ export class ComponentTools implements ToolExecutor {
                         componentType: {
                             type: 'string',
                             description: 'Component type - 组件类型',
-                            enum: ['cc.Label', 'cc.Sprite', 'cc.Button', 'cc.Toggle', 'cc.Slider', 'cc.ScrollView', 'cc.EditBox', 'cc.ProgressBar', 'cc.RichText', 'cc.Mask', 'cc.Graphics', 'cc.Layout', 'cc.Widget', 'cc.UITransform']
+                            enum: ['cc.Label', 'cc.Sprite', 'cc.Button', 'cc.Toggle', 'cc.Slider', 'cc.ScrollView', 'cc.EditBox', 'cc.ProgressBar', 'cc.RichText', 'cc.Mask', 'cc.Graphics', 'cc.Layout', 'cc.Widget', 'cc.UITransform', 'TestMCPScript']
                         },
                         property: {
                             type: 'string',
-                            description: 'Property name - 属性名称，常见值: string(文本), color(颜色), fontSize(字体大小), spriteFrame(精灵帧), enabled(启用状态), position(位置), scale(缩放), rotation(旋转)'
+                            description: 'Property name - 属性名称'
+                        },
+                        propertyType: {
+                            type: 'string',
+                            description: 'Property type - 属性类型（必须明确指定）',
+                            enum: [
+                                'string', 'number', 'boolean', 'integer', 'float',
+                                'color', 'vec2', 'vec3', 'size',
+                                'node', 'component', 'spriteFrame', 'prefab', 'asset',
+                                'nodeArray', 'colorArray', 'numberArray', 'stringArray'
+                            ]
                         },
                         value: {
-                            description: 'Property value - 属性值，支持的类型:\n• 字符串: "Hello World"\n• 数字: 32, 1.5\n• 布尔值: true, false\n• 颜色对象: {"r":255,"g":0,"b":0,"a":255} 或 "#FF0000"\n• 向量对象: {"x":100,"y":50} 或 {"x":1,"y":2,"z":3}\n• 尺寸对象: {"width":100,"height":50}\n• 资源UUID: "asset-uuid-string"'
+                            description: 'Property value - 属性值，根据propertyType使用不同格式:\n' +
+                                '基础类型：\n' +
+                                '• string: "Hello World"\n' +
+                                '• number/integer/float: 42 或 3.14\n' +
+                                '• boolean: true 或 false\n' +
+                                '• color: {"r":255,"g":0,"b":0,"a":255}\n' +
+                                '• vec2: {"x":100,"y":50}\n' +
+                                '• vec3: {"x":1,"y":2,"z":3}\n' +
+                                '• size: {"width":100,"height":50}\n' +
+                                '引用类型（重要）：\n' +
+                                '• node: "target-node-uuid-string" （目标节点的UUID字符串）\n' +
+                                '• component: "target-component-uuid-string" （目标组件的UUID字符串）\n' +
+                                '• spriteFrame/prefab/asset: "asset-uuid-string" （资源UUID字符串）\n' +
+                                '数组类型：\n' +
+                                '• nodeArray: ["uuid1","uuid2","uuid3"]\n' +
+                                '• colorArray: [{"r":255,"g":0,"b":0,"a":255},{"r":0,"g":255,"b":0,"a":255}]\n' +
+                                '• numberArray: [1,2,3,4,5]\n' +
+                                '• stringArray: ["item1","item2","item3"]'
                         }
                     },
-                    required: ['nodeUuid', 'componentType', 'property', 'value']
+                    required: ['nodeUuid', 'componentType', 'property', 'propertyType', 'value']
                 }
             },
             {
@@ -335,24 +366,35 @@ export class ComponentTools implements ToolExecutor {
     }
 
     private extractComponentProperties(component: any): Record<string, any> {
+        console.log(`[extractComponentProperties] Processing component:`, Object.keys(component));
+        
+        // 检查组件是否有 value 属性，这通常包含实际的组件属性
+        if (component.value && typeof component.value === 'object') {
+            console.log(`[extractComponentProperties] Found component.value with properties:`, Object.keys(component.value));
+            return component.value; // 直接返回 value 对象，它包含所有组件属性
+        }
+        
+        // 备用方案：从组件对象中直接提取属性
         const properties: Record<string, any> = {};
-        const excludeKeys = ['__type__', 'enabled', 'node', '_id'];
+        const excludeKeys = ['__type__', 'enabled', 'node', '_id', '__scriptAsset', 'uuid', 'name', '_name', '_objFlags', '_enabled', 'type', 'readonly', 'visible', 'cid', 'editor', 'extends'];
         
         for (const key in component) {
             if (!excludeKeys.includes(key) && !key.startsWith('_')) {
+                console.log(`[extractComponentProperties] Found direct property '${key}':`, typeof component[key]);
                 properties[key] = component[key];
             }
         }
         
+        console.log(`[extractComponentProperties] Final extracted properties:`, Object.keys(properties));
         return properties;
     }
 
     private async setComponentProperty(args: any): Promise<ToolResponse> {
-        const { nodeUuid, componentType, property, value } = args;
+        const { nodeUuid, componentType, property, propertyType, value } = args;
         
         return new Promise(async (resolve) => {
             try {
-                console.log(`[ComponentTools] Setting ${componentType}.${property} = ${JSON.stringify(value)} on node ${nodeUuid}`);
+                console.log(`[ComponentTools] Setting ${componentType}.${property} (type: ${propertyType}) = ${JSON.stringify(value)} on node ${nodeUuid}`);
                 
                 // Step 1: 获取组件信息，使用与getComponents相同的方法
                 const componentsResponse = await this.getComponents(nodeUuid);
@@ -410,13 +452,198 @@ export class ComponentTools implements ToolExecutor {
                     return;
                 }
                 
-                const processedValue = this.smartConvertValue(value, propertyInfo);
+                // Step 4: 处理属性值和设置
                 const originalValue = propertyInfo.originalValue;
+                let processedValue: any;
                 
-                console.log(`[ComponentTools] Converting value: ${JSON.stringify(value)} -> ${JSON.stringify(processedValue)} (type: ${propertyInfo.type})`);
+                // 根据明确的propertyType处理属性值
+                switch (propertyType) {
+                    case 'string':
+                        processedValue = String(value);
+                        break;
+                    case 'number':
+                    case 'integer':
+                    case 'float':
+                        processedValue = Number(value);
+                        break;
+                    case 'boolean':
+                        processedValue = Boolean(value);
+                        break;
+                    case 'color':
+                        if (typeof value === 'object' && value !== null) {
+                            processedValue = {
+                                r: Math.min(255, Math.max(0, Number(value.r) || 0)),
+                                g: Math.min(255, Math.max(0, Number(value.g) || 0)),
+                                b: Math.min(255, Math.max(0, Number(value.b) || 0)),
+                                a: value.a !== undefined ? Math.min(255, Math.max(0, Number(value.a))) : 255
+                            };
+                        } else {
+                            throw new Error('Color value must be an object with r, g, b properties');
+                        }
+                        break;
+                    case 'vec2':
+                        if (typeof value === 'object' && value !== null) {
+                            processedValue = {
+                                x: Number(value.x) || 0,
+                                y: Number(value.y) || 0
+                            };
+                        } else {
+                            throw new Error('Vec2 value must be an object with x, y properties');
+                        }
+                        break;
+                    case 'vec3':
+                        if (typeof value === 'object' && value !== null) {
+                            processedValue = {
+                                x: Number(value.x) || 0,
+                                y: Number(value.y) || 0,
+                                z: Number(value.z) || 0
+                            };
+                        } else {
+                            throw new Error('Vec3 value must be an object with x, y, z properties');
+                        }
+                        break;
+                    case 'size':
+                        if (typeof value === 'object' && value !== null) {
+                            processedValue = {
+                                width: Number(value.width) || 0,
+                                height: Number(value.height) || 0
+                            };
+                        } else {
+                            throw new Error('Size value must be an object with width, height properties');
+                        }
+                        break;
+                    case 'node':
+                        if (typeof value === 'string') {
+                            processedValue = { uuid: value };
+                        } else {
+                            throw new Error('Node reference value must be a string UUID');
+                        }
+                        break;
+                    case 'component':
+                        if (typeof value === 'string') {
+                            // 组件引用：需要验证节点上是否有对应组件类型
+                            // 推断组件类型从属性名称（例如：labelComponent -> Label, buttonComponent -> Button）
+                            let expectedComponentType = '';
+                            const propertyLower = property.toLowerCase(); 
+                            if (propertyLower.includes('label')) {
+                                expectedComponentType = 'cc.Label';
+                            } else if (propertyLower.includes('button')) {
+                                expectedComponentType = 'cc.Button';
+                            } else if (propertyLower.includes('sprite')) {
+                                expectedComponentType = 'cc.Sprite';
+                            } else if (propertyLower.includes('canvas')) {
+                                expectedComponentType = 'cc.Canvas';
+                            } else if (propertyLower.includes('camera')) {
+                                expectedComponentType = 'cc.Camera';
+                            }
+                            
+                            // 验证目标节点是否存在指定组件
+                            try {
+                                const nodeData = await Editor.Message.request('scene', 'query-node', value);
+                                if (nodeData && nodeData.__comps__ && expectedComponentType) {
+                                    const targetComponent = nodeData.__comps__.find((comp: any) => 
+                                        comp.__type__ === expectedComponentType
+                                    );
+                                    if (targetComponent) {
+                                        // 找到匹配组件，使用组件的UUID
+                                        processedValue = { uuid: (targetComponent as any).uuid || value };
+                                    } else {
+                                        console.warn(`[setComponentProperty] Node ${value} does not have component ${expectedComponentType}`);
+                                        processedValue = { uuid: value }; // 仍然设置，让Editor处理
+                                    }
+                                } else {
+                                    // 无法推断组件类型或节点不存在，直接使用UUID
+                                    processedValue = { uuid: value };
+                                }
+                            } catch (error) {
+                                console.warn(`[setComponentProperty] Failed to verify component on node ${value}: ${error}`);
+                                processedValue = { uuid: value }; // 仍然设置，让Editor处理
+                            }
+                        } else if (typeof value === 'object' && value !== null && value.node && value.component) {
+                            // 查找具体的组件UUID
+                            try {
+                                const nodeData = await Editor.Message.request('scene', 'query-node', value.node);
+                                if (nodeData && nodeData.__comps__) {
+                                    const targetComponent = nodeData.__comps__.find((comp: any) => 
+                                        comp.__type__ === value.component
+                                    );
+                                    if (targetComponent) {
+                                        processedValue = { uuid: (targetComponent as any).uuid || "" };
+                                    } else {
+                                        processedValue = { uuid: "" };
+                                    }
+                                } else {
+                                    processedValue = { uuid: "" };
+                                }
+                            } catch (error) {
+                                console.warn(`[setComponentProperty] Failed to find component: ${error}`);
+                                processedValue = { uuid: "" };
+                            }
+                        } else {
+                            throw new Error('Component reference value must be a string UUID or object with node and component properties');
+                        }
+                        break;
+                    case 'spriteFrame':
+                    case 'prefab':
+                    case 'asset':
+                        if (typeof value === 'string') {
+                            processedValue = { uuid: value };
+                        } else {
+                            throw new Error(`${propertyType} value must be a string UUID`);
+                        }
+                        break;
+                    case 'nodeArray':
+                        if (Array.isArray(value)) {
+                            processedValue = value.map((item: any) => {
+                                if (typeof item === 'string') {
+                                    return { uuid: item };
+                                } else {
+                                    throw new Error('NodeArray items must be string UUIDs');
+                                }
+                            });
+                        } else {
+                            throw new Error('NodeArray value must be an array');
+                        }
+                        break;
+                    case 'colorArray':
+                        if (Array.isArray(value)) {
+                            processedValue = value.map((item: any) => {
+                                if (typeof item === 'object' && item !== null && 'r' in item) {
+                                    return {
+                                        r: Math.min(255, Math.max(0, Number(item.r) || 0)),
+                                        g: Math.min(255, Math.max(0, Number(item.g) || 0)),
+                                        b: Math.min(255, Math.max(0, Number(item.b) || 0)),
+                                        a: item.a !== undefined ? Math.min(255, Math.max(0, Number(item.a))) : 255
+                                    };
+                                } else {
+                                    throw new Error('ColorArray items must be objects with r, g, b properties');
+                                }
+                            });
+                        } else {
+                            throw new Error('ColorArray value must be an array');
+                        }
+                        break;
+                    case 'numberArray':
+                        if (Array.isArray(value)) {
+                            processedValue = value.map((item: any) => Number(item));
+                        } else {
+                            throw new Error('NumberArray value must be an array');
+                        }
+                        break;
+                    case 'stringArray':
+                        if (Array.isArray(value)) {
+                            processedValue = value.map((item: any) => String(item));
+                        } else {
+                            throw new Error('StringArray value must be an array');
+                        }
+                        break;
+                    default:
+                        throw new Error(`Unsupported property type: ${propertyType}`);
+                }
                 
-                // Step 4: 设置属性值
-                // 需要重新获取原始节点数据来构建正确的路径
+                console.log(`[ComponentTools] Converting value: ${JSON.stringify(value)} -> ${JSON.stringify(processedValue)} (type: ${propertyType})`);
+                
+                // Step 5: 获取原始节点数据来构建正确的路径
                 const rawNodeData = await Editor.Message.request('scene', 'query-node', nodeUuid);
                 if (!rawNodeData || !rawNodeData.__comps__) {
                     resolve({
@@ -534,6 +761,189 @@ export class ComponentTools implements ToolExecutor {
                         path: `__comps__.${rawComponentIndex}.anchorY`,
                         dump: { value: anchorY }
                     });
+                } else if (propertyInfo.type === 'color' && processedValue && typeof processedValue === 'object') {
+                    // 特殊处理颜色属性，确保RGBA值正确
+                    // Cocos Creator颜色值范围是0-255
+                    const colorValue = {
+                        r: Math.min(255, Math.max(0, Number(processedValue.r) || 0)),
+                        g: Math.min(255, Math.max(0, Number(processedValue.g) || 0)),
+                        b: Math.min(255, Math.max(0, Number(processedValue.b) || 0)),
+                        a: processedValue.a !== undefined ? Math.min(255, Math.max(0, Number(processedValue.a))) : 255
+                    };
+                    
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: propertyPath,
+                        dump: { 
+                            value: colorValue,
+                            type: 'cc.Color'
+                        }
+                    });
+                } else if (propertyInfo.type === 'vec3' && processedValue && typeof processedValue === 'object') {
+                    // 特殊处理Vec3属性
+                    const vec3Value = {
+                        x: Number(processedValue.x) || 0,
+                        y: Number(processedValue.y) || 0,
+                        z: Number(processedValue.z) || 0
+                    };
+                    
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: propertyPath,
+                        dump: { 
+                            value: vec3Value,
+                            type: 'cc.Vec3'
+                        }
+                    });
+                } else if (propertyInfo.type === 'vec2' && processedValue && typeof processedValue === 'object') {
+                    // 特殊处理Vec2属性
+                    const vec2Value = {
+                        x: Number(processedValue.x) || 0,
+                        y: Number(processedValue.y) || 0
+                    };
+                    
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: propertyPath,
+                        dump: { 
+                            value: vec2Value,
+                            type: 'cc.Vec2'
+                        }
+                    });
+                } else if (propertyInfo.type === 'size' && processedValue && typeof processedValue === 'object') {
+                    // 特殊处理Size属性
+                    const sizeValue = {
+                        width: Number(processedValue.width) || 0,
+                        height: Number(processedValue.height) || 0
+                    };
+                    
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: propertyPath,
+                        dump: { 
+                            value: sizeValue,
+                            type: 'cc.Size'
+                        }
+                    });
+                } else if ((propertyInfo.type === 'node' || propertyInfo.type === 'cc.Node') && processedValue && typeof processedValue === 'object' && 'uuid' in processedValue) {
+                    // 特殊处理节点引用
+                    console.log(`[ComponentTools] Setting node reference with UUID: ${processedValue.uuid}`);
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: propertyPath,
+                        dump: { 
+                            value: processedValue,
+                            type: 'cc.Node'
+                        }
+                    });
+                } else if (propertyInfo.type === 'component') {
+                    // 特殊处理组件引用 - 方案B：使用完整的属性描述符
+                    let componentValue;
+                    let originalPropertyDescriptor: any = {};
+                    
+                    // 关键优化：获取完整的原始属性描述符
+                    try {
+                        const tempResult = await this.getComponentInfo(nodeUuid, componentType);
+                        if (tempResult.success && tempResult.data?.properties?.[property]) {
+                            const propertyMeta = tempResult.data.properties[property];
+                            if (propertyMeta && typeof propertyMeta === 'object') {
+                                // 保存完整的属性描述符（除了value之外的所有信息）
+                                originalPropertyDescriptor = { ...propertyMeta };
+                                delete originalPropertyDescriptor.value; // 移除旧的value，我们会设置新的
+                                console.log(`[setComponentProperty] Preserving original property descriptor for ${property}:`, Object.keys(originalPropertyDescriptor));
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`[setComponentProperty] Failed to get original property descriptor: ${error}`);
+                    }
+                    
+                    if (typeof processedValue === 'string') {
+                        // 如果是字符串，假设是组件的UUID
+                        componentValue = { uuid: processedValue };
+                    } else if (processedValue && typeof processedValue === 'object') {
+                        if (processedValue.node && processedValue.component) {
+                            // 如果提供了节点和组件类型，需要查找具体的组件UUID
+                            try {
+                                const nodeData = await Editor.Message.request('scene', 'query-node', processedValue.node);
+                                if (nodeData && nodeData.__comps__) {
+                                    const targetComponent = nodeData.__comps__.find((comp: any) => 
+                                        comp.__type__ === processedValue.component
+                                    );
+                                    if (targetComponent) {
+                                        componentValue = { uuid: (targetComponent as any).uuid || "" };
+                                    } else {
+                                        componentValue = { uuid: "" };
+                                    }
+                                } else {
+                                    componentValue = { uuid: "" };
+                                }
+                            } catch (error) {
+                                console.warn(`[setComponentProperty] Failed to find component: ${error}`);
+                                componentValue = { uuid: "" };
+                            }
+                        } else {
+                            componentValue = processedValue;
+                        }
+                    } else {
+                        componentValue = { uuid: "" };
+                    }
+                    
+                    // 方案B：使用完整的属性描述符，保持所有原始元数据
+                    const dumpData = {
+                        value: componentValue,
+                        ...originalPropertyDescriptor // 保持完整的属性描述符
+                    };
+                    
+                    console.log(`[setComponentProperty] Setting with complete descriptor:`, Object.keys(dumpData));
+                    
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: propertyPath,
+                        dump: dumpData
+                    });
+                } else if (propertyInfo.type === 'nodeArray' && Array.isArray(processedValue)) {
+                    // 特殊处理节点数组
+                    const nodeArrayValue = processedValue.map((item: any) => {
+                        if (typeof item === 'string') {
+                            return { __uuid__: item };
+                        } else if (item && typeof item === 'object' && (item.uuid || item.__uuid__)) {
+                            return { __uuid__: item.uuid || item.__uuid__ };
+                        } else {
+                            return { __uuid__: "" };
+                        }
+                    });
+                    
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: propertyPath,
+                        dump: { 
+                            value: nodeArrayValue,
+                            type: 'cc.Node'
+                        }
+                    });
+                } else if (propertyInfo.type === 'colorArray' && Array.isArray(processedValue)) {
+                    // 特殊处理颜色数组
+                    const colorArrayValue = processedValue.map((item: any) => {
+                        if (item && typeof item === 'object' && 'r' in item) {
+                            return {
+                                r: Math.min(255, Math.max(0, Number(item.r) || 0)),
+                                g: Math.min(255, Math.max(0, Number(item.g) || 0)),
+                                b: Math.min(255, Math.max(0, Number(item.b) || 0)),
+                                a: item.a !== undefined ? Math.min(255, Math.max(0, Number(item.a))) : 255
+                            };
+                        } else {
+                            return { r: 255, g: 255, b: 255, a: 255 };
+                        }
+                    });
+                    
+                    await Editor.Message.request('scene', 'set-property', {
+                        uuid: nodeUuid,
+                        path: propertyPath,
+                        dump: { 
+                            value: colorArrayValue,
+                            type: 'cc.Color'
+                        }
+                    });
                 } else {
                     // Normal property setting for non-asset properties
                     await Editor.Message.request('scene', 'set-property', {
@@ -543,7 +953,8 @@ export class ComponentTools implements ToolExecutor {
                     });
                 }
                 
-                // Step 5: 验证设置结果
+                // Step 5: 等待Editor完成更新，然后验证设置结果
+                await new Promise(resolve => setTimeout(resolve, 200)); // 等待200ms让Editor完成更新
                 const verification = await this.verifyPropertyChange(nodeUuid, componentType, property, originalValue, processedValue);
                 
                 resolve({
@@ -773,7 +1184,16 @@ export class ComponentTools implements ToolExecutor {
         let type = 'unknown';
         
         // 智能类型检测
-        if (typeof propertyValue === 'string') {
+        if (Array.isArray(propertyValue)) {
+            // 数组类型检测
+            if (propertyName.toLowerCase().includes('node')) {
+                type = 'nodeArray';
+            } else if (propertyName.toLowerCase().includes('color')) {
+                type = 'colorArray';
+            } else {
+                type = 'array';
+            }
+        } else if (typeof propertyValue === 'string') {
             // Check if property name suggests it's an asset
             if (['spriteFrame', 'texture', 'material', 'font', 'clip', 'prefab'].includes(propertyName.toLowerCase())) {
                 type = 'asset';
@@ -794,7 +1214,17 @@ export class ComponentTools implements ToolExecutor {
                 } else if (keys.includes('width') && keys.includes('height')) {
                     type = 'size';
                 } else if (keys.includes('uuid') || keys.includes('__uuid__')) {
-                    type = 'asset';
+                    // 检查是否是节点引用（通过属性名或__id__属性判断）
+                    if (propertyName.toLowerCase().includes('node') || 
+                        propertyName.toLowerCase().includes('target') ||
+                        keys.includes('__id__')) {
+                        type = 'node';
+                    } else {
+                        type = 'asset';
+                    }
+                } else if (keys.includes('__id__')) {
+                    // 节点引用特征
+                    type = 'node';
                 } else {
                     type = 'object';
                 }
@@ -806,6 +1236,11 @@ export class ComponentTools implements ToolExecutor {
             // For null/undefined values, check property name to determine type
             if (['spriteFrame', 'texture', 'material', 'font', 'clip', 'prefab'].includes(propertyName.toLowerCase())) {
                 type = 'asset';
+            } else if (propertyName.toLowerCase().includes('node') || 
+                      propertyName.toLowerCase().includes('target')) {
+                type = 'node';
+            } else if (propertyName.toLowerCase().includes('component')) {
+                type = 'component';
             } else {
                 type = 'unknown';
             }
@@ -849,7 +1284,7 @@ export class ComponentTools implements ToolExecutor {
                                 r: Number(inputValue.r) || 0,
                                 g: Number(inputValue.g) || 0,
                                 b: Number(inputValue.b) || 0,
-                                a: Number(inputValue.a) !== undefined ? Number(inputValue.a) : 255
+                                a: inputValue.a !== undefined ? Number(inputValue.a) : 255
                             };
                         }
                     } catch (error) {
@@ -907,6 +1342,16 @@ export class ComponentTools implements ToolExecutor {
                 }
                 return originalValue;
                 
+            case 'node':
+                if (typeof inputValue === 'string') {
+                    // 节点引用需要特殊处理
+                    return inputValue;
+                } else if (typeof inputValue === 'object' && inputValue !== null) {
+                    // 如果已经是对象形式，返回UUID或完整对象
+                    return inputValue.uuid || inputValue;
+                }
+                return originalValue;
+                
             case 'asset':
                 if (typeof inputValue === 'string') {
                     // 如果输入是字符串路径，转换为asset对象
@@ -938,35 +1383,115 @@ export class ComponentTools implements ToolExecutor {
     }
 
     private async verifyPropertyChange(nodeUuid: string, componentType: string, property: string, originalValue: any, expectedValue: any): Promise<{ verified: boolean; actualValue: any; fullData: any }> {
+        console.log(`[verifyPropertyChange] Starting verification for ${componentType}.${property}`);
+        console.log(`[verifyPropertyChange] Expected value:`, JSON.stringify(expectedValue));
+        console.log(`[verifyPropertyChange] Original value:`, JSON.stringify(originalValue));
+        
         try {
             // 重新获取组件信息进行验证
+            console.log(`[verifyPropertyChange] Calling getComponentInfo...`);
             const componentInfo = await this.getComponentInfo(nodeUuid, componentType);
+            console.log(`[verifyPropertyChange] getComponentInfo success:`, componentInfo.success);
+            
             const allComponents = await this.getComponents(nodeUuid);
+            console.log(`[verifyPropertyChange] getComponents success:`, allComponents.success);
             
             if (componentInfo.success && componentInfo.data) {
-                const actualValue = componentInfo.data.properties?.[property];
-                const verified = JSON.stringify(actualValue) !== JSON.stringify(originalValue);
+                console.log(`[verifyPropertyChange] Component data available, extracting property '${property}'`);
+                const allPropertyNames = Object.keys(componentInfo.data.properties || {});
+                console.log(`[verifyPropertyChange] Available properties:`, allPropertyNames);
+                const propertyData = componentInfo.data.properties?.[property];
+                console.log(`[verifyPropertyChange] Raw property data for '${property}':`, JSON.stringify(propertyData));
                 
-                return {
+                // 从属性数据中提取实际值
+                let actualValue = propertyData;
+                console.log(`[verifyPropertyChange] Initial actualValue:`, JSON.stringify(actualValue));
+                
+                if (propertyData && typeof propertyData === 'object' && 'value' in propertyData) {
+                    actualValue = propertyData.value;
+                    console.log(`[verifyPropertyChange] Extracted actualValue from .value:`, JSON.stringify(actualValue));
+                } else {
+                    console.log(`[verifyPropertyChange] No .value property found, using raw data`);
+                }
+                
+                // 修复验证逻辑：检查实际值是否匹配期望值
+                let verified = false;
+                
+                if (typeof expectedValue === 'object' && expectedValue !== null && 'uuid' in expectedValue) {
+                    // 对于引用类型（节点/组件/资源），比较UUID
+                    const actualUuid = actualValue && typeof actualValue === 'object' && 'uuid' in actualValue ? actualValue.uuid : '';
+                    const expectedUuid = expectedValue.uuid || '';
+                    verified = actualUuid === expectedUuid && expectedUuid !== '';
+                    
+                    console.log(`[verifyPropertyChange] Reference comparison:`);
+                    console.log(`  - Expected UUID: "${expectedUuid}"`);
+                    console.log(`  - Actual UUID: "${actualUuid}"`);
+                    console.log(`  - UUID match: ${actualUuid === expectedUuid}`);
+                    console.log(`  - UUID not empty: ${expectedUuid !== ''}`);
+                    console.log(`  - Final verified: ${verified}`);
+                } else {
+                    // 对于其他类型，直接比较值
+                    console.log(`[verifyPropertyChange] Value comparison:`);
+                    console.log(`  - Expected type: ${typeof expectedValue}`);
+                    console.log(`  - Actual type: ${typeof actualValue}`);
+                    
+                    if (typeof actualValue === typeof expectedValue) {
+                        if (typeof actualValue === 'object' && actualValue !== null && expectedValue !== null) {
+                            // 对象类型的深度比较
+                            verified = JSON.stringify(actualValue) === JSON.stringify(expectedValue);
+                            console.log(`  - Object comparison (JSON): ${verified}`);
+                        } else {
+                            // 基本类型的直接比较
+                            verified = actualValue === expectedValue;
+                            console.log(`  - Direct comparison: ${verified}`);
+                        }
+                    } else {
+                        // 类型不匹配时的特殊处理（如数字和字符串）
+                        const stringMatch = String(actualValue) === String(expectedValue);
+                        const numberMatch = Number(actualValue) === Number(expectedValue);
+                        verified = stringMatch || numberMatch;
+                        console.log(`  - String match: ${stringMatch}`);
+                        console.log(`  - Number match: ${numberMatch}`);
+                        console.log(`  - Type mismatch verified: ${verified}`);
+                    }
+                }
+                
+                console.log(`[verifyPropertyChange] Final verification result: ${verified}`);
+                console.log(`[verifyPropertyChange] Final actualValue:`, JSON.stringify(actualValue));
+                
+                const result = {
                     verified,
                     actualValue,
                     fullData: {
-                        updatedComponent: componentInfo.data,
-                        allNodeComponents: allComponents.data,
-                        changeDetails: {
-                            property,
+                        // 只返回修改的属性信息，不返回完整组件数据
+                        modifiedProperty: {
+                            name: property,
                             before: originalValue,
                             expected: expectedValue,
                             actual: actualValue,
-                            verified
+                            verified,
+                            propertyMetadata: propertyData // 只包含这个属性的元数据
+                        },
+                        // 简化的组件信息
+                        componentSummary: {
+                            nodeUuid,
+                            componentType,
+                            totalProperties: Object.keys(componentInfo.data?.properties || {}).length
                         }
                     }
                 };
+                
+                console.log(`[verifyPropertyChange] Returning result:`, JSON.stringify(result, null, 2));
+                return result;
+            } else {
+                console.log(`[verifyPropertyChange] ComponentInfo failed or no data:`, componentInfo);
             }
         } catch (error) {
-            console.warn('[verifyPropertyChange] Verification failed:', error);
+            console.error('[verifyPropertyChange] Verification failed with error:', error);
+            console.error('[verifyPropertyChange] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
         }
         
+        console.log(`[verifyPropertyChange] Returning fallback result`);
         return {
             verified: false,
             actualValue: undefined,
