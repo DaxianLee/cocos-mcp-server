@@ -23,6 +23,7 @@ export class MCPServer {
     private clients: Map<string, MCPClient> = new Map();
     private tools: Record<string, any> = {};
     private toolsList: ToolDefinition[] = [];
+    private enabledTools: any[] = []; // 存储启用的工具列表
 
     constructor(settings: MCPServerSettings) {
         this.settings = settings;
@@ -90,17 +91,47 @@ export class MCPServer {
     private setupTools(): void {
         this.toolsList = [];
         
-        for (const [category, toolSet] of Object.entries(this.tools)) {
-            const tools = toolSet.getTools();
-            for (const tool of tools) {
-                this.toolsList.push({
-                    name: `${category}_${tool.name}`,
-                    description: tool.description,
-                    inputSchema: tool.inputSchema
-                });
+        // 如果没有启用工具配置，返回所有工具
+        if (!this.enabledTools || this.enabledTools.length === 0) {
+            for (const [category, toolSet] of Object.entries(this.tools)) {
+                const tools = toolSet.getTools();
+                for (const tool of tools) {
+                    this.toolsList.push({
+                        name: `${category}_${tool.name}`,
+                        description: tool.description,
+                        inputSchema: tool.inputSchema
+                    });
+                }
+            }
+        } else {
+            // 根据启用的工具配置过滤
+            const enabledToolNames = new Set(this.enabledTools.map(tool => `${tool.category}_${tool.name}`));
+            
+            for (const [category, toolSet] of Object.entries(this.tools)) {
+                const tools = toolSet.getTools();
+                for (const tool of tools) {
+                    const toolName = `${category}_${tool.name}`;
+                    if (enabledToolNames.has(toolName)) {
+                        this.toolsList.push({
+                            name: toolName,
+                            description: tool.description,
+                            inputSchema: tool.inputSchema
+                        });
+                    }
+                }
             }
         }
+        
+        console.log(`[MCPServer] Setup tools: ${this.toolsList.length} tools available`);
+    }
 
+    public getFilteredTools(enabledTools: any[]): ToolDefinition[] {
+        if (!enabledTools || enabledTools.length === 0) {
+            return this.toolsList; // 如果没有过滤配置，返回所有工具
+        }
+
+        const enabledToolNames = new Set(enabledTools.map(tool => `${tool.category}_${tool.name}`));
+        return this.toolsList.filter(tool => enabledToolNames.has(tool.name));
     }
 
     public async executeToolCall(toolName: string, args: any): Promise<any> {
@@ -120,6 +151,12 @@ export class MCPServer {
     }
     public getAvailableTools(): ToolDefinition[] {
         return this.toolsList;
+    }
+
+    public updateEnabledTools(enabledTools: any[]): void {
+        console.log(`[MCPServer] Updating enabled tools: ${enabledTools.length} tools`);
+        this.enabledTools = enabledTools;
+        this.setupTools(); // 重新设置工具列表
     }
 
     public getSettings(): MCPServerSettings {

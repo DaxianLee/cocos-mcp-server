@@ -4,12 +4,66 @@
 
 一个适用于 Cocos Creator 3.8+ 的综合性 MCP（模型上下文协议）服务器插件，使 AI 助手能够通过标准化协议与 Cocos Creator 编辑器进行交互。一键安装和使用，省去所有繁琐环境和配置。已经测试过Claude客户端Claude CLI和Cursor，其他的编辑器理论上也完美支持。
 
-**🚀 现在提供 13 个类别的 151 个工具，实现98%的编辑器控制！（预制体实例化存在子节点恢复问题）**
+**🚀 现在提供 13 个类别的 158 个工具，实现98%的编辑器控制！（预制体实例化存在子节点恢复问题）**
+
+## 视频演示和教学
+
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114890828157799&bvid=BV1uzgVz8EyQ&cid=31188255575&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+
+## 视频演示配置工具列表
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114909316652345&bvid=BV1kfbyzQEAS&cid=31259361289&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+
 
 ##快速链接
 
-- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 151 tools（待补充）
-- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有151工具的详细文档（待补充）
+- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 158 tools（待补充）
+- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有158工具的详细文档（待补充）
+
+
+## 更新日志
+
+### v1.3.0 - 2024年7月25日
+
+#### 🆕 新功能
+- **集成工具管理面板**: 在主控制面板中直接添加了全面的工具管理功能
+- **工具配置系统**: 实现了选择性工具启用/禁用，支持持久化配置
+- **动态工具加载**: 增强了工具发现功能，能够动态加载MCP服务器中的所有158个可用工具
+- **实时工具状态管理**: 添加了工具计数和状态的实时更新，当单个工具切换时立即反映
+- **配置持久化**: 在编辑器会话间自动保存和加载工具配置
+
+#### 🔧 改进
+- **统一面板界面**: 将工具管理合并到主MCP服务器面板作为标签页，消除了对单独面板的需求
+- **增强服务器设置**: 改进了服务器配置管理，具有更好的持久化和加载功能
+- **Vue 3集成**: 升级到Vue 3 Composition API，提供更好的响应性和性能
+- **更好的错误处理**: 添加了全面的错误处理，包含失败操作的回滚机制
+- **改进的UI/UX**: 增强了视觉设计，包含适当的分隔符、独特的块样式和非透明模态背景
+
+#### 🐛 错误修复
+- **修复工具状态持久化**: 解决了工具状态在标签页切换或面板重新打开时重置的问题
+- **修复配置加载**: 纠正了服务器设置加载问题和消息注册问题
+- **修复复选框交互**: 解决了复选框取消选中问题并改进了响应性
+- **修复面板滚动**: 确保工具管理面板中的正确滚动功能
+- **修复IPC通信**: 解决了前端和后端之间的各种IPC通信问题
+
+#### 🏗️ 技术改进
+- **简化架构**: 移除了多配置复杂性，专注于单一配置管理
+- **更好的类型安全**: 增强了TypeScript类型定义和接口
+- **改进数据同步**: 前端UI状态和后端工具管理器之间更好的同步
+- **增强调试**: 添加了全面的日志记录和调试功能
+
+#### 📊 统计信息
+- **总工具数**: 从151个增加到158个工具
+- **类别**: 13个工具类别，全面覆盖
+- **编辑器控制**: 实现98%的编辑器功能覆盖
+
+### v1.2.0 - 之前版本
+- 初始发布，包含151个工具
+- 基本MCP服务器功能
+- 场景、节点、组件和预制体操作
+- 项目控制和调试工具
+
+
+
 
 ## 快速使用
 
@@ -53,12 +107,6 @@ claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp（使用
 
 }
 ```
-
-**效果：**
-
-<img width="1166" height="693" alt="image" src="https://github.com/user-attachments/assets/ecc30596-2e81-4123-b3fd-9e2cf08e5863" />
-<img width="470" height="622" alt="image" src="https://github.com/user-attachments/assets/504fa39b-4f43-4cc4-a912-28654c488072" />
-<img width="466" height="499" alt="image" src="https://github.com/user-attachments/assets/e5f73aa2-068f-457f-94fd-02f52084d6f4" />
 
 ## 功能特性
 
@@ -110,6 +158,7 @@ claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp（使用
 - **参考图片管理**: 在场景视图中添加、删除和管理参考图片
 - **场景视图控制**: 控制Gizmo工具、坐标系和视图模式
 - **高级场景操作**: 撤销/重做、快照和高级节点操作
+- **🆕 工具管理**: 选择性启用/禁用工具、保存配置和管理工具状态
 
 ## 安装说明
 
@@ -249,6 +298,29 @@ AI 助手可以使用 MCP 协议连接并访问所有可用工具。
 }
 ```
 
+工具配置存储在 `您的项目/settings/tool-manager.json` 中：
+
+```json
+{
+  "currentConfigId": "default",
+  "configurations": {
+    "default": {
+      "id": "default",
+      "name": "默认配置",
+      "description": "默认工具配置",
+      "tools": [
+        {
+          "category": "scene",
+          "name": "get_current_scene",
+          "enabled": true,
+          "description": "获取当前场景信息"
+        }
+      ]
+    }
+  }
+}
+```
+
 ## 图标设置
 
 为插件面板添加图标：
@@ -356,3 +428,4 @@ npm run build
 ## 许可证
 
 本插件供 Cocos Creator 项目使用,并且源代码一并打包，可以用于学习和交流。没有加密。可以支持你自己二次开发优化，任何本项目代码或者衍生代码均不能用于任何商用、转售，如果需要商用，请联系本人。
+

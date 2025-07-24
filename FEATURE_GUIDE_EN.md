@@ -2,19 +2,19 @@
 
 ## Overview
 
-The Cocos Creator MCP Server is a comprehensive Model Context Protocol (MCP) server plugin designed for Cocos Creator 3.8+ that enables AI assistants to interact with the Cocos Creator editor through a standardized protocol.
+The Cocos Creator MCP Server is a comprehensive Model Context Protocol (MCP) server plugin designed for Cocos Creator 3.8+, enabling AI assistants to interact with the Cocos Creator editor through standardized protocols.
 
 This document provides detailed information about all available MCP tools and their usage.
 
 ## Tool Categories
 
-The MCP server provides **151 tools** organized into 13 main categories:
+The MCP server provides **158 tools** organized into 13 main categories by functionality:
 
 1. [Scene Tools](#1-scene-tools)
 2. [Node Tools](#2-node-tools)
-3. [Component Tools](#3-component-tools)
+3. [Component Management Tools](#3-component-management-tools)
 4. [Prefab Tools](#4-prefab-tools)
-5. [Project Tools](#5-project-tools)
+5. [Project Control Tools](#5-project-control-tools)
 6. [Debug Tools](#6-debug-tools)
 7. [Preferences Tools](#7-preferences-tools)
 8. [Server Tools](#8-server-tools)
@@ -33,7 +33,7 @@ Get current scene information
 
 **Parameters**: None
 
-**Returns**: Current scene name, UUID, type, active state, and node count
+**Returns**: Current scene name, UUID, type, active status, and node count
 
 **Example**:
 ```json
@@ -48,7 +48,7 @@ Get all scenes in the project
 
 **Parameters**: None
 
-**Returns**: List of all scenes in the project with name, path, and UUID
+**Returns**: List of all scenes in the project, including names, paths, and UUIDs
 
 **Example**:
 ```json
@@ -62,7 +62,7 @@ Get all scenes in the project
 Open a scene by path
 
 **Parameters**:
-- `scenePath` (string, required): The scene file path
+- `scenePath` (string, required): Scene file path
 
 **Example**:
 ```json
@@ -106,7 +106,7 @@ Create a new scene asset
 ```
 
 ### 1.6 scene_save_scene_as
-Save scene as new file
+Save scene as a new file
 
 **Parameters**:
 - `path` (string, required): Path to save the scene
@@ -138,7 +138,7 @@ Close current scene
 Get the complete hierarchy of current scene
 
 **Parameters**:
-- `includeComponents` (boolean, optional): Include component information, default is false
+- `includeComponents` (boolean, optional): Whether to include component information, defaults to false
 
 **Example**:
 ```json
@@ -159,9 +159,14 @@ Create a new node in the scene
 
 **Parameters**:
 - `name` (string, required): Node name
-- `parentUuid` (string, optional): Parent node UUID, if not provided, node will be created at current editor selection
-- `nodeType` (string, optional): Node type, options: `Node`, `2DNode`, `3DNode`, default is `Node`
-- `siblingIndex` (number, optional): Sibling index for ordering, -1 means append at end, default is -1
+- `parentUuid` (string, **strongly recommended**): Parent node UUID. **Important**: It is strongly recommended to always provide this parameter. Use `get_current_scene` or `get_all_nodes` to find parent node UUIDs. If not provided, the node will be created at the scene root.
+- `nodeType` (string, optional): Node type, options: `Node`, `2DNode`, `3DNode`, defaults to `Node`
+- `siblingIndex` (number, optional): Sibling index, -1 means append at end, defaults to -1
+
+**Important Note**: To ensure the node is created at the expected location, always provide the `parentUuid` parameter. You can obtain parent node UUIDs by:
+- Using `scene_get_current_scene` to get the scene root node UUID
+- Using `node_get_all_nodes` to view all nodes and their UUIDs
+- Using `node_find_node_by_name` to find specific node UUIDs
 
 **Example**:
 ```json
@@ -196,7 +201,7 @@ Find nodes by name pattern
 
 **Parameters**:
 - `pattern` (string, required): Name pattern to search
-- `exactMatch` (boolean, optional): Exact match or partial match, default is false
+- `exactMatch` (boolean, optional): Whether to match exactly, defaults to false
 
 **Example**:
 ```json
@@ -210,7 +215,7 @@ Find nodes by name pattern
 ```
 
 ### 2.4 node_find_node_by_name
-Find first node by exact name
+Find the first node by exact name
 
 **Parameters**:
 - `name` (string, required): Node name to find
@@ -259,10 +264,10 @@ Set node property value
 ```
 
 ### 2.7 node_delete_node
-Delete a node from scene
+Delete a node from the scene
 
 **Parameters**:
-- `uuid` (string, required): Node UUID to delete
+- `uuid` (string, required): UUID of the node to delete
 
 **Example**:
 ```json
@@ -275,12 +280,12 @@ Delete a node from scene
 ```
 
 ### 2.8 node_move_node
-Move node to new parent
+Move a node to a new parent
 
 **Parameters**:
-- `nodeUuid` (string, required): Node UUID to move
+- `nodeUuid` (string, required): UUID of the node to move
 - `newParentUuid` (string, required): New parent node UUID
-- `siblingIndex` (number, optional): Sibling index in new parent, default is -1
+- `siblingIndex` (number, optional): Sibling index in the new parent, defaults to -1
 
 **Example**:
 ```json
@@ -298,8 +303,8 @@ Move node to new parent
 Duplicate a node
 
 **Parameters**:
-- `uuid` (string, required): Node UUID to duplicate
-- `includeChildren` (boolean, optional): Include children nodes, default is true
+- `uuid` (string, required): UUID of the node to duplicate
+- `includeChildren` (boolean, optional): Whether to include child nodes, defaults to true
 
 **Example**:
 ```json
@@ -314,14 +319,19 @@ Duplicate a node
 
 ---
 
-## 3. Component Tools
+## 3. Component Management Tools
 
 ### 3.1 component_add_component
 Add a component to a specific node
 
 **Parameters**:
-- `nodeUuid` (string, required): Target node UUID
+- `nodeUuid` (string, **required**): Target node UUID. **Important**: You must specify the exact node to add the component to. Use `get_all_nodes` or `find_node_by_name` to get the UUID of the desired node.
 - `componentType` (string, required): Component type (e.g., cc.Sprite, cc.Label, cc.Button)
+
+**Important Note**: Before adding a component, ensure:
+1. First use `node_get_all_nodes` or `node_find_node_by_name` to find the target node's UUID
+2. Verify the node exists and the UUID is correct
+3. Choose the appropriate component type
 
 **Example**:
 ```json
@@ -430,7 +440,7 @@ Attach a script component to a node
 Get list of available component types
 
 **Parameters**:
-- `category` (string, optional): Component category filter, options: `all`, `renderer`, `ui`, `physics`, `animation`, `audio`, default is `all`
+- `category` (string, optional): Component category filter, options: `all`, `renderer`, `ui`, `physics`, `animation`, `audio`, defaults to `all`
 
 **Example**:
 ```json
@@ -446,13 +456,13 @@ Get list of available component types
 
 ## 4. Prefab Tools
 
-**⚠️ Known Issue**: Prefab instantiation using the standard Cocos Creator API may not properly restore complex prefab structures with child nodes. While prefab creation correctly saves all child node information, the instantiation process through `create-node` with `assetUuid` has limitations and may result in missing child nodes in the instantiated prefab.
+**⚠️ Known Issue**: When using standard Cocos Creator API for prefab instantiation, complex prefabs with child nodes may not be properly restored. While prefab creation functionality can correctly save all child node information, the instantiation process through `create-node` with `assetUuid` has limitations that may result in missing child nodes in the instantiated prefab.
 
 ### 4.1 prefab_get_prefab_list
 Get all prefabs in the project
 
 **Parameters**:
-- `folder` (string, optional): Folder path to search, default is `db://assets`
+- `folder` (string, optional): Search folder path, defaults to `db://assets`
 
 **Example**:
 ```json
@@ -500,7 +510,7 @@ Instantiate a prefab in the scene
 }
 ```
 
-**⚠️ Limitation**: Complex prefabs with child nodes may not instantiate correctly. Only the root node may be created, and child nodes may be missing due to Cocos Creator API limitations in the standard `create-node` method with `assetUuid`. This is a known issue with the current implementation.
+**⚠️ Functionality Limitation**: Complex prefabs with child nodes may not instantiate correctly. Due to Cocos Creator API limitations in the standard `create-node` method using `assetUuid`, only the root node may be created, and child nodes may be lost. This is a known issue with the current implementation.
 
 ### 4.4 prefab_create_prefab
 Create a prefab from a node
@@ -545,7 +555,7 @@ Update an existing prefab
 
 **Parameters**:
 - `prefabPath` (string, required): Prefab asset path
-- `nodeUuid` (string, required): Node UUID with changes
+- `nodeUuid` (string, required): Node UUID containing changes
 
 **Example**:
 ```json
@@ -559,7 +569,7 @@ Update an existing prefab
 ```
 
 ### 4.7 prefab_revert_prefab
-Revert prefab instance to original
+Revert a prefab instance to its original state
 
 **Parameters**:
 - `nodeUuid` (string, required): Prefab instance node UUID
@@ -592,13 +602,13 @@ Get detailed prefab information
 
 ---
 
-## 5. Project Tools
+## 5. Project Control Tools
 
 ### 5.1 project_run_project
 Run the project in preview mode
 
 **Parameters**:
-- `platform` (string, optional): Target platform, options: `browser`, `simulator`, `preview`, default is `browser`
+- `platform` (string, optional): Target platform, options: `browser`, `simulator`, `preview`, defaults to `browser`
 
 **Example**:
 ```json
@@ -615,7 +625,7 @@ Build the project
 
 **Parameters**:
 - `platform` (string, required): Build platform, options: `web-mobile`, `web-desktop`, `ios`, `android`, `windows`, `mac`
-- `debug` (boolean, optional): Debug build, default is true
+- `debug` (boolean, optional): Whether to build in debug mode, defaults to true
 
 **Example**:
 ```json
@@ -645,7 +655,7 @@ Get project information
 Get project settings
 
 **Parameters**:
-- `category` (string, optional): Settings category, options: `general`, `physics`, `render`, `assets`, default is `general`
+- `category` (string, optional): Settings category, options: `general`, `physics`, `render`, `assets`, defaults to `general`
 
 **Example**:
 ```json
@@ -658,7 +668,7 @@ Get project settings
 ```
 
 ### 5.5 project_refresh_assets
-Refresh asset database
+Refresh the asset database
 
 **Parameters**:
 - `folder` (string, optional): Specific folder to refresh
@@ -711,8 +721,8 @@ Get asset information
 Get assets by type
 
 **Parameters**:
-- `type` (string, optional): Asset type filter, options: `all`, `scene`, `prefab`, `script`, `texture`, `material`, `mesh`, `audio`, `animation`, default is `all`
-- `folder` (string, optional): Folder to search in, default is `db://assets`
+- `type` (string, optional): Asset type filter, options: `all`, `scene`, `prefab`, `script`, `texture`, `material`, `mesh`, `audio`, `animation`, defaults to `all`
+- `folder` (string, optional): Search folder, defaults to `db://assets`
 
 **Example**:
 ```json
@@ -752,7 +762,7 @@ Open the build panel in the editor
 ```
 
 ### 5.11 project_check_builder_status
-Check if builder worker is ready
+Check if the builder worker process is ready
 
 **Parameters**: None
 
@@ -765,10 +775,10 @@ Check if builder worker is ready
 ```
 
 ### 5.12 project_start_preview_server
-Start preview server
+Start the preview server
 
 **Parameters**:
-- `port` (number, optional): Preview server port, default is 7456
+- `port` (number, optional): Preview server port, defaults to 7456
 
 **Example**:
 ```json
@@ -781,7 +791,7 @@ Start preview server
 ```
 
 ### 5.13 project_stop_preview_server
-Stop preview server
+Stop the preview server
 
 **Parameters**: None
 
@@ -798,8 +808,8 @@ Create a new asset file or folder
 
 **Parameters**:
 - `url` (string, required): Asset URL
-- `content` (string, optional): File content, null for folder
-- `overwrite` (boolean, optional): Overwrite existing file, default is false
+- `content` (string, optional): File content, null means create folder
+- `overwrite` (boolean, optional): Whether to overwrite existing file, defaults to false
 
 **Example**:
 ```json
@@ -819,7 +829,7 @@ Copy an asset to another location
 **Parameters**:
 - `source` (string, required): Source asset URL
 - `target` (string, required): Target location URL
-- `overwrite` (boolean, optional): Overwrite existing file, default is false
+- `overwrite` (boolean, optional): Whether to overwrite existing file, defaults to false
 
 **Example**:
 ```json
@@ -839,7 +849,7 @@ Move an asset to another location
 **Parameters**:
 - `source` (string, required): Source asset URL
 - `target` (string, required): Target location URL
-- `overwrite` (boolean, optional): Overwrite existing file, default is false
+- `overwrite` (boolean, optional): Whether to overwrite existing file, defaults to false
 
 **Example**:
 ```json
@@ -959,8 +969,8 @@ Get asset URL from UUID
 Get editor console logs
 
 **Parameters**:
-- `limit` (number, optional): Number of recent logs to retrieve, default is 100
-- `filter` (string, optional): Filter logs by type, options: `all`, `log`, `warn`, `error`, `info`, default is `all`
+- `limit` (number, optional): Number of latest logs to retrieve, defaults to 100
+- `filter` (string, optional): Filter logs by type, options: `all`, `log`, `warn`, `error`, `info`, defaults to `all`
 
 **Example**:
 ```json
@@ -974,7 +984,7 @@ Get editor console logs
 ```
 
 ### 6.2 debug_clear_console
-Clear editor console
+Clear the editor console
 
 **Parameters**: None
 
@@ -987,7 +997,7 @@ Clear editor console
 ```
 
 ### 6.3 debug_execute_script
-Execute JavaScript in scene context
+Execute JavaScript code in scene context
 
 **Parameters**:
 - `script` (string, required): JavaScript code to execute
@@ -1006,8 +1016,8 @@ Execute JavaScript in scene context
 Get detailed node tree for debugging
 
 **Parameters**:
-- `rootUuid` (string, optional): Root node UUID, uses scene root if not provided
-- `maxDepth` (number, optional): Maximum tree depth, default is 10
+- `rootUuid` (string, optional): Root node UUID, if not provided uses scene root node
+- `maxDepth` (number, optional): Maximum tree depth, defaults to 10
 
 **Example**:
 ```json
@@ -1034,11 +1044,11 @@ Get performance statistics
 ```
 
 ### 6.6 debug_validate_scene
-Validate current scene for issues
+Validate if the current scene has issues
 
 **Parameters**:
-- `checkMissingAssets` (boolean, optional): Check for missing asset references, default is true
-- `checkPerformance` (boolean, optional): Check for performance issues, default is true
+- `checkMissingAssets` (boolean, optional): Check for missing asset references, defaults to true
+- `checkPerformance` (boolean, optional): Check for performance issues, defaults to true
 
 **Example**:
 ```json
@@ -1069,8 +1079,8 @@ Get project logs from temp/logs/project.log file
 
 **Parameters**:
 - `lines` (number, optional): Number of lines to read from the end of the log file, default is 100, range: 1-10000
-- `filterKeyword` (string, optional): Filter logs containing specific keyword
-- `logLevel` (string, optional): Filter by log level, options: `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`, default is `ALL`
+- `filterKeyword` (string, optional): Filter logs by specific keyword
+- `logLevel` (string, optional): Filter by log level, options: `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`, defaults to `ALL`
 
 **Example**:
 ```json
@@ -1085,7 +1095,7 @@ Get project logs from temp/logs/project.log file
 ```
 
 ### 6.9 debug_get_log_file_info
-Get information about the project log file
+Get project log file information
 
 **Parameters**: None
 
@@ -1104,8 +1114,8 @@ Search for specific patterns or errors in project logs
 
 **Parameters**:
 - `pattern` (string, required): Search pattern (supports regex)
-- `maxResults` (number, optional): Maximum number of matching results, default is 20, range: 1-100
-- `contextLines` (number, optional): Number of context lines to show around each match, default is 2, range: 0-10
+- `maxResults` (number, optional): Maximum number of matching results, defaults to 20, range: 1-100
+- `contextLines` (number, optional): Number of context lines to show around each match, defaults to 2, range: 0-10
 
 **Example**:
 ```json
@@ -1205,7 +1215,7 @@ Get recently opened projects
 ```
 
 ### 7.6 preferences_clear_recent_projects
-Clear recently opened projects list
+Clear the list of recently opened projects
 
 **Parameters**: None
 
@@ -1335,10 +1345,10 @@ Request to quit the editor
 ## 9. Broadcast Tools
 
 ### 9.1 broadcast_get_broadcast_log
-Get recent broadcast messages log
+Get recent broadcast message log
 
 **Parameters**:
-- `limit` (number, optional): Number of recent messages to return, default is 50
+- `limit` (number, optional): Number of latest messages to return, defaults to 50
 - `messageType` (string, optional): Filter by message type
 
 **Example**:
@@ -1385,7 +1395,7 @@ Stop listening for specific broadcast messages
 ```
 
 ### 9.4 broadcast_clear_broadcast_log
-Clear the broadcast messages log
+Clear broadcast message log
 
 **Parameters**: None
 
@@ -1435,7 +1445,7 @@ All tool calls use JSON-RPC 2.0 format:
 ### 2. Common UUID Retrieval Methods
 
 - Use `node_get_all_nodes` to get all node UUIDs
-- Use `node_find_node_by_name` to find node UUID by name
+- Use `node_find_node_by_name` to find node UUIDs by name
 - Use `scene_get_current_scene` to get scene UUID
 - Use `prefab_get_prefab_list` to get prefab information
 
@@ -1449,7 +1459,7 @@ Cocos Creator uses `db://` prefixed asset URL format:
 
 ### 4. Error Handling
 
-If a tool call fails, it will return error information:
+If a tool call fails, an error message will be returned:
 
 ```json
 {
@@ -1467,23 +1477,23 @@ If a tool call fails, it will return error information:
 
 ### 5. Best Practices
 
-1. **Query Before Modify**: Use query tools to get current state before modifying nodes or components
-2. **Use UUIDs**: Prefer using UUIDs over names to reference nodes and assets
-3. **Error Checking**: Always check tool call return values to ensure operations succeeded
-4. **Asset Management**: Ensure no references exist before deleting or moving assets
+1. **Query First, Then Operate**: Before modifying nodes or components, first use query tools to get current state
+2. **Use UUIDs**: Prefer using UUIDs over names when referencing nodes and assets
+3. **Error Checking**: Always check the return value of tool calls to ensure operations succeed
+4. **Asset Management**: Before deleting or moving assets, ensure they are not referenced elsewhere
 5. **Performance Considerations**: Avoid frequent tool calls in loops, consider batch operations
 
 ---
 
 ## Technical Support
 
-If you encounter issues while using the tools, you can:
+If you encounter issues during use, you can:
 
 1. Use `debug_get_console_logs` to view detailed error logs
-2. Use `debug_validate_scene` to check for scene issues
+2. Use `debug_validate_scene` to check if the scene has issues
 3. Use `debug_get_editor_info` to get environment information
 4. Check the MCP server's running status and logs
 
 ---
 
-*This document is based on Cocos Creator MCP Server v1.0.0. Please refer to the latest version documentation for updates.*
+*This document is based on Cocos Creator MCP Server v1.3.0. Please refer to the latest version documentation for updates.*

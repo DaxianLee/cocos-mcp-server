@@ -4,12 +4,65 @@
 
 A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8+, enabling AI assistants to interact with the Cocos Creator editor through standardized protocols. One-click installation and use, eliminating all cumbersome environments and configurations. Claude clients Claude CLI and Cursor have been tested, and other editors are also perfectly supported in theory.
 
-**🚀 Now provides 151 tools in 13 categories, achieving 98% editor control! (Prefab instantiation has known child node restoration issues)**
+**🚀 Now provides 158 tools in 13 categories, achieving 98% editor control! (Prefab instantiation has known child node restoration issues)**
+
+## Video Demonstrations and Tutorials
+
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114890828157799&bvid=BV1uzgVz8EyQ&cid=31188255575&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+
+
+## Video Demonstration Configuration Tool List
+
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114909316652345&bvid=BV1kfbyzQEAS&cid=31259361289&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+
 
 ## Quick Links
 
-- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 151 tools(To be completed)
-- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有151个工具的详细文档(To be completed)
+- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 158 tools(To be completed)
+- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有158个工具的详细文档(To be completed)
+
+
+## Changelog
+
+### v1.3.0 - July 25, 2024
+
+#### 🆕 New Features
+- **Integrated Tool Management Panel**: Added comprehensive tool management functionality directly into the main control panel
+- **Tool Configuration System**: Implemented selective tool enabling/disabling with persistent configurations
+- **Dynamic Tool Loading**: Enhanced tool discovery to dynamically load all 158 available tools from the MCP server
+- **Real-time Tool State Management**: Added real-time updates for tool counts and status when individual tools are toggled
+- **Configuration Persistence**: Automatic saving and loading of tool configurations across editor sessions
+
+#### 🔧 Improvements
+- **Unified Panel Interface**: Merged tool management into the main MCP server panel as a tab, eliminating the need for separate panels
+- **Enhanced Server Settings**: Improved server configuration management with better persistence and loading
+- **Vue 3 Integration**: Upgraded to Vue 3 Composition API for better reactivity and performance
+- **Better Error Handling**: Added comprehensive error handling with rollback mechanisms for failed operations
+- **Improved UI/UX**: Enhanced visual design with proper dividers, distinct block styles, and non-transparent modal backgrounds
+
+#### 🐛 Bug Fixes
+- **Fixed Tool State Persistence**: Resolved issues where tool states would reset upon tab switching or panel re-opening
+- **Fixed Configuration Loading**: Corrected server settings loading issues and message registration problems
+- **Fixed Checkbox Interactions**: Resolved checkbox unchecking issues and improved reactivity
+- **Fixed Panel Scrolling**: Ensured proper scrolling functionality in the tool management panel
+- **Fixed IPC Communication**: Resolved various IPC communication issues between frontend and backend
+
+#### 🏗️ Technical Improvements
+- **Simplified Architecture**: Removed multi-configuration complexity, focusing on single configuration management
+- **Better Type Safety**: Enhanced TypeScript type definitions and interfaces
+- **Improved Data Synchronization**: Better synchronization between frontend UI state and backend tool manager
+- **Enhanced Debugging**: Added comprehensive logging and debugging capabilities
+
+#### 📊 Statistics
+- **Total Tools**: Increased from 151 to 158 tools
+- **Categories**: 13 tool categories with comprehensive coverage
+- **Editor Control**: Achieved 98% editor functionality coverage
+
+### v1.2.0 - Previous Version
+- Initial release with 151 tools
+- Basic MCP server functionality
+- Scene, node, component, and prefab operations
+- Project control and debugging tools
 
 
 **Claude cli configuration:**
@@ -54,9 +107,6 @@ claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp (use the
 }
 
 ```
-<img width="1166" height="693" alt="image" src="https://github.com/user-attachments/assets/ecc30596-2e81-4123-b3fd-9e2cf08e5863" />
-<img width="470" height="622" alt="image" src="https://github.com/user-attachments/assets/504fa39b-4f43-4cc4-a912-28654c488072" />
-<img width="466" height="499" alt="image" src="https://github.com/user-attachments/assets/e5f73aa2-068f-457f-94fd-02f52084d6f4" />
 
 ## Features
 
@@ -109,6 +159,7 @@ claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp (use the
 - **Reference Image Management**: Add, remove, and manage reference images in scene view
 - **Scene View Controls**: Control gizmo tools, coordinate systems, and view modes
 - **Advanced Scene Operations**: Undo/redo, snapshots, and advanced node manipulation
+- **🆕 Tool Management**: Selectively enable/disable tools, save configurations, and manage tool states
 
 ## Installation
 
@@ -246,6 +297,29 @@ Settings are stored in `YourProject/settings/mcp-server.json`:
   "enableDebugLog": true,
   "allowedOrigins": ["*"],
   "maxConnections": 10
+}
+```
+
+Tool configurations are stored in `YourProject/settings/tool-manager.json`:
+
+```json
+{
+  "currentConfigId": "default",
+  "configurations": {
+    "default": {
+      "id": "default",
+      "name": "默认配置",
+      "description": "默认工具配置",
+      "tools": [
+        {
+          "category": "scene",
+          "name": "get_current_scene",
+          "enabled": true,
+          "description": "Get current scene information"
+        }
+      ]
+    }
+  }
 }
 ```
 

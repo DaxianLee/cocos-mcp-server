@@ -14,7 +14,8 @@
     "main": "./dist/main.js",
     "dependencies": {
         "fs-extra": "^11.3.0",
-        "uuid": "^9.0.1"
+        "uuid": "^9.0.1",
+        "vue": "^3.1.4"
     },
     "devDependencies": {
         "@cocos/creator-types": "^3.8.6",
@@ -38,7 +39,7 @@
         }
     },
     "contributions": {
-        "menu": [
+                "menu": [
             {
                 "path": "i18n:menu.extension/Cocos MCP Server",
                 "label": "i18n:cocos-mcp-server.open_panel",
@@ -49,6 +50,11 @@
             "open-panel": {
                 "methods": [
                     "openPanel"
+                ]
+            },
+            "open-tool-manager": {
+                "methods": [
+                    "openToolManager"
                 ]
             },
             "start-server": {
@@ -79,6 +85,56 @@
             "get-server-settings": {
                 "methods": [
                     "getServerSettings"
+                ]
+            },
+            "getToolManagerState": {
+                "methods": [
+                    "getToolManagerState"
+                ]
+            },
+            "createToolConfiguration": {
+                "methods": [
+                    "createToolConfiguration"
+                ]
+            },
+            "updateToolConfiguration": {
+                "methods": [
+                    "updateToolConfiguration"
+                ]
+            },
+            "deleteToolConfiguration": {
+                "methods": [
+                    "deleteToolConfiguration"
+                ]
+            },
+            "setCurrentToolConfiguration": {
+                "methods": [
+                    "setCurrentToolConfiguration"
+                ]
+            },
+            "updateToolStatus": {
+                "methods": [
+                    "updateToolStatus"
+                ]
+            },
+            "updateToolStatusBatch": {
+                "methods": [
+                    "updateToolStatusBatch"
+                ]
+            },
+            "exportToolConfiguration": {
+                "methods": [
+                    "exportToolConfiguration"
+                ]
+            },
+            "importToolConfiguration": {
+                "methods": [
+                    "importToolConfiguration"
+                ]
+            },
+            "getEnabledTools": {
+                "methods": [
+                    "getEnabledTools"
                 ]
             }
         },
