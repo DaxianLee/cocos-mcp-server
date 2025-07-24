@@ -8,10 +8,10 @@
 
 ## 视频演示和教学
 
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114890828157799&bvid=BV1uzgVz8EyQ&cid=31188255575&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+[<img width="1007" height="703" alt="image" src="https://github.com/user-attachments/assets/f186ce14-9ffc-4a29-8761-48bdd7c1ea16" />](https://www.bilibili.com/video/BV1uzgVz8EyQ/?vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
 
 ## 视频演示配置工具列表
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=114909316652345&bvid=BV1kfbyzQEAS&cid=31259361289&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+[<img width="1004" height="690" alt="image" src="https://github.com/user-attachments/assets/c5bfe1ed-8946-42a7-ac50-d86dd177e496" />](https://www.bilibili.com/video/BV1kfbyzQEAS/?vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
 
 
 ##快速链接
