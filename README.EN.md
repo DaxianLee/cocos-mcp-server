@@ -7,10 +7,10 @@ A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8
 **🚀 Now provides 158 tools in 13 categories, achieving 98% editor control!**
 
 ## Video Demonstrations and Tutorials
-[<img width="1007" height="703" alt="image" src="https://github.com/user-attachments/assets/f186ce14-9ffc-4a29-8761-48bdd7c1ea16" />](https://www.bilibili.com/video/BV1uzgVz8EyQ/?vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
+[<img width="503" height="351" alt="image" src="https://github.com/user-attachments/assets/f186ce14-9ffc-4a29-8761-48bdd7c1ea16" />](https://www.bilibili.com/video/BV1uzgVz8EyQ/?vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
 
 ## Video Demonstration Configuration Tool List
-[<img width="1004" height="690" alt="image" src="https://github.com/user-attachments/assets/c5bfe1ed-8946-42a7-ac50-d86dd177e496" />](https://www.bilibili.com/video/BV1kfbyzQEAS/?vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
+[<img width="502" height="345" alt="image" src="https://github.com/user-attachments/assets/c5bfe1ed-8946-42a7-ac50-d86dd177e496" />](https://www.bilibili.com/video/BV1kfbyzQEAS/?vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
 
 ## Quick Links
 
@@ -491,3 +491,6 @@ This plug-in is for Cocos Creator project, and the source code is packaged toget
 
 ## Contact me to join the group
 
+<img src="https://github.com/user-attachments/assets/2e3f043a-0b03-4b27-a175-e9c31fbed981" style="max-width: 400px; border-radius: 8px;"/>
+
+<img src="https://github.com/user-attachments/assets/5ef6172c-2968-499e-9edf-7da133016cd2" style="max-width: 400px; border-radius: 8px;" />
