@@ -1,6 +1,6 @@
 # Cocos Creator MCP 服务器插件
 
-**[📖 English](README.EN.md)**  **[📖 中文](README.md)**
+**[📖 English](README.en.md)**  **[📖 中文](README.md)**
 
 一个适用于 Cocos Creator 3.8+ 的综合性 MCP（模型上下文协议）服务器插件，使 AI 助手能够通过标准化协议与 Cocos Creator 编辑器进行交互。一键安装和使用，省去所有繁琐环境和配置。已经测试过Claude客户端Claude CLI和Cursor，其他的编辑器理论上也完美支持。
 
