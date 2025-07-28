@@ -468,4 +468,6 @@ npm run build
 本插件供 Cocos Creator 项目使用,并且源代码一并打包，可以用于学习和交流。没有加密。可以支持你自己二次开发优化，任何本项目代码或者衍生代码均不能用于任何商用、转售，如果需要商用，请联系本人。
 
 ## 联系我加入群
+![wecom-temp-205100-d7f4cbf93918275e3b800ac5966fb73e](https://github.com/user-attachments/assets/2e3f043a-0b03-4b27-a175-e9c31fbed981)
+![wecom-temp-246823-43460ba35c9f33305f8e737de6cbe397](https://github.com/user-attachments/assets/5ef6172c-2968-499e-9edf-7da133016cd2)
 
