@@ -1,5 +1,5 @@
 # Cocos Creator MCP Server Plugin
-**[📖 English](README.en.md)** **[📖 中文](README.md)**
+**[📖 English](README.EN.md)** **[📖 中文](README.md)**
 
 
 A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8+, enabling AI assistants to interact with the Cocos Creator editor through standardized protocols. One-click installation and use, eliminating all cumbersome environments and configurations. Claude clients Claude CLI and Cursor have been tested, and other editors are also perfectly supported in theory.
