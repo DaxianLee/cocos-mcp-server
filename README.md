@@ -1,173 +1,214 @@
-# Cocos Creator MCP Server Plugin
-**[📖 English](README.md)** **[📖 中文](README.zh-CN.md)**
+# Cocos Creator MCP 服务器插件
 
+**[📖 English](README.EN.md)**  **[📖 中文](README.md)**
 
-A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8+, enabling AI assistants to interact with the Cocos Creator editor through standardized protocols. One-click installation and use, eliminating all cumbersome environments and configurations. Claude clients Claude CLI and Cursor have been tested, and other editors are also perfectly supported in theory.
+一个适用于 Cocos Creator 3.8+ 的综合性 MCP（模型上下文协议）服务器插件，使 AI 助手能够通过标准化协议与 Cocos Creator 编辑器进行交互。一键安装和使用，省去所有繁琐环境和配置。已经测试过Claude客户端Claude CLI和Cursor，其他的编辑器理论上也完美支持。
 
-**🚀 Now provides 158 tools in 13 categories, achieving 98% editor control! (Prefab instantiation has known child node restoration issues)**
+**🚀 现在提供 13 个类别的 158 个工具，实现98%的编辑器控制！**
 
-## Video Demonstrations and Tutorials
+## 视频演示和教学
+
 [<img width="1007" height="703" alt="image" src="https://github.com/user-attachments/assets/f186ce14-9ffc-4a29-8761-48bdd7c1ea16" />](https://www.bilibili.com/video/BV1uzgVz8EyQ/?vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
 
-## Video Demonstration Configuration Tool List
+## 视频演示配置工具列表
 [<img width="1004" height="690" alt="image" src="https://github.com/user-attachments/assets/c5bfe1ed-8946-42a7-ac50-d86dd177e496" />](https://www.bilibili.com/video/BV1kfbyzQEAS/?vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
 
-## Quick Links
 
-- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 158 tools(To be completed)
-- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有158个工具的详细文档(To be completed)
+##快速链接
 
-
-## Changelog
-
-### v1.3.0 - July 25, 2024
-
-#### 🆕 New Features
-- **Integrated Tool Management Panel**: Added comprehensive tool management functionality directly into the main control panel
-- **Tool Configuration System**: Implemented selective tool enabling/disabling with persistent configurations
-- **Dynamic Tool Loading**: Enhanced tool discovery to dynamically load all 158 available tools from the MCP server
-- **Real-time Tool State Management**: Added real-time updates for tool counts and status when individual tools are toggled
-- **Configuration Persistence**: Automatic saving and loading of tool configurations across editor sessions
-
-#### 🔧 Improvements
-- **Unified Panel Interface**: Merged tool management into the main MCP server panel as a tab, eliminating the need for separate panels
-- **Enhanced Server Settings**: Improved server configuration management with better persistence and loading
-- **Vue 3 Integration**: Upgraded to Vue 3 Composition API for better reactivity and performance
-- **Better Error Handling**: Added comprehensive error handling with rollback mechanisms for failed operations
-- **Improved UI/UX**: Enhanced visual design with proper dividers, distinct block styles, and non-transparent modal backgrounds
-
-#### 🐛 Bug Fixes
-- **Fixed Tool State Persistence**: Resolved issues where tool states would reset upon tab switching or panel re-opening
-- **Fixed Configuration Loading**: Corrected server settings loading issues and message registration problems
-- **Fixed Checkbox Interactions**: Resolved checkbox unchecking issues and improved reactivity
-- **Fixed Panel Scrolling**: Ensured proper scrolling functionality in the tool management panel
-- **Fixed IPC Communication**: Resolved various IPC communication issues between frontend and backend
-
-#### 🏗️ Technical Improvements
-- **Simplified Architecture**: Removed multi-configuration complexity, focusing on single configuration management
-- **Better Type Safety**: Enhanced TypeScript type definitions and interfaces
-- **Improved Data Synchronization**: Better synchronization between frontend UI state and backend tool manager
-- **Enhanced Debugging**: Added comprehensive logging and debugging capabilities
-
-#### 📊 Statistics
-- **Total Tools**: Increased from 151 to 158 tools
-- **Categories**: 13 tool categories with comprehensive coverage
-- **Editor Control**: Achieved 98% editor functionality coverage
-
-### v1.2.0 - Previous Version
-- Initial release with 151 tools
-- Basic MCP server functionality
-- Scene, node, component, and prefab operations
-- Project control and debugging tools
+- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 158 tools（待补充）
+- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有158工具的详细文档（待补充）
 
 
-**Claude cli configuration:**
+## 更新日志
+
+### v1.4.0 - 2025年7月26日 （已经在cocos 商城更新，github版本将在近期同步）
+cocos store：https://store.cocos.com/app/detail/7941
+如果不愿意购买，加入沟通群我也可以直接发送最新版给你！
+
+#### 🎯 重大功能修复
+- **完全修复预制体创建功能**: 彻底解决了预制体创建时组件/节点/资源类型引用丢失的问题
+- **正确的引用处理**: 实现了与手动创建预制体完全一致的引用格式
+  - **内部引用**: 预制体内部的节点和组件引用正确转换为 `{"__id__": x}` 格式
+  - **外部引用**: 预制体外部的节点和组件引用正确设置为 `null`
+  - **资源引用**: 预制体、纹理、精灵帧等资源引用完整保留UUID格式
+- **组件/脚本移除API规范化**: 现在移除组件/脚本时，必须传入组件的cid（type字段），不能用脚本名或类名。AI和用户应先用getComponents获取type字段（cid），再传给removeComponent。这样能100%准确移除所有类型组件和脚本，兼容所有Cocos Creator版本。
+
+#### 🔧 核心改进
+- **索引顺序优化**: 调整预制体对象创建顺序，确保与Cocos Creator标准格式一致
+- **组件类型支持**: 扩展组件引用检测，支持所有cc.开头的组件类型（Label、Button、Sprite等）
+- **UUID映射机制**: 完善内部UUID到索引的映射系统，确保引用关系正确建立
+- **属性格式标准化**: 修复组件属性顺序和格式，消除引擎解析错误
+
+#### 🐛 错误修复
+- **修复预制体导入错误**: 解决 `Cannot read properties of undefined (reading '_name')` 错误
+- **修复引擎兼容性**: 解决 `placeHolder.initDefault is not a function` 错误
+- **修复属性覆盖**: 防止 `_objFlags` 等关键属性被组件数据覆盖
+- **修复引用丢失**: 确保所有类型的引用都能正确保存和加载
+
+#### 📈 功能增强
+- **完整组件属性保留**: 包括私有属性（如_group、_density等）在内的所有组件属性
+- **子节点结构支持**: 正确处理预制体的层级结构和子节点关系
+- **变换属性处理**: 保留节点的位置、旋转、缩放和层级信息
+- **调试信息优化**: 添加详细的引用处理日志，便于问题追踪
+
+#### 💡 技术突破
+- **引用类型识别**: 智能区分内部引用和外部引用，避免无效引用
+- **格式兼容性**: 生成的预制体与手动创建的预制体格式100%兼容
+- **引擎集成**: 预制体可以正常挂载到场景中，无任何运行时错误
+- **性能优化**: 优化预制体创建流程，提高大型预制体的处理效率
+
+**🎉 现在预制体创建功能已完全可用，支持复杂的组件引用关系和完整的预制体结构！**
+
+### v1.3.0 - 2024年7月25日
+
+#### 🆕 新功能
+- **集成工具管理面板**: 在主控制面板中直接添加了全面的工具管理功能
+- **工具配置系统**: 实现了选择性工具启用/禁用，支持持久化配置
+- **动态工具加载**: 增强了工具发现功能，能够动态加载MCP服务器中的所有158个可用工具
+- **实时工具状态管理**: 添加了工具计数和状态的实时更新，当单个工具切换时立即反映
+- **配置持久化**: 在编辑器会话间自动保存和加载工具配置
+
+#### 🔧 改进
+- **统一面板界面**: 将工具管理合并到主MCP服务器面板作为标签页，消除了对单独面板的需求
+- **增强服务器设置**: 改进了服务器配置管理，具有更好的持久化和加载功能
+- **Vue 3集成**: 升级到Vue 3 Composition API，提供更好的响应性和性能
+- **更好的错误处理**: 添加了全面的错误处理，包含失败操作的回滚机制
+- **改进的UI/UX**: 增强了视觉设计，包含适当的分隔符、独特的块样式和非透明模态背景
+
+#### 🐛 错误修复
+- **修复工具状态持久化**: 解决了工具状态在标签页切换或面板重新打开时重置的问题
+- **修复配置加载**: 纠正了服务器设置加载问题和消息注册问题
+- **修复复选框交互**: 解决了复选框取消选中问题并改进了响应性
+- **修复面板滚动**: 确保工具管理面板中的正确滚动功能
+- **修复IPC通信**: 解决了前端和后端之间的各种IPC通信问题
+
+#### 🏗️ 技术改进
+- **简化架构**: 移除了多配置复杂性，专注于单一配置管理
+- **更好的类型安全**: 增强了TypeScript类型定义和接口
+- **改进数据同步**: 前端UI状态和后端工具管理器之间更好的同步
+- **增强调试**: 添加了全面的日志记录和调试功能
+
+#### 📊 统计信息
+- **总工具数**: 从151个增加到158个工具
+- **类别**: 13个工具类别，全面覆盖
+- **编辑器控制**: 实现98%的编辑器功能覆盖
+
+### v1.2.0 - 之前版本
+- 初始发布，包含151个工具
+- 基本MCP服务器功能
+- 场景、节点、组件和预制体操作
+- 项目控制和调试工具
+
+
+
+
+## 快速使用
+
+**Claude cli配置：**
 
 ```
-claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp (use the port number you configured yourself)
+claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp（使用你自己配置的端口号）
 ```
 
-**Claude client configuration:**
+**Claude客户端配置：**
 
 ```
 {
 
-"mcpServers": {
+  "mcpServers": {
 
-"cocos-creator": {
+		"cocos-creator": {
 
-"type": "http",
+ 		"type": "http",
 
-"url": "http://127.0.0.1:3000/mcp"
+		"url": "http://127.0.0.1:3000/mcp"
+
+		 }
+
+	  }
 
 }
-
-}
-
-}
-
 ```
 
-**Cursor or VS class MCP configuration**
+**Cursor或VS类MCP配置**
 
 ```
 {
 
-"mcpServers": {
+  "mcpServers": { 
 
-"cocos-creator": {
-"url": "http://localhost:3000/mcp"
-}
-}
+   "cocos-creator": {
+      "url": "http://localhost:3000/mcp"
+   }
+  }
 
 }
-
 ```
 
-## Features
+## 功能特性
 
-### 🎯 Scene Operations
-- Get current scene information and complete scene list
-- Open scenes by path and save current scene
-- Create new scenes with custom names
-- Get complete scene hierarchy with component information
+### 🎯 场景操作
+- 获取当前场景信息和完整场景列表
+- 通过路径打开场景并保存当前场景
+- 创建自定义名称的新场景
+- 获取完整场景层级结构及组件信息
 
-### 🎮 Node Operations
-- Create nodes with different types (Node, 2DNode, 3DNode)
-- Get node information by UUID and find nodes by name pattern
-- Set node properties (position, rotation, scale, active)
-- Delete, move, and duplicate nodes with full hierarchy support
+### 🎮 节点操作
+- 创建不同类型的节点（Node、2DNode、3DNode）
+- 通过 UUID 获取节点信息，按名称模式查找节点
+- 设置节点属性（位置、旋转、缩放、激活状态）
+- 删除、移动和复制节点，完整支持层级结构
 
-### 🔧 Component Operations
-- Add/remove components from nodes
-- Get all components of a node with properties
-- Set component properties dynamically
-- Attach script components from asset paths
-- List available component types by category
+### 🔧 组件操作
+- 向节点添加/删除组件
+- 获取节点的所有组件及属性
+- 动态设置组件属性
+- 从资源路径挂载脚本组件
+- 按类别列出可用的组件类型
 
-### 📦 Prefab Operations
-- List all prefabs in project with folder organization
-- Load, instantiate, and create prefabs
-- Update existing prefabs and revert prefab instances
-- Get detailed prefab information including dependencies
-- **⚠️ Known Issue**: Prefab instantiation may not properly restore child nodes due to Cocos Creator API limitations
+### 📦 预制体操作
+- 列出项目中的所有预制体，支持文件夹组织
+- 加载、实例化和创建预制体
+- 更新现有预制体并还原预制体实例
+- 获取详细的预制体信息，包括依赖关系
 
-### 🚀 Project Control
-- Run project in preview mode (browser/simulator)
-- Build project for different platforms (web, mobile, desktop)
-- Get project information and settings
-- Refresh asset database and import new assets
-- Get detailed asset information
+### 🚀 项目控制
+- 在预览模式下运行项目（浏览器/模拟器）
+- 为不同平台构建项目（Web、移动端、桌面端）
+- 获取项目信息和设置
+- 刷新资源数据库并导入新资源
+- 获取详细的资源信息
 
-### 🔍 Debug Tools
-- Get editor console logs with filtering
-- Clear console and execute JavaScript in scene context
-- Get detailed node tree for debugging
-- Performance statistics and scene validation
-- Get editor and environment information
+### 🔍 调试工具
+- 获取编辑器控制台日志，支持过滤
+- 清空控制台并在场景上下文中执行 JavaScript
+- 获取详细的节点树用于调试
+- 性能统计和场景验证
+- 获取编辑器和环境信息
 
-### ⚙️ Additional Features
-- **Preferences Management**: Get/set editor preferences and global settings
-- **Server Control**: Server information, project details, and editor control
-- **Message Broadcasting**: Listen to and broadcast custom messages
-- **Asset Management**: Create, copy, move, delete, and query assets
-- **Build System**: Project building and preview server control
-- **Reference Image Management**: Add, remove, and manage reference images in scene view
-- **Scene View Controls**: Control gizmo tools, coordinate systems, and view modes
-- **Advanced Scene Operations**: Undo/redo, snapshots, and advanced node manipulation
-- **🆕 Tool Management**: Selectively enable/disable tools, save configurations, and manage tool states
+### ⚙️ 其他功能
+- **偏好设置管理**: 获取/设置编辑器偏好和全局设置
+- **服务器控制**: 服务器信息、项目详情和编辑器控制
+- **消息广播**: 监听和广播自定义消息
+- **资源管理**: 创建、复制、移动、删除和查询资源
+- **构建系统**: 项目构建和预览服务器控制
+- **参考图片管理**: 在场景视图中添加、删除和管理参考图片
+- **场景视图控制**: 控制Gizmo工具、坐标系和视图模式
+- **高级场景操作**: 撤销/重做、快照和高级节点操作
+- **🆕 工具管理**: 选择性启用/禁用工具、保存配置和管理工具状态
 
-## Installation
+## 安装说明
 
-### 1. Copy Plugin Files
+### 1. 复制插件文件
 
-Copy the entire `cocos-mcp-server` folder to your Cocos Creator project's `extensions` directory:
+将整个 `cocos-mcp-server` 文件夹复制到您的 Cocos Creator 项目的 `extensions` 目录中：
 
 ```
-YourProject/
+您的项目/
 ├── assets/
 ├── extensions/
-│   └── cocos-mcp-server/          <- Place plugin here
+│   └── cocos-mcp-server/          <- 将插件放在这里
 │       ├── source/
 │       ├── dist/
 │       ├── package.json
@@ -176,68 +217,68 @@ YourProject/
 └── ...
 ```
 
-### 2. Install Dependencies
+### 2. 安装依赖
 
 ```bash
 cd extensions/cocos-mcp-server
 npm install
 ```
 
-### 3. Build the Plugin
+### 3. 构建插件
 
 ```bash
 npm run build
 ```
 
-### 4. Enable Plugin
+### 4. 启用插件
 
-1. Restart Cocos Creator or refresh extensions
-2. The plugin will appear in the Extension menu
-3. Click `Extension > Cocos MCP Server` to open the control panel
+1. 重启 Cocos Creator 或刷新扩展
+2. 插件将出现在扩展菜单中
+3. 点击 `扩展 > Cocos MCP Server` 打开控制面板
 
-## Usage
+## 使用方法
 
-### Starting the Server
+### 启动服务器
 
-1. Open the MCP Server panel from `Extension > Cocos MCP Server`
-2. Configure settings:
-   - **Port**: HTTP server port (default: 3000)
-   - **Auto Start**: Automatically start server when editor opens
-   - **Debug Logging**: Enable detailed logging for development
-   - **Max Connections**: Maximum concurrent connections allowed
+1. 从 `扩展 > Cocos MCP Server` 打开 MCP 服务器面板
+2. 配置设置：
+   - **端口**: HTTP 服务器端口（默认：3000）
+   - **自动启动**: 编辑器启动时自动启动服务器
+   - **调试日志**: 启用详细日志以便开发调试
+   - **最大连接数**: 允许的最大并发连接数
 
-3. Click "Start Server" to begin accepting connections
+3. 点击"启动服务器"开始接受连接
 
-### Connecting AI Assistants
+### 连接 AI 助手
 
-The server exposes an HTTP endpoint at `http://localhost:3000/mcp` (or your configured port).
+服务器在 `http://localhost:3000/mcp`（或您配置的端口）上提供 HTTP 端点。
 
-AI assistants can connect using the MCP protocol and access all available tools.
+AI 助手可以使用 MCP 协议连接并访问所有可用工具。
 
-### Tool Categories
+### 工具分类
 
-Tools are organized by category with naming convention: `category_toolname`
+工具按类别组织，命名约定为：`category_toolname`
 
-- **scene_\***: Scene-related operations (8 tools)
-- **node_\***: Node manipulation (9 tools)  
-- **component_\***: Component management (7 tools)
-- **prefab_\***: Prefab operations (11 tools)
-- **project_\***: Project control (22 tools)
-- **debug_\***: Debugging utilities (10 tools)
-- **preferences_\***: Editor preferences (7 tools)
-- **server_\***: Server information (6 tools)
-- **broadcast_\***: Message broadcasting (5 tools)
-- **assetAdvanced_\***: Advanced asset operations (10 tools)
-- **referenceImage_\***: Reference image management (12 tools)
-- **sceneAdvanced_\***: Advanced scene operations (23 tools)
-- **sceneView_\***: Scene view controls (14 tools)
+- **scene_\***: 场景相关操作 (8个工具)
+- **node_\***: 节点操作 (9个工具)
+- **component_\***: 组件管理 (7个工具)
+- **prefab_\***: 预制体操作 (11个工具)
+- **project_\***: 项目控制 (22个工具)
+- **debug_\***: 调试工具 (10个工具)
+- **preferences_\***: 编辑器偏好设置 (7个工具)
+- **server_\***: 服务器信息 (6个工具)
+- **broadcast_\***: 消息广播 (5个工具)
+- **assetAdvanced_\***: 高级资源操作 (10个工具)
+- **referenceImage_\***: 参考图片管理 (12个工具)
+- **sceneAdvanced_\***: 高级场景操作 (23个工具)
+- **sceneView_\***: 场景视图控制 (14个工具)
 
 
-📖 **[View Complete Tool Documentation](FEATURE_GUIDE_EN.md)** for detailed usage examples and parameters.
+📖 **[查看完整工具文档](FEATURE_GUIDE_CN.md)** 了解详细的使用示例和参数。
 
-## Example Tool Usage
+## 工具使用示例
 
-### Create a new sprite node
+### 创建新的精灵节点
 ```json
 {
   "tool": "node_create_node",
@@ -249,10 +290,10 @@ Tools are organized by category with naming convention: `category_toolname`
 }
 ```
 
-### Add a Sprite component
+### 添加 Sprite 组件
 ```json
 {
-  "tool": "component_add_component", 
+  "tool": "component_add_component",
   "arguments": {
     "nodeUuid": "node-uuid",
     "componentType": "cc.Sprite"
@@ -260,7 +301,7 @@ Tools are organized by category with naming convention: `category_toolname`
 }
 ```
 
-### Instantiate a prefab
+### 实例化预制体
 ```json
 {
   "tool": "prefab_instantiate_prefab",
@@ -270,9 +311,8 @@ Tools are organized by category with naming convention: `category_toolname`
   }
 }
 ```
-**⚠️ Note**: Complex prefabs with child nodes may not instantiate correctly due to Cocos Creator API limitations. Child nodes may be missing in the instantiated prefab.
 
-### Run project in browser
+### 在浏览器中运行项目
 ```json
 {
   "tool": "project_run_project",
@@ -282,9 +322,9 @@ Tools are organized by category with naming convention: `category_toolname`
 }
 ```
 
-## Configuration
+## 配置
 
-Settings are stored in `YourProject/settings/mcp-server.json`:
+设置存储在 `您的项目/settings/mcp-server.json` 中：
 
 ```json
 {
@@ -296,7 +336,7 @@ Settings are stored in `YourProject/settings/mcp-server.json`:
 }
 ```
 
-Tool configurations are stored in `YourProject/settings/tool-manager.json`:
+工具配置存储在 `您的项目/settings/tool-manager.json` 中：
 
 ```json
 {
@@ -311,7 +351,7 @@ Tool configurations are stored in `YourProject/settings/tool-manager.json`:
           "category": "scene",
           "name": "get_current_scene",
           "enabled": true,
-          "description": "Get current scene information"
+          "description": "获取当前场景信息"
         }
       ]
     }
@@ -319,25 +359,25 @@ Tool configurations are stored in `YourProject/settings/tool-manager.json`:
 }
 ```
 
-## Icon Setup
+## 图标设置
 
-To add an icon for the plugin panel:
+为插件面板添加图标：
 
-1. Create a PNG icon file (recommended size: 32x32 or 64x64)
-2. Place it in the `static/` directory: `static/icon.png`
-3. The icon path is already configured in `package.json`
+1. 创建 PNG 图标文件（推荐尺寸：32x32 或 64x64）
+2. 将其放在 `static/` 目录中：`static/icon.png`
+3. 图标路径已在 `package.json`
 
-## Development
+## 开发
 
-### Project Structure
+### 项目结构
 ```
 cocos-mcp-server/
-├── source/                    # TypeScript source files
-│   ├── main.ts               # Plugin entry point
-│   ├── mcp-server.ts         # MCP server implementation
-│   ├── settings.ts           # Settings management
-│   ├── types/                # TypeScript type definitions
-│   ├── tools/                # Tool implementations
+├── source/                    # TypeScript 源文件
+│   ├── main.ts               # 插件入口点
+│   ├── mcp-server.ts         # MCP 服务器实现
+│   ├── settings.ts           # 设置管理
+│   ├── types/                # TypeScript 类型定义
+│   ├── tools/                # 工具实现
 │   │   ├── scene-tools.ts
 │   │   ├── node-tools.ts
 │   │   ├── component-tools.ts
@@ -351,70 +391,57 @@ cocos-mcp-server/
 │   │   ├── scene-view-tools.ts
 │   │   ├── reference-image-tools.ts
 │   │   └── asset-advanced-tools.ts
-│   ├── panels/               # UI panel implementation
-│   └── test/                 # Test files
-├── dist/                     # Compiled JavaScript output
-├── static/                   # Static assets (icons, etc.)
-├── i18n/                     # Internationalization files
-├── package.json              # Plugin configuration
-└── tsconfig.json             # TypeScript configuration
+│   ├── panels/               # UI 面板实现
+│   └── test/                 # 测试文件
+├── dist/                     # 编译后的 JavaScript 输出
+├── static/                   # 静态资源（图标等）
+├── i18n/                     # 国际化文件
+├── package.json              # 插件配置
+└── tsconfig.json             # TypeScript 配置
 ```
 
-### Building from Source
+### 从源码构建
 
 ```bash
-# Install dependencies
+# 安装依赖
 npm install
 
-# Build for development with watch mode
+# 开发构建（监视模式）
 npm run watch
 
-# Build for production
+# 生产构建
 npm run build
 ```
 
-### Adding New Tools
+### 添加新工具
 
-1. Create a new tool class in `source/tools/`
-2. Implement the `ToolExecutor` interface
-3. Add tool to `mcp-server.ts` initialization
-4. Tools are automatically exposed via MCP protocol
+1. 在 `source/tools/` 中创建新的工具类
+2. 实现 `ToolExecutor` 接口
+3. 将工具添加到 `mcp-server.ts` 初始化中
+4. 工具会自动通过 MCP 协议暴露
 
-### TypeScript Support
+### TypeScript 支持
 
-The plugin is fully written in TypeScript with:
-- Strict type checking enabled
-- Comprehensive type definitions for all APIs
-- IntelliSense support for development
-- Automatic compilation to JavaScript
+插件完全使用 TypeScript 编写，具备：
+- 启用严格类型检查
+- 为所有 API 提供全面的类型定义
+- 开发时的 IntelliSense 支持
+- 自动编译为 JavaScript
 
-### Running Tests
+## 故障排除
 
-```bash
-# Run comprehensive test suite
-node comprehensive-test.js
+### 常见问题
 
-# Run feature-specific tests
-./test-all-features.sh
+1. **服务器无法启动**: 检查端口可用性和防火墙设置
+2. **工具不工作**: 确保场景已加载且 UUID 有效
+3. **构建错误**: 运行 `npm run build` 检查 TypeScript 错误
+4. **连接问题**: 验证 HTTP URL 和服务器状态
 
-# Run Node.js test script
-node test-mcp-server.js
-```
+### 调试模式
 
-## Troubleshooting
+在插件面板中启用调试日志以获取详细的操作日志。
 
-### Common Issues
-
-1. **Server won't start**: Check port availability and firewall settings
-2. **Tools not working**: Ensure scene is loaded and UUIDs are valid
-3. **Build errors**: Run `npm run build` to check for TypeScript errors
-4. **Connection issues**: Verify HTTP URL and server status
-
-### Debug Mode
-
-Enable debug logging in the plugin panel for detailed operation logs.
-
-### Using Debug Tools
+### 使用调试工具
 
 ```json
 {
@@ -430,22 +457,15 @@ Enable debug logging in the plugin panel for detailed operation logs.
 }
 ```
 
-## Requirements
+## 系统要求
 
-- Cocos Creator 3.8.6 or later
-- Node.js (bundled with Cocos Creator)
-- TypeScript (installed as dev dependency)
+- Cocos Creator 3.8.6 或更高版本
+- Node.js（Cocos Creator 自带）
+- TypeScript（作为开发依赖安装）
 
-## Architecture Notes
+## 许可证
 
-This plugin uses a simplified MCP protocol implementation that is compatible with Cocos Creator's CommonJS environment. The HTTP server provides a JSON-RPC interface for AI assistants to interact with the editor.
+本插件供 Cocos Creator 项目使用,并且源代码一并打包，可以用于学习和交流。没有加密。可以支持你自己二次开发优化，任何本项目代码或者衍生代码均不能用于任何商用、转售，如果需要商用，请联系本人。
 
-### Protocol Support
-- **HTTP Connection**: `http://localhost:3000/mcp` (configurable port)
-- **JSON-RPC 2.0**: Standard request/response format
-- **Tool Discovery**: `tools/list` method returns available tools
-- **Tool Execution**: `tools/call` method executes specific tools
+## 联系我加入群
 
-## License
-
-This plug-in is for Cocos Creator project, and the source code is packaged together, which can be used for learning and communication. It is not encrypted. It can support your own secondary development and optimization. Any code of this project or its derivative code cannot be used for any commercial purpose or resale. If you need commercial use, please contact me.
