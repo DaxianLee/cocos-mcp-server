@@ -1,11 +1,13 @@
 import { ToolDefinition, ToolResponse, ToolExecutor, NodeInfo } from '../types';
+import { ComponentTools } from './component-tools';
 
 export class NodeTools implements ToolExecutor {
+    private componentTools = new ComponentTools();
     getTools(): ToolDefinition[] {
         return [
             {
                 name: 'create_node',
-                description: 'Create a new node in the scene. IMPORTANT: You should always provide parentUuid to specify where to create the node. If parentUuid is not provided, the node will be created at the scene root.',
+                description: 'Create a new node in the scene. Supports creating empty nodes, nodes with components, or instantiating from assets (prefabs, etc.). IMPORTANT: You should always provide parentUuid to specify where to create the node.',
                 inputSchema: {
                     type: 'object',
                     properties: {
@@ -27,6 +29,59 @@ export class NodeTools implements ToolExecutor {
                             type: 'number',
                             description: 'Sibling index for ordering (-1 means append at end)',
                             default: -1
+                        },
+                        assetUuid: {
+                            type: 'string',
+                            description: 'Asset UUID to instantiate from (e.g., prefab UUID). When provided, creates a node instance from the asset instead of an empty node.'
+                        },
+                        assetPath: {
+                            type: 'string',
+                            description: 'Asset path to instantiate from (e.g., "db://assets/prefabs/MyPrefab.prefab"). Alternative to assetUuid.'
+                        },
+                        components: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            description: 'Array of component type names to add to the new node (e.g., ["cc.Sprite", "cc.Button"])'
+                        },
+                        unlinkPrefab: {
+                            type: 'boolean',
+                            description: 'If true and creating from prefab, unlink from prefab to create a regular node',
+                            default: false
+                        },
+                        keepWorldTransform: {
+                            type: 'boolean',
+                            description: 'Whether to keep world transform when creating the node',
+                            default: false
+                        },
+                        initialTransform: {
+                            type: 'object',
+                            properties: {
+                                position: {
+                                    type: 'object',
+                                    properties: {
+                                        x: { type: 'number' },
+                                        y: { type: 'number' },
+                                        z: { type: 'number' }
+                                    }
+                                },
+                                rotation: {
+                                    type: 'object',
+                                    properties: {
+                                        x: { type: 'number' },
+                                        y: { type: 'number' },
+                                        z: { type: 'number' }
+                                    }
+                                },
+                                scale: {
+                                    type: 'object',
+                                    properties: {
+                                        x: { type: 'number' },
+                                        y: { type: 'number' },
+                                        z: { type: 'number' }
+                                    }
+                                }
+                            },
+                            description: 'Initial transform to apply to the created node'
                         }
                     },
                     required: ['name']
@@ -89,7 +144,7 @@ export class NodeTools implements ToolExecutor {
             },
             {
                 name: 'set_node_property',
-                description: 'Set node property value (prefer using set_node_transform for position/rotation/scale)',
+                description: 'Set node property value (prefer using set_node_transform for active/layer/mobility/position/rotation/scale)',
                 inputSchema: {
                     type: 'object',
                     properties: {
@@ -253,150 +308,190 @@ export class NodeTools implements ToolExecutor {
 
     private async createNode(args: any): Promise<ToolResponse> {
         return new Promise(async (resolve) => {
-            let targetParentUuid = args.parentUuid;
-            
-            // 如果没有提供父节点UUID，获取场景根节点
-            if (!targetParentUuid) {
-                try {
-                    const sceneInfo = await Editor.Message.request('scene', 'query-node-tree');
-                    if (sceneInfo && typeof sceneInfo === 'object' && !Array.isArray(sceneInfo) && Object.prototype.hasOwnProperty.call(sceneInfo, 'uuid')) {
-                        targetParentUuid = (sceneInfo as any).uuid;
-                        console.log(`No parent specified, using scene root: ${targetParentUuid}`);
-                    } else if (Array.isArray(sceneInfo) && sceneInfo.length > 0 && sceneInfo[0].uuid) {
-                        // 如果返回的是数组，使用第一个元素（通常是场景根节点）
-                        targetParentUuid = sceneInfo[0].uuid;
-                        console.log(`No parent specified, using scene root: ${targetParentUuid}`);
-                    } else {
-                        // 备用方案：尝试获取当前场景
-                        const currentScene = await Editor.Message.request('scene', 'query-current-scene');
-                        if (currentScene && currentScene.uuid) {
-                            targetParentUuid = currentScene.uuid;
+            try {
+                let targetParentUuid = args.parentUuid;
+                
+                // 如果没有提供父节点UUID，获取场景根节点
+                if (!targetParentUuid) {
+                    try {
+                        const sceneInfo = await Editor.Message.request('scene', 'query-node-tree');
+                        if (sceneInfo && typeof sceneInfo === 'object' && !Array.isArray(sceneInfo) && Object.prototype.hasOwnProperty.call(sceneInfo, 'uuid')) {
+                            targetParentUuid = (sceneInfo as any).uuid;
+                            console.log(`No parent specified, using scene root: ${targetParentUuid}`);
+                        } else if (Array.isArray(sceneInfo) && sceneInfo.length > 0 && sceneInfo[0].uuid) {
+                            targetParentUuid = sceneInfo[0].uuid;
+                            console.log(`No parent specified, using scene root: ${targetParentUuid}`);
+                        } else {
+                            const currentScene = await Editor.Message.request('scene', 'query-current-scene');
+                            if (currentScene && currentScene.uuid) {
+                                targetParentUuid = currentScene.uuid;
+                            }
                         }
+                    } catch (err) {
+                        console.warn('Failed to get scene root, will use default behavior');
                     }
-                } catch (err) {
-                    console.warn('Failed to get scene root, will use default behavior');
                 }
-            }
 
-            // 如果指定了父节点，先验证父节点是否存在
-            if (targetParentUuid) {
-                try {
-                    const parentNode = await Editor.Message.request('scene', 'query-node', targetParentUuid);
-                    if (!parentNode) {
+                // 如果提供了assetPath，先解析为assetUuid
+                let finalAssetUuid = args.assetUuid;
+                if (args.assetPath && !finalAssetUuid) {
+                    try {
+                        const assetInfo = await Editor.Message.request('asset-db', 'query-asset-info', args.assetPath);
+                        if (assetInfo && assetInfo.uuid) {
+                            finalAssetUuid = assetInfo.uuid;
+                            console.log(`Asset path '${args.assetPath}' resolved to UUID: ${finalAssetUuid}`);
+                        } else {
+                            resolve({
+                                success: false,
+                                error: `Asset not found at path: ${args.assetPath}`
+                            });
+                            return;
+                        }
+                    } catch (err) {
                         resolve({
                             success: false,
-                            error: `Parent node with UUID '${targetParentUuid}' not found`
+                            error: `Failed to resolve asset path '${args.assetPath}': ${err}`
                         });
                         return;
                     }
-                } catch (err) {
-                    resolve({
-                        success: false,
-                        error: `Failed to verify parent node: ${err}`
-                    });
-                    return;
                 }
-            }
 
-            const nodeData: any = {
-                name: args.name,
-                type: args.nodeType || 'cc.Node'
-            };
-
-            // 使用正确的create-node API参数结构
-            if (targetParentUuid) {
-                const createNodeOptions = {
-                    parent: targetParentUuid,
-                    name: args.name,
-                    components: args.nodeType && args.nodeType !== 'Node' ? [args.nodeType] : undefined
+                // 构建create-node选项
+                const createNodeOptions: any = {
+                    name: args.name
                 };
-                
-                Editor.Message.request('scene', 'create-node', createNodeOptions).then((nodeUuid: any) => {
-                    // 如果需要设置特定的兄弟索引，使用set-parent API
-                    // 添加延迟以避免内部状态竞争
-                    if (args.siblingIndex !== undefined && args.siblingIndex >= 0 && nodeUuid) {
-                        setTimeout(() => {
-                            Editor.Message.request('scene', 'set-parent', {
-                                parent: targetParentUuid,
-                                uuids: [nodeUuid],
-                                keepWorldTransform: false
-                            }).then(() => {
-                                resolve({
-                                    success: true,
-                                    data: {
-                                        uuid: nodeUuid,
-                                        name: args.name,
-                                        parentUuid: targetParentUuid,
-                                        message: args.parentUuid 
-                                            ? `Node '${args.name}' created under specified parent`
-                                            : `Node '${args.name}' created at scene root (no parent specified)`
-                                    }
-                                });
-                            }).catch(() => {
-                                // 即使移动失败，节点已创建，返回成功但带警告
-                                resolve({
-                                    success: true,
-                                    data: {
-                                        uuid: nodeUuid,
-                                        name: args.name,
-                                        message: `Node '${args.name}' created but may not be under intended parent`,
-                                        warning: 'Failed to move node to specified parent'
-                                    }
-                                });
-                            });
-                        }, 100); // 100ms延迟
-                    } else {
-                        // Get complete node info for verification
-                        this.getNodeInfo(nodeUuid).then((nodeInfo) => {
-                            resolve({
-                                success: true,
-                                data: {
-                                    uuid: nodeUuid,
-                                    name: args.name,
-                                    message: `Node '${args.name}' created successfully`
-                                },
-                                verificationData: {
-                                    nodeInfo: nodeInfo.data,
-                                    creationDetails: {
-                                        parentUuid: targetParentUuid,
-                                        nodeType: args.nodeType || 'Node',
-                                        timestamp: new Date().toISOString()
-                                    }
-                                }
-                            });
-                        }).catch(() => {
-                            resolve({
-                                success: true,
-                                data: {
-                                    uuid: nodeUuid,
-                                    name: args.name,
-                                    message: `Node '${args.name}' created successfully (verification failed)`
-                                }
-                            });
-                        });
+
+                // 设置父节点
+                if (targetParentUuid) {
+                    createNodeOptions.parent = targetParentUuid;
+                }
+
+                // 从资源实例化
+                if (finalAssetUuid) {
+                    createNodeOptions.assetUuid = finalAssetUuid;
+                    if (args.unlinkPrefab) {
+                        createNodeOptions.unlinkPrefab = true;
                     }
-                }).catch((err: Error) => {
-                    resolve({ success: false, error: err.message });
-                });
-            } else {
-                // 没有找到场景根节点，使用默认行为（创建在场景根节点）
-                const createNodeOptions = {
-                    name: args.name,
-                    components: args.nodeType && args.nodeType !== 'Node' ? [args.nodeType] : undefined
-                };
-                
-                Editor.Message.request('scene', 'create-node', createNodeOptions).then((result: any) => {
-                    resolve({
-                        success: true,
-                        data: {
-                            uuid: result,
-                            name: args.name,
-                            message: `Node '${args.name}' created at default location (scene root not found)`,
-                            warning: 'Could not determine scene root, node created at default location'
+                }
+
+                // 添加组件
+                if (args.components && args.components.length > 0) {
+                    createNodeOptions.components = args.components;
+                } else if (args.nodeType && args.nodeType !== 'Node' && !finalAssetUuid) {
+                    // 只有在不从资源实例化时才添加nodeType组件
+                    createNodeOptions.components = [args.nodeType];
+                }
+
+                // 保持世界变换
+                if (args.keepWorldTransform) {
+                    createNodeOptions.keepWorldTransform = true;
+                }
+
+                // 不使用dump参数处理初始变换，创建后使用set_node_transform设置
+
+                console.log('Creating node with options:', createNodeOptions);
+
+                // 创建节点
+                const nodeUuid = await Editor.Message.request('scene', 'create-node', createNodeOptions);
+                const uuid = Array.isArray(nodeUuid) ? nodeUuid[0] : nodeUuid;
+
+                // 处理兄弟索引
+                if (args.siblingIndex !== undefined && args.siblingIndex >= 0 && uuid && targetParentUuid) {
+                    try {
+                        await new Promise(resolve => setTimeout(resolve, 100)); // 等待内部状态更新
+                        await Editor.Message.request('scene', 'set-parent', {
+                            parent: targetParentUuid,
+                            uuids: [uuid],
+                            keepWorldTransform: args.keepWorldTransform || false
+                        });
+                    } catch (err) {
+                        console.warn('Failed to set sibling index:', err);
+                    }
+                }
+
+                // 添加组件（如果提供的话）
+                if (args.components && args.components.length > 0 && uuid) {
+                    try {
+                        await new Promise(resolve => setTimeout(resolve, 100)); // 等待节点创建完成
+                        for (const componentType of args.components) {
+                            try {
+                                const result = await this.componentTools.execute('add_component', {
+                                    nodeUuid: uuid,
+                                    componentType: componentType
+                                });
+                                if (result.success) {
+                                    console.log(`Component ${componentType} added successfully`);
+                                } else {
+                                    console.warn(`Failed to add component ${componentType}:`, result.error);
+                                }
+                            } catch (err) {
+                                console.warn(`Failed to add component ${componentType}:`, err);
+                            }
                         }
-                    });
-                }).catch((err: Error) => {
-                    resolve({ success: false, error: err.message });
+                    } catch (err) {
+                        console.warn('Failed to add components:', err);
+                    }
+                }
+
+                // 设置初始变换（如果提供的话）
+                if (args.initialTransform && uuid) {
+                    try {
+                        await new Promise(resolve => setTimeout(resolve, 150)); // 等待节点和组件创建完成
+                        await this.setNodeTransform({
+                            uuid: uuid,
+                            position: args.initialTransform.position,
+                            rotation: args.initialTransform.rotation,
+                            scale: args.initialTransform.scale
+                        });
+                        console.log('Initial transform applied successfully');
+                    } catch (err) {
+                        console.warn('Failed to set initial transform:', err);
+                    }
+                }
+
+                // 获取创建后的节点信息进行验证
+                let verificationData: any = null;
+                try {
+                    const nodeInfo = await this.getNodeInfo(uuid);
+                    if (nodeInfo.success) {
+                        verificationData = {
+                            nodeInfo: nodeInfo.data,
+                            creationDetails: {
+                                parentUuid: targetParentUuid,
+                                nodeType: args.nodeType || 'Node',
+                                fromAsset: !!finalAssetUuid,
+                                assetUuid: finalAssetUuid,
+                                assetPath: args.assetPath,
+                                timestamp: new Date().toISOString()
+                            }
+                        };
+                    }
+                } catch (err) {
+                    console.warn('Failed to get verification data:', err);
+                }
+
+                const successMessage = finalAssetUuid 
+                    ? `Node '${args.name}' instantiated from asset successfully`
+                    : `Node '${args.name}' created successfully`;
+
+                resolve({
+                    success: true,
+                    data: {
+                        uuid: uuid,
+                        name: args.name,
+                        parentUuid: targetParentUuid,
+                        nodeType: args.nodeType || 'Node',
+                        fromAsset: !!finalAssetUuid,
+                        assetUuid: finalAssetUuid,
+                        message: successMessage
+                    },
+                    verificationData: verificationData
+                });
+
+            } catch (err: any) {
+                resolve({ 
+                    success: false, 
+                    error: `Failed to create node: ${err.message}. Args: ${JSON.stringify(args)}`
                 });
             }
         });

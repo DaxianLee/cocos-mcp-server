@@ -4,7 +4,7 @@
 
 一个适用于 Cocos Creator 3.8+ 的综合性 MCP（模型上下文协议）服务器插件，使 AI 助手能够通过标准化协议与 Cocos Creator 编辑器进行交互。一键安装和使用，省去所有繁琐环境和配置。已经测试过Claude客户端Claude CLI和Cursor，其他的编辑器理论上也完美支持。
 
-**🚀 现在提供 13 个类别的 158 个工具，实现98%的编辑器控制！**
+**🚀 现在提供 50 个强力融合工具，实现99%的编辑器控制！**
 
 ## 视频演示和教学
 
@@ -22,9 +22,55 @@
 
 ## 更新日志
 
-### v1.4.0 - 2025年7月26日 （已经在cocos 商城更新，github版本将在近期同步）
+## 🚀 重大更新 v1.5.0（2024年7月29日）（已经在cocos 商城更新，github版本将在下个版本同步更新）
+
 cocos store：https://store.cocos.com/app/detail/7941
 如果不愿意购买，加入沟通群我也可以直接发送最新版给你！
+
+- **工具精简与重构**：将原有150+工具浓缩规整为50个高复用、高覆盖率的核心工具，去除所有无效冗余代码，极大提升易用性和可维护性。
+- **操作码统一**：所有工具均采用“操作码+参数”模式，极大简化AI调用流程，提升AI调用成功率，减少AI调用次数，降低50% token消耗。
+- **预制体功能全面升级**：彻底修复和完善预制体的创建、实例化、同步、引用等所有核心功能，支持复杂引用关系，100%对齐官方格式。
+- **事件绑定与老功能补全**：补充并实现了事件绑定、节点/组件/资源等老功能，所有方法与官方实现完全对齐。
+- **接口优化**：所有接口参数更清晰，文档更完善，AI更容易理解和调用。
+- **插件面板优化**：面板UI更简洁，操作更直观。
+- **性能与兼容性提升**：整体架构更高效，兼容Cocos Creator 3.8.6及以上所有版本。
+
+
+## 工具体系与操作码
+
+- 所有工具均以“类别_操作”命名，参数采用统一Schema，支持多操作码（action）切换，极大提升灵活性和可扩展性。
+- 50个核心工具涵盖场景、节点、组件、预制体、资源、项目、调试、偏好设置、服务器、消息广播等全部编辑器操作。
+- 工具调用示例：
+
+```json
+{
+  "tool": "node_lifecycle",
+  "arguments": {
+    "action": "create",
+    "name": "MyNode",
+    "parentUuid": "parent-uuid",
+    "nodeType": "2DNode"
+  }
+}
+```
+
+---
+
+## 主要功能类别（部分示例）
+
+- **scene_management**：场景管理（获取/打开/保存/新建/关闭场景）
+- **node_query / node_lifecycle / node_transform**：节点查询、创建、删除、属性变更
+- **component_manage / component_script / component_query**：组件增删、脚本挂载、组件信息
+- **prefab_browse / prefab_lifecycle / prefab_instance**：预制体浏览、创建、实例化、同步
+- **asset_manage / asset_analyze**：资源导入、删除、依赖分析
+- **project_manage / project_build_system**：项目运行、构建、配置信息
+- **debug_console / debug_logs**：控制台与日志管理
+- **preferences_manage**：偏好设置
+- **server_info**：服务器信息
+- **broadcast_message**：消息广播
+
+
+### v1.4.0 - 2025年7月26日（当前github版本）
 
 #### 🎯 重大功能修复
 - **完全修复预制体创建功能**: 彻底解决了预制体创建时组件/节点/资源类型引用丢失的问题
@@ -102,7 +148,6 @@ cocos store：https://store.cocos.com/app/detail/7941
 
 
 
-
 ## 快速使用
 
 **Claude cli配置：**
@@ -148,61 +193,85 @@ claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp（使用
 
 ## 功能特性
 
-### 🎯 场景操作
-- 获取当前场景信息和完整场景列表
-- 通过路径打开场景并保存当前场景
-- 创建自定义名称的新场景
-- 获取完整场景层级结构及组件信息
+### 🎯 场景操作 (scene_*)
+- **scene_management**: 场景管理 - 获取当前场景、打开/保存/创建/关闭场景，支持场景列表查询
+- **scene_hierarchy**: 场景层级 - 获取完整场景结构，支持组件信息包含
+- **scene_execution_control**: 执行控制 - 执行组件方法、场景脚本、预制体同步
 
-### 🎮 节点操作
-- 创建不同类型的节点（Node、2DNode、3DNode）
-- 通过 UUID 获取节点信息，按名称模式查找节点
-- 设置节点属性（位置、旋转、缩放、激活状态）
-- 删除、移动和复制节点，完整支持层级结构
+### 🎮 节点操作 (node_*)
+- **node_query**: 节点查询 - 按名称/模式查找节点，获取节点信息，检测2D/3D类型
+- **node_lifecycle**: 节点生命周期 - 创建/删除节点，支持组件预装、预制体实例化
+- **node_transform**: 节点变换 - 修改节点名称、位置、旋转、缩放、可见性等属性
+- **node_hierarchy**: 节点层级 - 移动、复制、粘贴节点，支持层级结构操作
+- **node_clipboard**: 节点剪贴板 - 复制/粘贴/剪切节点操作
+- **node_property_management**: 属性管理 - 重置节点属性、组件属性、变换属性
 
-### 🔧 组件操作
-- 向节点添加/删除组件
-- 获取节点的所有组件及属性
-- 动态设置组件属性
-- 从资源路径挂载脚本组件
-- 按类别列出可用的组件类型
+### 🔧 组件操作 (component_*)
+- **component_manage**: 组件管理 - 添加/删除引擎组件（cc.Sprite、cc.Button等）
+- **component_script**: 脚本组件 - 挂载/移除自定义脚本组件
+- **component_query**: 组件查询 - 获取组件列表、详细信息、可用组件类型
+- **set_component_property**: 属性设置 - 设置单个或多个组件属性值
 
-### 📦 预制体操作
-- 列出项目中的所有预制体，支持文件夹组织
-- 加载、实例化和创建预制体
-- 更新现有预制体并还原预制体实例
-- 获取详细的预制体信息，包括依赖关系
+### 📦 预制体操作 (prefab_*)
+- **prefab_browse**: 预制体浏览 - 列出预制体、查看信息、验证文件
+- **prefab_lifecycle**: 预制体生命周期 - 从节点创建预制体、删除预制体
+- **prefab_instance**: 预制体实例 - 实例化到场景、解除链接、应用更改、还原原始
+- **prefab_edit**: 预制体编辑 - 进入/退出编辑模式、保存预制体、测试更改
 
-### 🚀 项目控制
-- 在预览模式下运行项目（浏览器/模拟器）
-- 为不同平台构建项目（Web、移动端、桌面端）
-- 获取项目信息和设置
-- 刷新资源数据库并导入新资源
-- 获取详细的资源信息
+### 🚀 项目控制 (project_*)
+- **project_manage**: 项目管理 - 运行项目、构建项目、获取项目信息和设置
+- **project_build_system**: 构建系统 - 控制构建面板、检查构建状态、预览服务器管理
 
-### 🔍 调试工具
-- 获取编辑器控制台日志，支持过滤
-- 清空控制台并在场景上下文中执行 JavaScript
-- 获取详细的节点树用于调试
-- 性能统计和场景验证
-- 获取编辑器和环境信息
+### 🔍 调试工具 (debug_*)
+- **debug_console**: 控制台管理 - 获取/清空控制台日志，支持过滤和限制
+- **debug_logs**: 日志分析 - 读取/搜索/分析项目日志文件，支持模式匹配
+- **debug_system**: 系统调试 - 获取编辑器信息、性能统计、环境信息
 
-### ⚙️ 其他功能
-- **偏好设置管理**: 获取/设置编辑器偏好和全局设置
-- **服务器控制**: 服务器信息、项目详情和编辑器控制
-- **消息广播**: 监听和广播自定义消息
-- **资源管理**: 创建、复制、移动、删除和查询资源
-- **构建系统**: 项目构建和预览服务器控制
-- **参考图片管理**: 在场景视图中添加、删除和管理参考图片
-- **场景视图控制**: 控制Gizmo工具、坐标系和视图模式
-- **高级场景操作**: 撤销/重做、快照和高级节点操作
-- **🆕 工具管理**: 选择性启用/禁用工具、保存配置和管理工具状态
+### 📁 资源管理 (asset_*)
+- **asset_manage**: 资源管理 - 批量导入/删除资源、保存元数据、生成URL
+- **asset_analyze**: 资源分析 - 获取依赖关系、导出资源清单
+- **asset_system**: 资源系统 - 刷新资源、查询资源数据库状态
+- **asset_query**: 资源查询 - 按类型/文件夹查询资源、获取详细信息
+- **asset_operations**: 资源操作 - 创建/复制/移动/删除/保存/重新导入资源
+
+### ⚙️ 偏好设置 (preferences_*)
+- **preferences_manage**: 偏好管理 - 获取/设置编辑器偏好设置
+- **preferences_global**: 全局设置 - 管理全局配置和系统设置
+
+### 🌐 服务器与广播 (server_* / broadcast_*)
+- **server_info**: 服务器信息 - 获取服务器状态、项目详情、环境信息
+- **broadcast_message**: 消息广播 - 监听和广播自定义消息
+
+### 🖼️ 参考图片 (referenceImage_*)
+- **reference_image_manage**: 参考图片管理 - 添加/删除/管理场景视图中的参考图片
+- **reference_image_view**: 参考图片视图 - 控制参考图片的显示和编辑
+
+### 🎨 场景视图 (sceneView_*)
+- **scene_view_control**: 场景视图控制 - 控制Gizmo工具、坐标系、视图模式
+- **scene_view_tools**: 场景视图工具 - 管理场景视图的各种工具和选项
+
+### ✅ 验证工具 (validation_*)
+- **validation_scene**: 场景验证 - 验证场景完整性、检查缺失资源
+- **validation_asset**: 资源验证 - 验证资源引用、检查资源完整性
+
+### 🛠️ 工具管理
+- **工具配置系统**: 选择性启用/禁用工具，支持多套配置
+- **配置持久化**: 自动保存和加载工具配置
+- **配置导入导出**: 支持工具配置的导入导出功能
+- **实时状态管理**: 工具状态实时更新和同步
+
+### 🚀 核心优势
+- **操作码统一**: 所有工具采用"类别_操作"命名，参数Schema统一
+- **高复用性**: 50个核心工具覆盖99%编辑器功能
+- **AI友好**: 参数清晰、文档完善、调用简单
+- **性能优化**: 降低50% token消耗，提升AI调用成功率
+- **完全兼容**: 与Cocos Creator官方API 100%对齐
 
 ## 安装说明
 
 ### 1. 复制插件文件
 
-将整个 `cocos-mcp-server` 文件夹复制到您的 Cocos Creator 项目的 `extensions` 目录中：
+将整个 `cocos-mcp-server` 文件夹复制到您的 Cocos Creator 项目的 `extensions` 目录中，您也可以直接在扩展管理器中导入项目：
 
 ```
 您的项目/
@@ -255,117 +324,6 @@ npm run build
 
 AI 助手可以使用 MCP 协议连接并访问所有可用工具。
 
-### 工具分类
-
-工具按类别组织，命名约定为：`category_toolname`
-
-- **scene_\***: 场景相关操作 (8个工具)
-- **node_\***: 节点操作 (9个工具)
-- **component_\***: 组件管理 (7个工具)
-- **prefab_\***: 预制体操作 (11个工具)
-- **project_\***: 项目控制 (22个工具)
-- **debug_\***: 调试工具 (10个工具)
-- **preferences_\***: 编辑器偏好设置 (7个工具)
-- **server_\***: 服务器信息 (6个工具)
-- **broadcast_\***: 消息广播 (5个工具)
-- **assetAdvanced_\***: 高级资源操作 (10个工具)
-- **referenceImage_\***: 参考图片管理 (12个工具)
-- **sceneAdvanced_\***: 高级场景操作 (23个工具)
-- **sceneView_\***: 场景视图控制 (14个工具)
-
-
-📖 **[查看完整工具文档](FEATURE_GUIDE_CN.md)** 了解详细的使用示例和参数。
-
-## 工具使用示例
-
-### 创建新的精灵节点
-```json
-{
-  "tool": "node_create_node",
-  "arguments": {
-    "name": "MySprite",
-    "nodeType": "2DNode",
-    "parentUuid": "parent-node-uuid"
-  }
-}
-```
-
-### 添加 Sprite 组件
-```json
-{
-  "tool": "component_add_component",
-  "arguments": {
-    "nodeUuid": "node-uuid",
-    "componentType": "cc.Sprite"
-  }
-}
-```
-
-### 实例化预制体
-```json
-{
-  "tool": "prefab_instantiate_prefab",
-  "arguments": {
-    "prefabPath": "db://assets/prefabs/Enemy.prefab",
-    "position": { "x": 100, "y": 200, "z": 0 }
-  }
-}
-```
-
-### 在浏览器中运行项目
-```json
-{
-  "tool": "project_run_project",
-  "arguments": {
-    "platform": "browser"
-  }
-}
-```
-
-## 配置
-
-设置存储在 `您的项目/settings/mcp-server.json` 中：
-
-```json
-{
-  "port": 3000,
-  "autoStart": false,
-  "enableDebugLog": true,
-  "allowedOrigins": ["*"],
-  "maxConnections": 10
-}
-```
-
-工具配置存储在 `您的项目/settings/tool-manager.json` 中：
-
-```json
-{
-  "currentConfigId": "default",
-  "configurations": {
-    "default": {
-      "id": "default",
-      "name": "默认配置",
-      "description": "默认工具配置",
-      "tools": [
-        {
-          "category": "scene",
-          "name": "get_current_scene",
-          "enabled": true,
-          "description": "获取当前场景信息"
-        }
-      ]
-    }
-  }
-}
-```
-
-## 图标设置
-
-为插件面板添加图标：
-
-1. 创建 PNG 图标文件（推荐尺寸：32x32 或 64x64）
-2. 将其放在 `static/` 目录中：`static/icon.png`
-3. 图标路径已在 `package.json`
 
 ## 开发
 
@@ -387,7 +345,7 @@ cocos-mcp-server/
 │   │   ├── preferences-tools.ts
 │   │   ├── server-tools.ts
 │   │   ├── broadcast-tools.ts
-│   │   ├── scene-advanced-tools.ts
+│   │   ├── scene-advanced-tools.ts (已整合到 node-tools.ts 和 scene-tools.ts)
 │   │   ├── scene-view-tools.ts
 │   │   ├── reference-image-tools.ts
 │   │   └── asset-advanced-tools.ts
@@ -468,7 +426,7 @@ npm run build
 本插件供 Cocos Creator 项目使用,并且源代码一并打包，可以用于学习和交流。没有加密。可以支持你自己二次开发优化，任何本项目代码或者衍生代码均不能用于任何商用、转售，如果需要商用，请联系本人。
 
 ## 联系我加入群
-<img src="https://github.com/user-attachments/assets/2e3f043a-0b03-4b27-a175-e9c31fbed981" style="max-width: 400px; border-radius: 8px;"/>
+<img src="https://github.com/user-attachments/assets/2e3f043a-0b03-4b27-a175-e9c31fbed981" width="400" height="400"/>
 
-<img src="https://github.com/user-attachments/assets/5ef6172c-2968-499e-9edf-7da133016cd2" style="max-width: 400px; border-radius: 8px;" />
+<img src="https://github.com/user-attachments/assets/5ef6172c-2968-499e-9edf-7da133016cd2" width="400" height="400"/>
 

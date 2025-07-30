@@ -2,8 +2,8 @@
     "$schema": "./@types/schema/package/index.json",
     "package_version": 2,
     "name": "cocos-mcp-server",
-    "version": "1.0.0",
-    "author": "Cocos Creator",
+    "version": "1.4.0",
+    "author": "LiDaxian",
     "editor": ">=3.8.6",
     "scripts": {
         "preinstall": "node ./scripts/preinstall.js",
