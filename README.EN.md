@@ -23,7 +23,6 @@ A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8
 ## 🚀 Major Update v1.5.0 (July 29, 2024) (Already updated in Cocos Store, GitHub version will be synchronized in next version)
 
 Cocos store: https://store.cocos.com/app/detail/7941
-If you don't want to purchase, join the communication group and I can send you the latest version directly!
 
 - **Tool Streamlining and Refactoring**: Condensed the original 150+ tools into 50 high-reuse, high-coverage core tools, removing all invalid redundant code, greatly improving usability and maintainability.
 - **Unified Operation Codes**: All tools adopt "operation code + parameters" mode, greatly simplifying AI calling process, improving AI calling success rate, reducing AI calling times, and lowering 50% token consumption.
