@@ -425,4 +425,3 @@ This plug-in is for Cocos Creator project use, and the source code is packaged t
 ## Contact me to join the group
 <img src="https://github.com/user-attachments/assets/2e3f043a-0b03-4b27-a175-e9c31fbed981" width="400" height="400"/>
 
-<img src="https://github.com/user-attachments/assets/5ef6172c-2968-499e-9edf-7da133016cd2" width="400" height="400"/>
