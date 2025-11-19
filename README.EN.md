@@ -423,5 +423,5 @@ Enable debug logging in the plugin panel for detailed operation logs.
 This plug-in is for Cocos Creator project use, and the source code is packaged together, which can be used for learning and communication. It is not encrypted. It can support your own secondary development and optimization. Any code of this project or its derivative code cannot be used for any commercial purpose or resale. If you need commercial use, please contact me.
 
 ## Contact me to join the group
-<img src="https://github.com/user-attachments/assets/2e3f043a-0b03-4b27-a175-e9c31fbed981" width="400" height="400"/>
+<img alt="image" src="https://github.com/user-attachments/assets/a276682c-4586-480c-90e5-6db132e89e0f" width="400" height="400" />
 
