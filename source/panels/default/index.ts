@@ -55,26 +55,160 @@ module.exports = Editor.Panel.define({
             // 创建主应用组件
             app.component('McpServerApp', defineComponent({
                 setup() {
-                    // 响应式数据
+                    // ==================== i18n 系统 ====================
+                    const translations: Record<string, Record<string, string>> = {
+                        zh: {
+                            // 品牌区
+                            brand_name: 'LiDaxian MCP',
+                            brand_slogan: '开源版本',
+                            pro_upgrade: '升级为PRO版本',
+                            pro_tip: '升级到专业版',
+                            // 语言
+                            language: '语言',
+                            // 标签页
+                            tab_server: '服务器',
+                            tab_tools: '工具管理',
+                            // 服务器页
+                            server_status: '服务器状态',
+                            status: '状态',
+                            running: '运行中',
+                            stopped: '已停止',
+                            connections: '连接数',
+                            start_server: '启动服务器',
+                            stop_server: '停止服务器',
+                            server_settings: '服务器设置',
+                            port: '端口',
+                            auto_start: '自动启动',
+                            debug_log: '调试日志',
+                            max_connections: '最大连接数',
+                            connection_info: '连接信息',
+                            http_url: 'HTTP URL',
+                            copy: '复制',
+                            save_settings: '保存设置',
+                            // 工具管理页
+                            tool_management: '工具管理',
+                            available_tools: '可用工具',
+                            tools_count: '个工具',
+                            enabled: '启用',
+                            disabled: '禁用',
+                            select_all: '全选',
+                            deselect_all: '取消全选',
+                            save_changes: '保存更改',
+                            // 工具分类
+                            cat_scene: '场景工具',
+                            cat_node: '节点工具',
+                            cat_component: '组件工具',
+                            cat_prefab: '预制体工具',
+                            cat_project: '项目工具',
+                            cat_debug: '调试工具',
+                            cat_preferences: '偏好设置工具',
+                            cat_server: '服务器工具',
+                            cat_broadcast: '广播工具',
+                            cat_sceneView: '场景视图工具',
+                            cat_referenceImage: '参考图片工具',
+                            cat_assetAdvanced: '高级资源工具',
+                            cat_validation: '验证工具',
+                        },
+                        en: {
+                            // 品牌区
+                            brand_name: 'LiDaxian MCP',
+                            brand_slogan: 'Open Source Edition',
+                            pro_upgrade: 'Upgrade to PRO',
+                            pro_tip: 'Upgrade to Pro',
+                            // 语言
+                            language: 'Language',
+                            // 标签页
+                            tab_server: 'Server',
+                            tab_tools: 'Tools',
+                            // 服务器页
+                            server_status: 'Server Status',
+                            status: 'Status',
+                            running: 'Running',
+                            stopped: 'Stopped',
+                            connections: 'Connections',
+                            start_server: 'Start Server',
+                            stop_server: 'Stop Server',
+                            server_settings: 'Server Settings',
+                            port: 'Port',
+                            auto_start: 'Auto Start',
+                            debug_log: 'Debug Log',
+                            max_connections: 'Max Connections',
+                            connection_info: 'Connection Info',
+                            http_url: 'HTTP URL',
+                            copy: 'Copy',
+                            save_settings: 'Save Settings',
+                            // 工具管理页
+                            tool_management: 'Tool Management',
+                            available_tools: 'Available Tools',
+                            tools_count: 'tools',
+                            enabled: 'enabled',
+                            disabled: 'disabled',
+                            select_all: 'Select All',
+                            deselect_all: 'Deselect All',
+                            save_changes: 'Save Changes',
+                            // 工具分类
+                            cat_scene: 'Scene Tools',
+                            cat_node: 'Node Tools',
+                            cat_component: 'Component Tools',
+                            cat_prefab: 'Prefab Tools',
+                            cat_project: 'Project Tools',
+                            cat_debug: 'Debug Tools',
+                            cat_preferences: 'Preferences Tools',
+                            cat_server: 'Server Tools',
+                            cat_broadcast: 'Broadcast Tools',
+                            cat_sceneView: 'Scene View Tools',
+                            cat_referenceImage: 'Reference Image Tools',
+                            cat_assetAdvanced: 'Asset Advanced Tools',
+                            cat_validation: 'Validation Tools',
+                        }
+                    };
+
+                    // 语言状态
+                    const currentLanguage = ref(
+                        (typeof localStorage !== 'undefined' && localStorage.getItem('cocos-mcp-language')) || 'zh'
+                    );
+
+                    const t = (key: string): string => {
+                        const dict = translations[currentLanguage.value] || translations['zh'];
+                        return dict[key] || key;
+                    };
+
+                    const switchLanguage = (lang: string) => {
+                        currentLanguage.value = lang;
+                        if (typeof localStorage !== 'undefined') {
+                            localStorage.setItem('cocos-mcp-language', lang);
+                        }
+                    };
+
+                    const openProLink = () => {
+                        const url = 'https://www.vberai.com/game-engines/cocos';
+                        try {
+                            // Cocos Creator 面板运行在 Electron 渲染进程中
+                            const { shell } = require('electron');
+                            shell.openExternal(url);
+                        } catch (e) {
+                            // fallback: 用 window.open
+                            window.open(url, '_blank');
+                        }
+                    };
+
+                    // ==================== 响应式数据 ====================
                     const activeTab = ref('server');
                     const serverRunning = ref(false);
-                    const serverStatus = ref('已停止');
                     const connectedClients = ref(0);
                     const httpUrl = ref('');
                     const isProcessing = ref(false);
-                    
+
                     const settings = ref<ServerSettings>({
                         port: 3000,
                         autoStart: false,
                         debugLog: false,
                         maxConnections: 10
                     });
-                    
+
                     const availableTools = ref<ToolConfig[]>([]);
                     const toolCategories = ref<string[]>([]);
-                    
 
-                    
                     // 计算属性
                     const statusClass = computed(() => ({
                         'status-running': serverRunning.value,
@@ -260,23 +394,7 @@ module.exports = Editor.Panel.define({
                     };
                     
                     const getCategoryDisplayName = (category: string): string => {
-                        const categoryNames: { [key: string]: string } = {
-                            'scene': '场景工具',
-                            'node': '节点工具',
-                            'component': '组件工具',
-                            'prefab': '预制体工具',
-                            'project': '项目工具',
-                            'debug': '调试工具',
-                            'preferences': '偏好设置工具',
-                            'server': '服务器工具',
-                            'broadcast': '广播工具',
-                            'sceneAdvanced': '高级场景工具',
-                            'sceneView': '场景视图工具',
-                            'referenceImage': '参考图片工具',
-                            'assetAdvanced': '高级资源工具',
-                            'validation': '验证工具'
-                        };
-                        return categoryNames[category] || category;
+                        return t('cat_' + category);
                     };
                     
 
@@ -322,7 +440,6 @@ module.exports = Editor.Panel.define({
                                 const result = await Editor.Message.request('cocos-mcp-server', 'get-server-status');
                                 if (result) {
                                     serverRunning.value = result.running;
-                                    serverStatus.value = result.running ? '运行中' : '已停止';
                                     connectedClients.value = result.clients || 0;
                                     httpUrl.value = result.running ? `http://localhost:${result.port}` : '';
                                     isProcessing.value = false;
@@ -334,10 +451,15 @@ module.exports = Editor.Panel.define({
                     });
                     
                     return {
+                        // i18n
+                        currentLanguage,
+                        t,
+                        switchLanguage,
+                        openProLink,
+
                         // 数据
                         activeTab,
                         serverRunning,
-                        serverStatus,
                         connectedClients,
                         httpUrl,
                         isProcessing,
@@ -345,13 +467,13 @@ module.exports = Editor.Panel.define({
                         availableTools,
                         toolCategories,
                         settingsChanged,
-                        
+
                         // 计算属性
                         statusClass,
                         totalTools,
                         enabledTools,
                         disabledTools,
-                        
+
                         // 方法
                         switchTab,
                         toggleServer,

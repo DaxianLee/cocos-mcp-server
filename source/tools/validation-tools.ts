@@ -1,21 +1,23 @@
 import { ToolDefinition, ToolResponse, ToolExecutor } from '../types';
+import { fixCommonJsonIssues } from '../utils/json-utils';
+import { readSettings } from '../settings';
 
 export class ValidationTools implements ToolExecutor {
     getTools(): ToolDefinition[] {
         return [
             {
                 name: 'validate_json_params',
-                description: 'Validate and fix JSON parameters before sending to other tools',
+                description: 'JSON PARAMETER VALIDATION: Validate and auto-fix JSON strings before sending to other tools. USAGE: Paste malformed JSON and get corrected version. Handles common issues like unescaped quotes, trailing commas, missing brackets. Essential for ensuring tool parameters are properly formatted.',
                 inputSchema: {
                     type: 'object',
                     properties: {
                         jsonString: {
                             type: 'string',
-                            description: 'JSON string to validate and fix'
+                            description: 'JSON string to validate and repair (REQUIRED). Can be malformed - tool will attempt automatic fixes. Examples: missing quotes, trailing commas, unescaped characters. Paste your JSON here for validation and correction.'
                         },
                         expectedSchema: {
                             type: 'object',
-                            description: 'Expected parameter schema (optional)'
+                            description: 'Expected JSON structure for validation (optional). Provides schema-based validation beyond syntax checking. Useful for ensuring JSON matches specific tool requirements. Leave empty for syntax-only validation.'
                         }
                     },
                     required: ['jsonString']
@@ -23,13 +25,13 @@ export class ValidationTools implements ToolExecutor {
             },
             {
                 name: 'safe_string_value',
-                description: 'Create a safe string value that won\'t cause JSON parsing issues',
+                description: 'STRING SAFETY: Convert text into JSON-safe format by escaping special characters. USAGE: When you have strings with quotes, newlines, or special characters that break JSON. Automatically handles escaping and formatting for safe JSON inclusion.',
                 inputSchema: {
                     type: 'object',
                     properties: {
                         value: {
                             type: 'string',
-                            description: 'String value to make safe'
+                            description: 'Text to make JSON-safe (REQUIRED). Can contain quotes, newlines, special characters. Examples: file paths with backslashes, text with quotes, multi-line strings. Tool will escape all problematic characters.'
                         }
                     },
                     required: ['value']
@@ -37,17 +39,17 @@ export class ValidationTools implements ToolExecutor {
             },
             {
                 name: 'format_mcp_request',
-                description: 'Format a complete MCP request with proper JSON escaping',
+                description: 'MCP REQUEST FORMATTING: Generate properly formatted MCP tool call request with correct JSON structure. USAGE: Provide tool name and arguments, get back complete MCP request ready to send. Handles all JSON escaping and protocol formatting automatically.',
                 inputSchema: {
                     type: 'object',
                     properties: {
                         toolName: {
                             type: 'string',
-                            description: 'Tool name to call'
+                            description: 'Target MCP tool name (REQUIRED). Must be exact tool name from available tools. Examples: "node_query", "asset_manage", "scene_management". Case-sensitive exact match required.'
                         },
                         arguments: {
                             type: 'object',
-                            description: 'Tool arguments'
+                            description: 'Tool parameters object (REQUIRED). Must be valid JSON object containing all required parameters for the specified tool. Example: {"action": "info", "uuid": "node-uuid-here"}. Use tool documentation for required fields.'
                         }
                     },
                     required: ['toolName', 'arguments']
@@ -65,7 +67,7 @@ export class ValidationTools implements ToolExecutor {
             case 'format_mcp_request':
                 return await this.formatMcpRequest(args.toolName, args.arguments);
             default:
-                throw new Error(`Unknown tool: ${toolName}`);
+                return { success: false, error: `Unknown validation tool: ${toolName}. Available tools: validate_json_params, safe_string_value, format_mcp_request` };
         }
     }
 
@@ -77,7 +79,7 @@ export class ValidationTools implements ToolExecutor {
                 parsed = JSON.parse(jsonString);
             } catch (error: any) {
                 // Try to fix common issues
-                const fixed = this.fixJsonString(jsonString);
+                const fixed = fixCommonJsonIssues(jsonString);
                 try {
                     parsed = JSON.parse(fixed);
                 } catch (secondError) {
@@ -170,30 +172,6 @@ export class ValidationTools implements ToolExecutor {
         }
     }
 
-    private fixJsonString(jsonStr: string): string {
-        let fixed = jsonStr;
-        
-        // Fix common escape character issues
-        fixed = fixed
-            // Fix unescaped quotes in string values
-            .replace(/(\{[^}]*"[^"]*":\s*")([^"]*")([^"]*")([^}]*\})/g, (match, prefix, content, suffix, end) => {
-                const escapedContent = content.replace(/"/g, '\\"');
-                return prefix + escapedContent + suffix + end;
-            })
-            // Fix unescaped backslashes
-            .replace(/([^\\])\\([^"\\\/bfnrtu])/g, '$1\\\\$2')
-            // Fix trailing commas
-            .replace(/,(\s*[}\]])/g, '$1')
-            // Fix control characters
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t')
-            // Fix single quotes to double quotes
-            .replace(/'/g, '"');
-        
-        return fixed;
-    }
-
     private escapJsonString(str: string): string {
         return str
             .replace(/\\/g, '\\\\')  // Escape backslashes first
@@ -256,7 +234,8 @@ export class ValidationTools implements ToolExecutor {
 
     private generateCurlCommand(jsonStr: string): string {
         const escapedJson = jsonStr.replace(/'/g, "'\"'\"'");
-        return `curl -X POST http://127.0.0.1:8585/mcp \\
+        const port = readSettings().port;
+        return `curl -X POST http://127.0.0.1:${port}/mcp \\
   -H "Content-Type: application/json" \\
   -d '${escapedJson}'`;
     }

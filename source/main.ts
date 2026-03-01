@@ -19,8 +19,6 @@ export const methods: { [key: string]: (...any: any) => any } = {
         Editor.Panel.open('cocos-mcp-server');
     },
 
-
-
     /**
      * @en Start the MCP server
      * @zh 启动 MCP 服务器
@@ -53,7 +51,7 @@ export const methods: { [key: string]: (...any: any) => any } = {
      * @zh 获取服务器状态
      */
     getServerStatus() {
-        const status = mcpServer ? mcpServer.getStatus() : { running: false, port: 0, clients: 0 };
+        const status = mcpServer ? mcpServer.getStatus() : { running: false, port: 0 };
         const settings = mcpServer ? mcpServer.getSettings() : readSettings();
         return {
             ...status,
@@ -85,30 +83,11 @@ export const methods: { [key: string]: (...any: any) => any } = {
         return mcpServer ? mcpServer.getAvailableTools() : [];
     },
 
-    getFilteredToolsList() {
-        if (!mcpServer) return [];
-        
-        // 获取当前启用的工具
-        const enabledTools = toolManager.getEnabledTools();
-        
-        // 更新MCP服务器的启用工具列表
-        mcpServer.updateEnabledTools(enabledTools);
-        
-        return mcpServer.getFilteredTools(enabledTools);
-    },
     /**
      * @en Get server settings
      * @zh 获取服务器设置
      */
     async getServerSettings() {
-        return mcpServer ? mcpServer.getSettings() : readSettings();
-    },
-
-    /**
-     * @en Get server settings (alternative method)
-     * @zh 获取服务器设置（替代方法）
-     */
-    async getSettings() {
         return mcpServer ? mcpServer.getSettings() : readSettings();
     },
 

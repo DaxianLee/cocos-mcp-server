@@ -6,22 +6,58 @@
 
 **🚀 现在提供 50 个强力融合工具，实现99%的编辑器控制！**
 
-## 视频演示和教学
+## V1.6.0 PRO 版本视频演示和教学
 
-[<img width="503" height="351" alt="image" src="https://github.com/user-attachments/assets/f186ce14-9ffc-4a29-8761-48bdd7c1ea16" />](https://www.bilibili.com/video/BV1mB8dzfEw8?spm_id_from=333.788.recommend_more_video.0&vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
+| 类型 | 链接 |
+|------|------|
+| **视频预览** | [Bilibili 视频](https://www.bilibili.com/video/BV1rTAXzuEH3/) |
+| **免费体验** | [vberai 体验地址](https://www.vberai.com/game-engines/cocos) |
+
+## V1.6.0 PRO 版本特性
+
+适用于 Cocos Creator 3.8+ 的 MCP（模型上下文协议）服务器插件，让 AI 助手通过标准化协议直接控制 Cocos Creator 编辑器。**13 个意图级工具**覆盖 **150+** 编辑器操作，支持一键配置主流 AI 客户端。
+
+### 核心特性
+
+- **13 个意图级 MCP 工具**：所有工具以 `cocos_` 前缀暴露，采用 action 操作码分发，一个工具覆盖一个领域。
+
+#### 工具一览
+
+| 工具 | 说明 | 操作数 |
+|------|------|--------|
+| `cocos_scene` | 场景管理 — 打开/保存/创建场景、层级查询、脚本执行、undo | 22 |
+| `cocos_node` | 节点操作 — 查找/创建/修改/移动/复制/脚本挂载，智能路径解析 | 16 |
+| `cocos_component` | 组件管理 — 增/删/查/属性设置/点击事件配置 | 7 |
+| `cocos_prefab` | 预制体 — 创建/实例化/编辑模式/apply/revert | 12 |
+| `cocos_asset` | 资源管理 — 查询/搜索/创建/复制/移动/删除/依赖分析 | 17 |
+| `cocos_editor` | 编辑器 — 项目/构建/预览/控制台/日志/偏好设置/服务器信息 | 28 |
+| `cocos_view` | 场景视图 — Gizmo/相机/网格/2D-3D 切换/参考图片 | 29 |
+| `cocos_composite` | 高级组合 — 一键创建按钮/标签/图片、Widget 配置、批量操作 | 6 |
+| `cocos_knowledge` | 知识库 — 组件属性表/UI 设计规范/布局模式/工具使用指南 | 6 |
+| `cocos_validate` | 场景验证 — 布局检查/引用检查/层级分析 | 3 |
+| `cocos_template` | UI 模板 — 对话框/滚动列表/导航栏/设置页 | 2 |
+| `cocos_capture` | 场景快照 — 完整场景结构/单节点详情（JSON 格式） | 2 |
+| `cocos_builder` | 场景构建器 — 从 JSON 树一次性构建完整节点层级 | 1 |
+
+#### 智能特性
+
+- **智能路径解析** — 所有节点参数接受 UUID、路径（如 `Canvas/Panel/Button`）或名称，自动解析
+- **UI 自动检测** — 在 UI 父节点下创建节点时自动添加 `cc.UITransform`
+- **视口上下文** — 创建/修改节点时返回设计分辨率、可见范围，越界自动警告
+- **内置知识库** — AI 可查询组件属性表、坐标系规则、布局模式等知识
+- **场景构建器** — 用 JSON 描述完整 UI 层级，一次调用构建出来，自动处理 Canvas/Camera/组件配置
+- **参考图片系统** — 在场景视图叠加 UI 设计稿，AI 看着设计图搭界面
+- **节点树缓存** — 2 秒 TTL 缓存避免重复查询，变更操作后自动失效
+- **原子化操作** — builder/composite 使用 snapshot 机制，失败时自动回滚
 
 
-##快速链接
+## 开源版本更新日志
 
-- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 158 tools（待补充）
-- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有158工具的详细文档（待补充）
+## 🚀 重大更新 v1.5.4
 
+## 当前开源本视频演示
 
-## 更新日志
-
-## 🚀 重大更新 v1.5.0（2024年7月29日）（已经在cocos 商城更新，github版本将在下个版本同步更新）
-
-cocos store：https://store.cocos.com/app/detail/7941
+[<img width="503" height="351" alt="视频演示" src="https://github.com/user-attachments/assets/f186ce14-9ffc-4a29-8761-48bdd7c1ea16" />](https://www.bilibili.com/video/BV1mB8dzfEw8?spm_id_from=333.788.recommend_more_video.0&vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
 
 - **工具精简与重构**：将原有150+工具浓缩规整为50个高复用、高覆盖率的核心工具，去除所有无效冗余代码，极大提升易用性和可维护性。
 - **操作码统一**：所有工具均采用“操作码+参数”模式，极大简化AI调用流程，提升AI调用成功率，减少AI调用次数，降低50% token消耗。
@@ -66,7 +102,7 @@ cocos store：https://store.cocos.com/app/detail/7941
 - **broadcast_message**：消息广播
 
 
-### v1.4.0 - 2025年7月26日（当前github版本）
+### v1.4.0 - 2025年7月26日
 
 #### 🎯 重大功能修复
 - **完全修复预制体创建功能**: 彻底解决了预制体创建时组件/节点/资源类型引用丢失的问题
@@ -423,5 +459,3 @@ npm run build
 
 ## 联系我加入群
 <img alt="image" src="https://github.com/user-attachments/assets/a276682c-4586-480c-90e5-6db132e89e0f" width="400" height="400" />
-
-

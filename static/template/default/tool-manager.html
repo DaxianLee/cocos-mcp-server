@@ -51,6 +51,7 @@
             border: 1px solid #4a4a4a;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
         }
 
         .header h2 {
@@ -66,6 +67,7 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
         }
 
         .config-header {
@@ -86,6 +88,7 @@
         .config-controls {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .config-selector {
@@ -93,10 +96,12 @@
             gap: 12px;
             margin-bottom: 20px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .config-selector select {
             flex: 1;
+            min-width: 200px;
             padding: 10px 12px;
             border: 1px solid #5a5a5a;
             border-radius: 6px;
@@ -123,6 +128,8 @@
             font-weight: 500;
             transition: all 0.2s;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+            min-width: fit-content;
         }
 
         .btn:hover {
@@ -163,7 +170,8 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 16px;
-            max-height: 500px;
+            height: calc(100vh - 400px);
+            min-height: 400px;
             overflow-y: auto;
             padding: 4px;
         }
@@ -229,12 +237,16 @@
         .tool-info {
             flex: 1;
             margin-right: 12px;
+            min-width: 0;
         }
 
         .tool-name {
             font-size: 13px;
             font-weight: 500;
             color: #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .tool-description {
@@ -242,11 +254,17 @@
             color: #b0b0b0;
             margin-top: 4px;
             line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .tool-toggle {
             display: flex;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .checkbox {
@@ -266,12 +284,14 @@
             border-radius: 8px;
             font-size: 13px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
         }
 
         .status-info {
             display: flex;
             gap: 20px;
             color: #b0b0b0;
+            flex-wrap: wrap;
         }
 
         .status-info span {
@@ -457,6 +477,7 @@
         .tools-section-controls {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .loading {
@@ -474,6 +495,48 @@
             font-size: 13px;
             margin-bottom: 16px;
             border: 1px solid #f44336;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                gap: 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .config-controls {
+                justify-content: center;
+            }
+            
+            .config-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .config-selector select {
+                min-width: auto;
+            }
+            
+            .tools-container {
+                grid-template-columns: 1fr;
+                height: calc(100vh - 350px);
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .status-info {
+                justify-content: center;
+            }
         }
     </style>
 </head>

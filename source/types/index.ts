@@ -9,7 +9,6 @@ export interface MCPServerSettings {
 export interface ServerStatus {
     running: boolean;
     port: number;
-    clients: number;
 }
 
 export interface ToolDefinition {
@@ -87,8 +86,8 @@ export interface ProjectInfo {
 }
 
 export interface ConsoleMessage {
-    timestamp: string;
-    type: 'log' | 'warn' | 'error' | 'info';
+    timestamp?: string;
+    type: string;
     message: string;
     stack?: string;
 }
@@ -113,12 +112,6 @@ export interface ValidationResult {
     valid: boolean;
     issueCount: number;
     issues: ValidationIssue[];
-}
-
-export interface MCPClient {
-    id: string;
-    lastActivity: Date;
-    userAgent?: string;
 }
 
 export interface ToolExecutor {

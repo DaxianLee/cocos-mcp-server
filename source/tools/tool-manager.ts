@@ -91,7 +91,6 @@ export class ToolManager {
             const { PreferencesTools } = require('./preferences-tools');
             const { ServerTools } = require('./server-tools');
             const { BroadcastTools } = require('./broadcast-tools');
-            const { SceneAdvancedTools } = require('./scene-advanced-tools');
             const { SceneViewTools } = require('./scene-view-tools');
             const { ReferenceImageTools } = require('./reference-image-tools');
             const { AssetAdvancedTools } = require('./asset-advanced-tools');
@@ -108,7 +107,6 @@ export class ToolManager {
                 preferences: new PreferencesTools(),
                 server: new ServerTools(),
                 broadcast: new BroadcastTools(),
-                sceneAdvanced: new SceneAdvancedTools(),
                 sceneView: new SceneViewTools(),
                 referenceImage: new ReferenceImageTools(),
                 assetAdvanced: new AssetAdvancedTools(),
@@ -192,11 +190,6 @@ export class ToolManager {
             { category: 'broadcast', name: '广播工具', tools: [
                 { name: 'broadcastMessage', description: '广播消息' },
                 { name: 'getBroadcastHistory', description: '获取广播历史' }
-            ]},
-            { category: 'sceneAdvanced', name: '高级场景工具', tools: [
-                { name: 'optimizeScene', description: '优化场景' },
-                { name: 'analyzeScene', description: '分析场景' },
-                { name: 'batchOperation', description: '批量操作' }
             ]},
             { category: 'sceneView', name: '场景视图工具', tools: [
                 { name: 'getViewportInfo', description: '获取视口信息' },
@@ -319,45 +312,26 @@ export class ToolManager {
     }
 
     public updateToolStatus(configId: string, category: string, toolName: string, enabled: boolean): void {
-        console.log(`Backend: Updating tool status - configId: ${configId}, category: ${category}, toolName: ${toolName}, enabled: ${enabled}`);
-        
         const config = this.settings.configurations.find(config => config.id === configId);
         if (!config) {
-            console.error(`Backend: Config not found with ID: ${configId}`);
             throw new Error('配置不存在');
         }
-
-        console.log(`Backend: Found config: ${config.name}`);
 
         const tool = config.tools.find(t => t.category === category && t.name === toolName);
         if (!tool) {
-            console.error(`Backend: Tool not found - category: ${category}, name: ${toolName}`);
             throw new Error('工具不存在');
         }
 
-        console.log(`Backend: Found tool: ${tool.name}, current enabled: ${tool.enabled}, new enabled: ${enabled}`);
-        
         tool.enabled = enabled;
         config.updatedAt = new Date().toISOString();
-        
-        console.log(`Backend: Tool updated, saving settings...`);
         this.saveSettings();
-        console.log(`Backend: Settings saved successfully`);
     }
 
     public updateToolStatusBatch(configId: string, updates: { category: string; name: string; enabled: boolean }[]): void {
-        console.log(`Backend: updateToolStatusBatch called with configId: ${configId}`);
-        console.log(`Backend: Current configurations count: ${this.settings.configurations.length}`);
-        console.log(`Backend: Current config IDs:`, this.settings.configurations.map(c => c.id));
-        
         const config = this.settings.configurations.find(config => config.id === configId);
         if (!config) {
-            console.error(`Backend: Config not found with ID: ${configId}`);
-            console.error(`Backend: Available config IDs:`, this.settings.configurations.map(c => c.id));
             throw new Error('配置不存在');
         }
-
-        console.log(`Backend: Found config: ${config.name}, updating ${updates.length} tools`);
 
         updates.forEach(update => {
             const tool = config.tools.find(t => t.category === update.category && t.name === update.name);
@@ -368,7 +342,6 @@ export class ToolManager {
 
         config.updatedAt = new Date().toISOString();
         this.saveSettings();
-        console.log(`Backend: Batch update completed successfully`);
     }
 
     public exportConfiguration(configId: string): string {
@@ -418,8 +391,6 @@ export class ToolManager {
     }
 
     private saveSettings(): void {
-        console.log(`Backend: Saving settings, current configs count: ${this.settings.configurations.length}`);
         this.saveToolManagerSettings(this.settings);
-        console.log(`Backend: Settings saved to file`);
     }
 } 

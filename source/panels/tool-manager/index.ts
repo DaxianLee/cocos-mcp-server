@@ -497,7 +497,6 @@ module.exports = Editor.Panel.define({
                 'preferences': '偏好设置工具',
                 'server': '服务器工具',
                 'broadcast': '广播工具',
-                'sceneAdvanced': '高级场景工具',
                 'sceneView': '场景视图工具',
                 'referenceImage': '参考图片工具',
                 'assetAdvanced': '高级资源工具',

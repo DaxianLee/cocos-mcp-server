@@ -6,23 +6,60 @@ A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8
 
 **🚀 Now provides 50 powerful integrated tools, achieving 99% editor control!**
 
-## Video Demonstrations and Tutorials
 
-[<img width="503" height="351" alt="image" src="https://github.com/user-attachments/assets/f186ce14-9ffc-4a29-8761-48bdd7c1ea16" />](https://www.bilibili.com/video/BV1mB8dzfEw8?spm_id_from=333.788.recommend_more_video.0&vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
+## V1.6.0 PRO Version Video Demonstration and Tutorials
+
+| Type            | Link                                                                               |
+|-----------------|------------------------------------------------------------------------------------|
+| **Video Preview**   | [Bilibili Video](https://www.bilibili.com/video/BV1rTAXzuEH3/)                     |
+| **Free Trial**      | [vberai Trial Link](https://www.vberai.com/game-engines/cocos)                      |
+
+## V1.6.0 PRO Version Features
+
+The MCP (Model Context Protocol) server plugin for Cocos Creator 3.8+ allows AI assistants to directly control the Cocos Creator editor via standardized protocols. **13 intent-level tools** cover **150+** editor operations and support one-click configuration for mainstream AI clients.
+
+### Core Features
+
+- **13 intent-level MCP tools**: All tools are exposed with the `cocos_` prefix and use action codes for dispatching—one tool covers one functional domain.
+
+#### Tool Overview
+
+| Tool              | Description                                                                             | Number of Actions |
+|-------------------|----------------------------------------------------------------------------------------|-------------------|
+| `cocos_scene`     | Scene management — open/save/create scenes, hierarchy query, script execution, undo     | 22                |
+| `cocos_node`      | Node operations — search/create/edit/move/duplicate/mount script, smart path resolver   | 16                |
+| `cocos_component` | Component management — add/remove/query/set properties/configure click events           | 7                 |
+| `cocos_prefab`    | Prefab — create/instantiate/edit mode/apply/revert                                      | 12                |
+| `cocos_asset`     | Asset management — query/search/create/duplicate/move/delete/dependency analysis        | 17                |
+| `cocos_editor`    | Editor — project/build/preview/console/logs/preferences/server info                     | 28                |
+| `cocos_view`      | Scene view — Gizmo/camera/grid/2D-3D switch/reference image                            | 29                |
+| `cocos_composite` | Advanced composite — one-click create button/label/image, widget config, batch ops      | 6                 |
+| `cocos_knowledge` | Knowledge base — component property table/UI design rules/layout/usage guide            | 6                 |
+| `cocos_validate`  | Scene validation — layout check/reference check/hierarchy analysis                      | 3                 |
+| `cocos_template`  | UI templates — dialogs/scroll list/nav bar/settings page                               | 2                 |
+| `cocos_capture`   | Scene snapshot — full scene structure/node detail (JSON format)                        | 2                 |
+| `cocos_builder`   | Scene builder — build complete node hierarchy at once from JSON tree                    | 1                 |
+
+#### Intelligent Features
+
+- **Smart Path Resolution** — All node parameters accept UUID, path (e.g. `Canvas/Panel/Button`), or name and are auto-resolved
+- **Automatic UI Detection** — Automatically adds `cc.UITransform` when creating nodes under UI parents
+- **Viewport Context** — Returns design resolution and visible range on node create/modify; warns for out-of-bounds
+- **Built-in Knowledge Base** — AI can query component property tables, coordinate system rules, layout models, and tool usage
+- **Scene Builder** — Build entire UI hierarchy in one call using JSON, automatically handling Canvas/Camera/components
+- **Reference Image System** — Overlay UI design mockup images in the scene view, so AI can layout interfaces visually
+- **Node Tree Caching** — 2-second TTL cache to avoid repeat queries; cache is invalidated automatically after changes
+- **Atomic Operations** — Builder/composite use snapshot mechanism; auto rollback if operation fails
 
 
 
-## Quick Links
+##Github Changelog
 
-- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 50 tools (to be completed)
-- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - All 50 tools detailed documentation (to be completed)
+## 🚀 Major Update v1.5.4
 
+## Current Open Source Version Video Demonstration
 
-## Changelog
-
-## 🚀 Major Update v1.5.0 (July 29, 2024) (Already updated in Cocos Store, GitHub version will be synchronized in next version)
-
-Cocos store: https://store.cocos.com/app/detail/7941
+[<img width="503" height="351" alt="Video Demonstration" src="https://github.com/user-attachments/assets/f186ce14-9ffc-4a29-8761-48bdd7c1ea16" />](https://www.bilibili.com/video/BV1mB8dzfEw8?spm_id_from=333.788.recommend_more_video.0&vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
 
 - **Tool Streamlining and Refactoring**: Condensed the original 150+ tools into 50 high-reuse, high-coverage core tools, removing all invalid redundant code, greatly improving usability and maintainability.
 - **Unified Operation Codes**: All tools adopt "operation code + parameters" mode, greatly simplifying AI calling process, improving AI calling success rate, reducing AI calling times, and lowering 50% token consumption.
@@ -67,7 +104,7 @@ Cocos store: https://store.cocos.com/app/detail/7941
 - **broadcast_message**: Message broadcasting
 
 
-### v1.4.0 - July 26, 2025 (Current github version)
+### v1.4.0 - July 26, 2025 
 
 #### 🎯 Major Functionality Fixes
 - **Complete Prefab Creation Fix**: Thoroughly resolved the issue of component/node/resource type reference loss during prefab creation
@@ -424,4 +461,3 @@ This plug-in is for Cocos Creator project use, and the source code is packaged t
 
 ## Contact me to join the group
 <img alt="image" src="https://github.com/user-attachments/assets/a276682c-4586-480c-90e5-6db132e89e0f" width="400" height="400" />
-

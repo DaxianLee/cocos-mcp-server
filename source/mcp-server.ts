@@ -1,7 +1,10 @@
 import * as http from 'http';
 import * as url from 'url';
 import { v4 as uuidv4 } from 'uuid';
-import { MCPServerSettings, ServerStatus, MCPClient, ToolDefinition } from './types';
+import * as path from 'path';
+import * as fs from 'fs';
+import { MCPServerSettings, ServerStatus, ToolDefinition } from './types';
+import { fixCommonJsonIssues } from './utils/json-utils';
 import { SceneTools } from './tools/scene-tools';
 import { NodeTools } from './tools/node-tools';
 import { ComponentTools } from './tools/component-tools';
@@ -11,7 +14,6 @@ import { DebugTools } from './tools/debug-tools';
 import { PreferencesTools } from './tools/preferences-tools';
 import { ServerTools } from './tools/server-tools';
 import { BroadcastTools } from './tools/broadcast-tools';
-import { SceneAdvancedTools } from './tools/scene-advanced-tools';
 import { SceneViewTools } from './tools/scene-view-tools';
 import { ReferenceImageTools } from './tools/reference-image-tools';
 import { AssetAdvancedTools } from './tools/asset-advanced-tools';
@@ -20,7 +22,6 @@ import { ValidationTools } from './tools/validation-tools';
 export class MCPServer {
     private settings: MCPServerSettings;
     private httpServer: http.Server | null = null;
-    private clients: Map<string, MCPClient> = new Map();
     private tools: Record<string, any> = {};
     private toolsList: ToolDefinition[] = [];
     private enabledTools: any[] = []; // 存储启用的工具列表
@@ -28,6 +29,16 @@ export class MCPServer {
     constructor(settings: MCPServerSettings) {
         this.settings = settings;
         this.initializeTools();
+    }
+
+    private getVersion(): string {
+        try {
+            const pkgPath = path.join(__dirname, '..', 'package.json');
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            return pkg.version || '0.0.0';
+        } catch {
+            return '0.0.0';
+        }
     }
 
     private initializeTools(): void {
@@ -42,7 +53,6 @@ export class MCPServer {
             this.tools.preferences = new PreferencesTools();
             this.tools.server = new ServerTools();
             this.tools.broadcast = new BroadcastTools();
-            this.tools.sceneAdvanced = new SceneAdvancedTools();
             this.tools.sceneView = new SceneViewTools();
             this.tools.referenceImage = new ReferenceImageTools();
             this.tools.assetAdvanced = new AssetAdvancedTools();
@@ -125,15 +135,6 @@ export class MCPServer {
         console.log(`[MCPServer] Setup tools: ${this.toolsList.length} tools available`);
     }
 
-    public getFilteredTools(enabledTools: any[]): ToolDefinition[] {
-        if (!enabledTools || enabledTools.length === 0) {
-            return this.toolsList; // 如果没有过滤配置，返回所有工具
-        }
-
-        const enabledToolNames = new Set(enabledTools.map(tool => `${tool.category}_${tool.name}`));
-        return this.toolsList.filter(tool => enabledToolNames.has(tool.name));
-    }
-
     public async executeToolCall(toolName: string, args: any): Promise<any> {
         const parts = toolName.split('_');
         const category = parts[0];
@@ -146,9 +147,6 @@ export class MCPServer {
         throw new Error(`Tool ${toolName} not found`);
     }
 
-    public getClients(): MCPClient[] {
-        return Array.from(this.clients.values());
-    }
     public getAvailableTools(): ToolDefinition[] {
         return this.toolsList;
     }
@@ -216,7 +214,7 @@ export class MCPServer {
                     message = JSON.parse(body);
                 } catch (parseError: any) {
                     // Try to fix common JSON issues
-                    const fixedBody = this.fixCommonJsonIssues(body);
+                    const fixedBody = fixCommonJsonIssues(body);
                     try {
                         message = JSON.parse(fixedBody);
                         console.log('[MCPServer] Fixed JSON parsing issue');
@@ -267,7 +265,7 @@ export class MCPServer {
                         },
                         serverInfo: {
                             name: 'cocos-mcp-server',
-                            version: '1.0.0'
+                            version: this.getVersion()
                         }
                     };
                     break;
@@ -292,42 +290,18 @@ export class MCPServer {
         }
     }
 
-    private fixCommonJsonIssues(jsonStr: string): string {
-        let fixed = jsonStr;
-        
-        // Fix common escape character issues
-        fixed = fixed
-            // Fix unescaped quotes in strings
-            .replace(/([^\\])"([^"]*[^\\])"([^,}\]:])/g, '$1\\"$2\\"$3')
-            // Fix unescaped backslashes
-            .replace(/([^\\])\\([^"\\\/bfnrt])/g, '$1\\\\$2')
-            // Fix trailing commas
-            .replace(/,(\s*[}\]])/g, '$1')
-            // Fix single quotes (should be double quotes)
-            .replace(/'/g, '"')
-            // Fix common control characters
-            .replace(/\n/g, '\\n')
-            .replace(/\r/g, '\\r')
-            .replace(/\t/g, '\\t');
-        
-        return fixed;
-    }
-
     public stop(): void {
         if (this.httpServer) {
             this.httpServer.close();
             this.httpServer = null;
             console.log('[MCPServer] HTTP server stopped');
         }
-
-        this.clients.clear();
     }
 
     public getStatus(): ServerStatus {
         return {
             running: !!this.httpServer,
-            port: this.settings.port,
-            clients: 0 // HTTP is stateless, no persistent clients
+            port: this.settings.port
         };
     }
 
@@ -358,7 +332,7 @@ export class MCPServer {
                     params = body ? JSON.parse(body) : {};
                 } catch (parseError: any) {
                     // Try to fix JSON issues
-                    const fixedBody = this.fixCommonJsonIssues(body);
+                    const fixedBody = fixCommonJsonIssues(body);
                     try {
                         params = JSON.parse(fixedBody);
                         console.log('[MCPServer] Fixed API JSON parsing issue');
@@ -417,7 +391,7 @@ export class MCPServer {
         const sampleParams = this.generateSampleParams(schema);
         const jsonString = JSON.stringify(sampleParams, null, 2);
         
-        return `curl -X POST http://127.0.0.1:8585/api/${category}/${toolName} \\
+        return `curl -X POST http://127.0.0.1:${this.settings.port}/api/${category}/${toolName} \\
   -H "Content-Type: application/json" \\
   -d '${jsonString}'`;
     }
@@ -456,6 +430,3 @@ export class MCPServer {
         }
     }
 }
-
-// HTTP transport doesn't need persistent connections
-// MCP over HTTP uses request-response pattern

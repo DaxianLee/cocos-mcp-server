@@ -1,1 +1,87 @@
+# Dependencies
 node_modules/
+
+# Build output
+
+build/
+build-secure/
+release/
+release-build/
+release-production/
+release-ultra-secure/
+releases/*.zip
+
+# Security files (sensitive)
+.license
+.license_*
+*.license
+keys/
+*.key
+*.pem
+private/
+
+# Development files
+native-module/
+webpack.config.js
+package.dev.json
+.dev-only
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+tmp/
+temp/
+
+# Config files with sensitive data
+config.local.json
+settings.local.json
+.env
+.env.local
+
+# Test files
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+test-*.js
+test-*.ts
+debug-*.js
+comprehensive-test.js
+source/test/
+dist/test/
+source/examples/
+dist/examples/
+
+# Backup files
+*.backup
+*.bak
+*.old

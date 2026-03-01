@@ -10,66 +10,54 @@ export class BroadcastTools implements ToolExecutor {
 
     getTools(): ToolDefinition[] {
         return [
+            // 1. Broadcast Log Management - Log operations
             {
-                name: 'get_broadcast_log',
-                description: 'Get recent broadcast messages log',
+                name: 'broadcast_log_management',
+                description: 'BROADCAST LOG MANAGEMENT: Monitor Cocos Creator internal messages for debugging and system monitoring. USAGE: get_log to view recent events, clear_log to reset history. DEBUGGING: Use messageType filter to focus on specific events like "scene:ready" or "asset-db:asset-add".',
                 inputSchema: {
                     type: 'object',
                     properties: {
+                        action: {
+                            type: 'string',
+                            enum: ['get_log', 'clear_log'],
+                            description: 'Log operation: "get_log" = retrieve recent broadcast messages (supports limit+messageType filters) | "clear_log" = clear all stored message history (no parameters needed)'
+                        },
+                        // For get_log action
                         limit: {
                             type: 'number',
-                            description: 'Number of recent messages to return',
-                            default: 50
+                            description: 'Maximum messages to return (get_log action). Controls output size. Examples: 10 for recent events, 100 for comprehensive history, 500 for deep debugging. Default: 50 for balanced view.',
+                            default: 50,
+                            minimum: 1,
+                            maximum: 1000
                         },
                         messageType: {
                             type: 'string',
-                            description: 'Filter by message type (optional)'
+                            description: 'Message type filter (get_log action). Show only specific event types. Common filters: "scene:ready" (scene loaded), "asset-db:asset-add" (asset imported), "build-worker:ready" (build system). Leave empty for all messages.'
                         }
-                    }
+                    },
+                    required: ['action']
                 }
             },
+
+            // 2. Broadcast Listener Management - Listener operations
             {
-                name: 'listen_broadcast',
-                description: 'Start listening for specific broadcast messages',
+                name: 'broadcast_listener_management',
+                description: 'BROADCAST LISTENER MANAGEMENT: Control which Cocos Creator events to monitor in real-time. WORKFLOW: start_listening to begin monitoring events → get_active_listeners to see current monitors → stop_listening to end monitoring. Useful for debugging workflows and system monitoring.',
                 inputSchema: {
                     type: 'object',
                     properties: {
+                        action: {
+                            type: 'string',
+                            enum: ['start_listening', 'stop_listening', 'get_active_listeners'],
+                            description: 'Listener operation: "start_listening" = begin monitoring events (requires messageType) | "stop_listening" = stop monitoring events (requires messageType) | "get_active_listeners" = list current monitors (no parameters needed)'
+                        },
+                        // For start_listening and stop_listening actions
                         messageType: {
                             type: 'string',
-                            description: 'Message type to listen for'
+                            description: 'Event type to monitor (REQUIRED for start_listening/stop_listening). Critical events: "scene:ready" (scene changes), "asset-db:asset-add" (imports), "asset-db:asset-change" (modifications), "build-worker:ready" (build status). Case-sensitive exact match required.'
                         }
                     },
-                    required: ['messageType']
-                }
-            },
-            {
-                name: 'stop_listening',
-                description: 'Stop listening for specific broadcast messages',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        messageType: {
-                            type: 'string',
-                            description: 'Message type to stop listening for'
-                        }
-                    },
-                    required: ['messageType']
-                }
-            },
-            {
-                name: 'clear_broadcast_log',
-                description: 'Clear the broadcast messages log',
-                inputSchema: {
-                    type: 'object',
-                    properties: {}
-                }
-            },
-            {
-                name: 'get_active_listeners',
-                description: 'Get list of active broadcast listeners',
-                inputSchema: {
-                    type: 'object',
-                    properties: {}
+                    required: ['action']
                 }
             }
         ];
@@ -77,16 +65,10 @@ export class BroadcastTools implements ToolExecutor {
 
     async execute(toolName: string, args: any): Promise<ToolResponse> {
         switch (toolName) {
-            case 'get_broadcast_log':
-                return await this.getBroadcastLog(args.limit, args.messageType);
-            case 'listen_broadcast':
-                return await this.listenBroadcast(args.messageType);
-            case 'stop_listening':
-                return await this.stopListening(args.messageType);
-            case 'clear_broadcast_log':
-                return await this.clearBroadcastLog();
-            case 'get_active_listeners':
-                return await this.getActiveListeners();
+            case 'broadcast_log_management':
+                return await this.handleBroadcastLogManagement(args);
+            case 'broadcast_listener_management':
+                return await this.handleBroadcastListenerManagement(args);
             default:
                 throw new Error(`Unknown tool: ${toolName}`);
         }
@@ -151,114 +133,126 @@ export class BroadcastTools implements ToolExecutor {
     }
 
     private async getBroadcastLog(limit: number = 50, messageType?: string): Promise<ToolResponse> {
-        return new Promise((resolve) => {
-            let filteredLog = this.messageLog;
+        let filteredLog = this.messageLog;
 
-            if (messageType) {
-                filteredLog = this.messageLog.filter(entry => entry.message === messageType);
+        if (messageType) {
+            filteredLog = this.messageLog.filter(entry => entry.message === messageType);
+        }
+
+        const recentLog = filteredLog.slice(-limit).map(entry => ({
+            ...entry,
+            timestamp: new Date(entry.timestamp).toISOString()
+        }));
+
+        return {
+            success: true,
+            data: {
+                log: recentLog,
+                count: recentLog.length,
+                totalCount: filteredLog.length,
+                filter: messageType || 'all',
+                message: 'Broadcast log retrieved successfully'
             }
-
-            const recentLog = filteredLog.slice(-limit).map(entry => ({
-                ...entry,
-                timestamp: new Date(entry.timestamp).toISOString()
-            }));
-
-            resolve({
-                success: true,
-                data: {
-                    log: recentLog,
-                    count: recentLog.length,
-                    totalCount: filteredLog.length,
-                    filter: messageType || 'all',
-                    message: 'Broadcast log retrieved successfully'
-                }
-            });
-        });
+        };
     }
 
     private async listenBroadcast(messageType: string): Promise<ToolResponse> {
-        return new Promise((resolve) => {
-            try {
-                if (!this.listeners.has(messageType)) {
-                    this.addBroadcastListener(messageType);
-                    resolve({
-                        success: true,
-                        data: {
-                            messageType: messageType,
-                            message: `Started listening for broadcast: ${messageType}`
-                        }
-                    });
-                } else {
-                    resolve({
-                        success: true,
-                        data: {
-                            messageType: messageType,
-                            message: `Already listening for broadcast: ${messageType}`
-                        }
-                    });
+        if (!this.listeners.has(messageType)) {
+            this.addBroadcastListener(messageType);
+            return {
+                success: true,
+                data: {
+                    messageType: messageType,
+                    message: `Started listening for broadcast: ${messageType}`
                 }
-            } catch (err: any) {
-                resolve({ success: false, error: err.message });
-            }
-        });
+            };
+        } else {
+            return {
+                success: true,
+                data: {
+                    messageType: messageType,
+                    message: `Already listening for broadcast: ${messageType}`
+                }
+            };
+        }
     }
 
     private async stopListening(messageType: string): Promise<ToolResponse> {
-        return new Promise((resolve) => {
-            try {
-                if (this.listeners.has(messageType)) {
-                    this.removeBroadcastListener(messageType);
-                    resolve({
-                        success: true,
-                        data: {
-                            messageType: messageType,
-                            message: `Stopped listening for broadcast: ${messageType}`
-                        }
-                    });
-                } else {
-                    resolve({
-                        success: true,
-                        data: {
-                            messageType: messageType,
-                            message: `Was not listening for broadcast: ${messageType}`
-                        }
-                    });
+        if (this.listeners.has(messageType)) {
+            this.removeBroadcastListener(messageType);
+            return {
+                success: true,
+                data: {
+                    messageType: messageType,
+                    message: `Stopped listening for broadcast: ${messageType}`
                 }
-            } catch (err: any) {
-                resolve({ success: false, error: err.message });
-            }
-        });
+            };
+        } else {
+            return {
+                success: true,
+                data: {
+                    messageType: messageType,
+                    message: `Was not listening for broadcast: ${messageType}`
+                }
+            };
+        }
     }
 
     private async clearBroadcastLog(): Promise<ToolResponse> {
-        return new Promise((resolve) => {
-            const previousCount = this.messageLog.length;
-            this.messageLog = [];
-            resolve({
-                success: true,
-                data: {
-                    clearedCount: previousCount,
-                    message: 'Broadcast log cleared successfully'
-                }
-            });
-        });
+        const previousCount = this.messageLog.length;
+        this.messageLog = [];
+        return {
+            success: true,
+            data: {
+                clearedCount: previousCount,
+                message: 'Broadcast log cleared successfully'
+            }
+        };
     }
 
     private async getActiveListeners(): Promise<ToolResponse> {
-        return new Promise((resolve) => {
-            const activeListeners = Array.from(this.listeners.keys()).map(messageType => ({
-                messageType: messageType,
-                listenerCount: this.listeners.get(messageType)?.length || 0
-            }));
+        const activeListeners = Array.from(this.listeners.keys()).map(messageType => ({
+            messageType: messageType,
+            listenerCount: this.listeners.get(messageType)?.length || 0
+        }));
 
-            resolve({
-                success: true,
-                data: {
-                    listeners: activeListeners,
-                    count: activeListeners.length,
-                    message: 'Active listeners retrieved successfully'
-                }
-            });
-        });
+        return {
+            success: true,
+            data: {
+                listeners: activeListeners,
+                count: activeListeners.length,
+                message: 'Active listeners retrieved successfully'
+            }
+        };
     }
+
+    // New handler methods for optimized tools
+    private async handleBroadcastLogManagement(args: any): Promise<ToolResponse> {
+        const { action, limit, messageType } = args;
+        
+        switch (action) {
+            case 'get_log':
+                return await this.getBroadcastLog(limit, messageType);
+            case 'clear_log':
+                return await this.clearBroadcastLog();
+            default:
+                return { success: false, error: `Unknown broadcast log management action: ${action}` };
+        }
+    }
+
+    private async handleBroadcastListenerManagement(args: any): Promise<ToolResponse> {
+        const { action, messageType } = args;
+        
+        switch (action) {
+            case 'start_listening':
+                return await this.listenBroadcast(messageType);
+            case 'stop_listening':
+                return await this.stopListening(messageType);
+            case 'get_active_listeners':
+                return await this.getActiveListeners();
+            default:
+                return { success: false, error: `Unknown broadcast listener management action: ${action}` };
+        }
+    }
+
 }
