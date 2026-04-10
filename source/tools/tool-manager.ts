@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { ToolConfig, ToolConfiguration, ToolManagerSettings, ToolDefinition } from '../types';
+import { ToolConfig, ToolConfiguration, ToolManagerSettings } from '../types';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -10,6 +10,7 @@ export class ToolManager {
     constructor() {
         this.settings = this.readToolManagerSettings();
         this.initializeAvailableTools();
+        this.syncConfigurationsWithAvailableTools();
         
         // 如果没有配置，自动创建一个默认配置
         if (this.settings.configurations.length === 0) {
@@ -81,59 +82,53 @@ export class ToolManager {
     private initializeAvailableTools(): void {
         // 从MCP服务器获取真实的工具列表
         try {
-            // 导入所有工具类
-            const { SceneTools } = require('./scene-tools');
-            const { NodeTools } = require('./node-tools');
-            const { ComponentTools } = require('./component-tools');
-            const { PrefabTools } = require('./prefab-tools');
-            const { ProjectTools } = require('./project-tools');
-            const { DebugTools } = require('./debug-tools');
-            const { PreferencesTools } = require('./preferences-tools');
-            const { ServerTools } = require('./server-tools');
-            const { BroadcastTools } = require('./broadcast-tools');
-            const { SceneAdvancedTools } = require('./scene-advanced-tools');
-            const { SceneViewTools } = require('./scene-view-tools');
-            const { ReferenceImageTools } = require('./reference-image-tools');
-            const { AssetAdvancedTools } = require('./asset-advanced-tools');
-            const { ValidationTools } = require('./validation-tools');
-
-            // 初始化工具实例
-            const tools = {
-                scene: new SceneTools(),
-                node: new NodeTools(),
-                component: new ComponentTools(),
-                prefab: new PrefabTools(),
-                project: new ProjectTools(),
-                debug: new DebugTools(),
-                preferences: new PreferencesTools(),
-                server: new ServerTools(),
-                broadcast: new BroadcastTools(),
-                sceneAdvanced: new SceneAdvancedTools(),
-                sceneView: new SceneViewTools(),
-                referenceImage: new ReferenceImageTools(),
-                assetAdvanced: new AssetAdvancedTools(),
-                validation: new ValidationTools()
-            };
-
-            // 从每个工具类获取工具列表
+            const { UnifiedTools } = require('./unified-tools');
+            const tools = new UnifiedTools();
             this.availableTools = [];
-            for (const [category, toolSet] of Object.entries(tools)) {
-                const toolDefinitions = toolSet.getTools();
-                toolDefinitions.forEach((tool: any) => {
-                    this.availableTools.push({
-                        category: category,
-                        name: tool.name,
-                        enabled: true, // 默认启用
-                        description: tool.description
-                    });
+            tools.getTools().forEach((tool: any) => {
+                const separatorIndex = tool.name.indexOf('_');
+                const category = separatorIndex >= 0 ? tool.name.slice(0, separatorIndex) : tool.name;
+                const name = separatorIndex >= 0 ? tool.name.slice(separatorIndex + 1) : tool.name;
+                this.availableTools.push({
+                    category,
+                    name,
+                    enabled: true,
+                    description: tool.description
                 });
-            }
+            });
 
             console.log(`[ToolManager] Initialized ${this.availableTools.length} tools from MCP server`);
         } catch (error) {
             console.error('[ToolManager] Failed to initialize tools from MCP server:', error);
             // 如果获取失败，使用默认工具列表作为后备
             this.initializeDefaultTools();
+        }
+    }
+
+    private syncConfigurationsWithAvailableTools(): void {
+        let changed = false;
+
+        for (const config of this.settings.configurations) {
+            const currentTools = config.tools || [];
+            const enabledState = new Map(currentTools.map(tool => [`${tool.category}_${tool.name}`, tool.enabled]));
+            const sameShape = currentTools.length === this.availableTools.length && currentTools.every(tool =>
+                this.availableTools.some(available => available.category === tool.category && available.name === tool.name)
+            );
+
+            if (sameShape) {
+                continue;
+            }
+
+            config.tools = this.availableTools.map(tool => ({
+                ...tool,
+                enabled: enabledState.has(`${tool.category}_${tool.name}`) ? !!enabledState.get(`${tool.category}_${tool.name}`) : true,
+            }));
+            config.updatedAt = new Date().toISOString();
+            changed = true;
+        }
+
+        if (changed) {
+            this.saveSettings();
         }
     }
 

@@ -978,8 +978,11 @@ export class PrefabTools implements ToolExecutor {
         }
 
         try {
+            const settings = await Editor.Message.request('cocos-mcp-server', 'get-server-settings').catch(() => ({ port: 3000 }));
+            const mcpPort = settings?.port || 3000;
+
             // 使用MCP接口获取节点的组件信息
-            const response = await fetch('http://localhost:8585/mcp', {
+            const response = await fetch(`http://127.0.0.1:${mcpPort}/mcp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

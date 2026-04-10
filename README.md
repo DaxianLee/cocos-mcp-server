@@ -4,22 +4,24 @@
 
 一个适用于 Cocos Creator 3.8+ 的综合性 MCP（模型上下文协议）服务器插件，使 AI 助手能够通过标准化协议与 Cocos Creator 编辑器进行交互。一键安装和使用，省去所有繁琐环境和配置。已经测试过Claude客户端Claude CLI和Cursor，其他的编辑器理论上也完美支持。
 
-**🚀 现在提供 50 个强力融合工具，实现99%的编辑器控制！**
+**🚀 现在提供 50 个强力融合工具，实现 99% 的编辑器控制！**
 
 ## 视频演示和教学
 
 [<img width="503" height="351" alt="image" src="https://github.com/user-attachments/assets/f186ce14-9ffc-4a29-8761-48bdd7c1ea16" />](https://www.bilibili.com/video/BV1mB8dzfEw8?spm_id_from=333.788.recommend_more_video.0&vd_source=6b1ff659dd5f04a92cc6d14061e8bb92)
 
 
-##快速链接
+## 快速链接
 
-- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 158 tools（待补充）
-- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 所有158工具的详细文档（待补充）
+- **[📖 1.5 Tool Guide (English)](FEATURE_GUIDE_V1_5_EN.md)** - 面向 AI 调用的 50 个统一工具说明（英文）
+- **[📖 1.5 工具说明 (中文)](FEATURE_GUIDE_V1_5_CN.md)** - 面向 AI 调用的 50 个统一工具说明
+- **[📖 Legacy Feature Guide (English)](FEATURE_GUIDE_EN.md)** - 1.4 及更早版本的旧工具体系说明
+- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - 1.4 及更早版本的旧工具体系说明
 
 
 ## 更新日志
 
-## 🚀 重大更新 v1.5.0（2024年7月29日）（已经在cocos 商城更新，github版本将在下个版本同步更新）
+## 🚀 重大更新 v1.5.0
 
 cocos store：https://store.cocos.com/app/detail/7941
 
@@ -66,7 +68,7 @@ cocos store：https://store.cocos.com/app/detail/7941
 - **broadcast_message**：消息广播
 
 
-### v1.4.0 - 2025年7月26日（当前github版本）
+### v1.4.0 - 2025年7月26日
 
 #### 🎯 重大功能修复
 - **完全修复预制体创建功能**: 彻底解决了预制体创建时组件/节点/资源类型引用丢失的问题
@@ -423,5 +425,3 @@ npm run build
 
 ## 联系我加入群
 <img alt="image" src="https://github.com/user-attachments/assets/a276682c-4586-480c-90e5-6db132e89e0f" width="400" height="400" />
-
-

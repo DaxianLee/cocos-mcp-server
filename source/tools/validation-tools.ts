@@ -256,7 +256,7 @@ export class ValidationTools implements ToolExecutor {
 
     private generateCurlCommand(jsonStr: string): string {
         const escapedJson = jsonStr.replace(/'/g, "'\"'\"'");
-        return `curl -X POST http://127.0.0.1:8585/mcp \\
+        return `curl -X POST http://127.0.0.1:3000/mcp \\
   -H "Content-Type: application/json" \\
   -d '${escapedJson}'`;
     }

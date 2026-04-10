@@ -1,27 +1,13 @@
 import * as http from 'http';
 import * as url from 'url';
-import { v4 as uuidv4 } from 'uuid';
 import { MCPServerSettings, ServerStatus, MCPClient, ToolDefinition } from './types';
-import { SceneTools } from './tools/scene-tools';
-import { NodeTools } from './tools/node-tools';
-import { ComponentTools } from './tools/component-tools';
-import { PrefabTools } from './tools/prefab-tools';
-import { ProjectTools } from './tools/project-tools';
-import { DebugTools } from './tools/debug-tools';
-import { PreferencesTools } from './tools/preferences-tools';
-import { ServerTools } from './tools/server-tools';
-import { BroadcastTools } from './tools/broadcast-tools';
-import { SceneAdvancedTools } from './tools/scene-advanced-tools';
-import { SceneViewTools } from './tools/scene-view-tools';
-import { ReferenceImageTools } from './tools/reference-image-tools';
-import { AssetAdvancedTools } from './tools/asset-advanced-tools';
-import { ValidationTools } from './tools/validation-tools';
+import { UnifiedTools } from './tools/unified-tools';
 
 export class MCPServer {
     private settings: MCPServerSettings;
     private httpServer: http.Server | null = null;
     private clients: Map<string, MCPClient> = new Map();
-    private tools: Record<string, any> = {};
+    private unifiedTools!: UnifiedTools;
     private toolsList: ToolDefinition[] = [];
     private enabledTools: any[] = []; // 存储启用的工具列表
 
@@ -32,21 +18,11 @@ export class MCPServer {
 
     private initializeTools(): void {
         try {
-            console.log('[MCPServer] Initializing tools...');
-            this.tools.scene = new SceneTools();
-            this.tools.node = new NodeTools();
-            this.tools.component = new ComponentTools();
-            this.tools.prefab = new PrefabTools();
-            this.tools.project = new ProjectTools();
-            this.tools.debug = new DebugTools();
-            this.tools.preferences = new PreferencesTools();
-            this.tools.server = new ServerTools();
-            this.tools.broadcast = new BroadcastTools();
-            this.tools.sceneAdvanced = new SceneAdvancedTools();
-            this.tools.sceneView = new SceneViewTools();
-            this.tools.referenceImage = new ReferenceImageTools();
-            this.tools.assetAdvanced = new AssetAdvancedTools();
-            this.tools.validation = new ValidationTools();
+            console.log('[MCPServer] Initializing unified 1.5.0 tools...');
+            this.unifiedTools = new UnifiedTools({
+                getSettings: () => this.settings,
+                getToolDefinitions: () => this.toolsList,
+            });
             console.log('[MCPServer] Tools initialized successfully');
         } catch (error) {
             console.error('[MCPServer] Error initializing tools:', error);
@@ -63,10 +39,11 @@ export class MCPServer {
         try {
             console.log(`[MCPServer] Starting HTTP server on port ${this.settings.port}...`);
             this.httpServer = http.createServer(this.handleHttpRequest.bind(this));
+            const listenHost = '0.0.0.0';
 
             await new Promise<void>((resolve, reject) => {
-                this.httpServer!.listen(this.settings.port, '127.0.0.1', () => {
-                    console.log(`[MCPServer] ✅ HTTP server started successfully on http://127.0.0.1:${this.settings.port}`);
+                this.httpServer!.listen(this.settings.port, listenHost, () => {
+                    console.log(`[MCPServer] ✅ HTTP server started successfully on http://${listenHost}:${this.settings.port}`);
                     console.log(`[MCPServer] Health check: http://127.0.0.1:${this.settings.port}/health`);
                     console.log(`[MCPServer] MCP endpoint: http://127.0.0.1:${this.settings.port}/mcp`);
                     resolve();
@@ -89,39 +66,15 @@ export class MCPServer {
     }
 
     private setupTools(): void {
-        this.toolsList = [];
-        
-        // 如果没有启用工具配置，返回所有工具
+        const allTools = this.unifiedTools.getTools();
+
         if (!this.enabledTools || this.enabledTools.length === 0) {
-            for (const [category, toolSet] of Object.entries(this.tools)) {
-                const tools = toolSet.getTools();
-                for (const tool of tools) {
-                    this.toolsList.push({
-                        name: `${category}_${tool.name}`,
-                        description: tool.description,
-                        inputSchema: tool.inputSchema
-                    });
-                }
-            }
+            this.toolsList = allTools;
         } else {
-            // 根据启用的工具配置过滤
-            const enabledToolNames = new Set(this.enabledTools.map(tool => `${tool.category}_${tool.name}`));
-            
-            for (const [category, toolSet] of Object.entries(this.tools)) {
-                const tools = toolSet.getTools();
-                for (const tool of tools) {
-                    const toolName = `${category}_${tool.name}`;
-                    if (enabledToolNames.has(toolName)) {
-                        this.toolsList.push({
-                            name: toolName,
-                            description: tool.description,
-                            inputSchema: tool.inputSchema
-                        });
-                    }
-                }
-            }
+            const enabledToolNames = new Set(this.enabledTools.map((tool) => `${tool.category}_${tool.name}`));
+            this.toolsList = allTools.filter((tool) => enabledToolNames.has(tool.name));
         }
-        
+
         console.log(`[MCPServer] Setup tools: ${this.toolsList.length} tools available`);
     }
 
@@ -135,15 +88,7 @@ export class MCPServer {
     }
 
     public async executeToolCall(toolName: string, args: any): Promise<any> {
-        const parts = toolName.split('_');
-        const category = parts[0];
-        const toolMethodName = parts.slice(1).join('_');
-        
-        if (this.tools[category]) {
-            return await this.tools[category].execute(toolMethodName, args);
-        }
-        
-        throw new Error(`Tool ${toolName} not found`);
+        return this.unifiedTools.execute(toolName, args);
     }
 
     public getClients(): MCPClient[] {
@@ -168,7 +113,9 @@ export class MCPServer {
         const pathname = parsedUrl.pathname;
         
         // Set CORS headers
-        res.setHeader('Access-Control-Allow-Origin', '*');
+        const requestOrigin = req.headers.origin as string | undefined;
+        const allowedOrigin = this.resolveCorsOrigin(requestOrigin);
+        res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         res.setHeader('Content-Type', 'application/json');
@@ -267,7 +214,7 @@ export class MCPServer {
                         },
                         serverInfo: {
                             name: 'cocos-mcp-server',
-                            version: '1.0.0'
+                            version: '1.5.0'
                         }
                     };
                     break;
@@ -417,7 +364,7 @@ export class MCPServer {
         const sampleParams = this.generateSampleParams(schema);
         const jsonString = JSON.stringify(sampleParams, null, 2);
         
-        return `curl -X POST http://127.0.0.1:8585/api/${category}/${toolName} \\
+        return `curl -X POST http://127.0.0.1:${this.settings.port}/api/${category}/${toolName} \\
   -H "Content-Type: application/json" \\
   -d '${jsonString}'`;
     }
@@ -454,6 +401,17 @@ export class MCPServer {
             this.stop();
             this.start();
         }
+    }
+
+    private resolveCorsOrigin(requestOrigin?: string): string {
+        const allowedOrigins = this.settings.allowedOrigins || ['*'];
+        if (allowedOrigins.includes('*')) {
+            return '*';
+        }
+        if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+            return requestOrigin;
+        }
+        return allowedOrigins[0] || '*';
     }
 }
 

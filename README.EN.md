@@ -14,13 +14,15 @@ A comprehensive MCP (Model Context Protocol) server plugin for Cocos Creator 3.8
 
 ## Quick Links
 
-- **[📖 Complete Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Detailed documentation for all 50 tools (to be completed)
-- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - All 50 tools detailed documentation (to be completed)
+- **[📖 1.5 Tool Guide (English)](FEATURE_GUIDE_V1_5_EN.md)** - AI-oriented guide for the 50 unified tools
+- **[📖 1.5 工具说明 (中文)](FEATURE_GUIDE_V1_5_CN.md)** - AI-oriented guide for the 50 unified tools in Chinese
+- **[📖 Legacy Feature Guide (English)](FEATURE_GUIDE_EN.md)** - Legacy 1.4 and earlier tool reference
+- **[📖 完整功能指南 (中文)](FEATURE_GUIDE_CN.md)** - Legacy 1.4 and earlier tool reference in Chinese
 
 
 ## Changelog
 
-## 🚀 Major Update v1.5.0 (July 29, 2024) (Already updated in Cocos Store, GitHub version will be synchronized in next version)
+## 🚀 Major Update v1.5.0
 
 Cocos store: https://store.cocos.com/app/detail/7941
 
@@ -67,7 +69,7 @@ Cocos store: https://store.cocos.com/app/detail/7941
 - **broadcast_message**: Message broadcasting
 
 
-### v1.4.0 - July 26, 2025 (Current github version)
+### v1.4.0 - July 26, 2025
 
 #### 🎯 Major Functionality Fixes
 - **Complete Prefab Creation Fix**: Thoroughly resolved the issue of component/node/resource type reference loss during prefab creation
@@ -424,4 +426,3 @@ This plug-in is for Cocos Creator project use, and the source code is packaged t
 
 ## Contact me to join the group
 <img alt="image" src="https://github.com/user-attachments/assets/a276682c-4586-480c-90e5-6db132e89e0f" width="400" height="400" />
-
