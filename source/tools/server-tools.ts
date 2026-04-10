@@ -160,7 +160,8 @@ export class ServerTools implements ToolExecutor {
                 }
 
                 // Add additional server info
-                status.mcpServerPort = 3000; // Our MCP server port
+                const mcpSettings = await Editor.Message.request('cocos-mcp-server', 'get-server-settings').catch(() => ({ port: 3000 }));
+                status.mcpServerPort = mcpSettings?.port || 3000;
                 status.editorVersion = (Editor as any).versions?.cocos || 'Unknown';
                 status.platform = process.platform;
                 status.nodeVersion = process.version;
