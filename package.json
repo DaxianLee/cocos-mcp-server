@@ -4,7 +4,7 @@
     "name": "cocos-mcp-server",
     "version": "1.4.0",
     "author": "LiDaxian",
-    "editor": ">=3.8.6",
+    "editor": ">=3.8.7",
     "scripts": {
         "preinstall": "node ./scripts/preinstall.js",
         "build": "tsc",
@@ -18,7 +18,7 @@
         "vue": "^3.1.4"
     },
     "devDependencies": {
-        "@cocos/creator-types": "^3.8.6",
+        "@cocos/creator-types": "^3.8.7",
         "@types/fs-extra": "^9.0.5",
         "@types/node": "^18.17.1",
         "@types/uuid": "^9.0.8",
