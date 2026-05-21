@@ -1,41 +1,41 @@
-# Cocos Creator MCP 服务器功能指导文档
+# Cocos Creator MCP Server Feature Guide
 
-## 概述
+## Overview
 
-Cocos Creator MCP 服务器是一个全面的 Model Context Protocol (MCP) 服务器插件，专为 Cocos Creator 3.8+ 设计，通过标准化协议使 AI 助手能够与 Cocos Creator 编辑器进行交互。
+The Cocos Creator MCP Server is a comprehensive Model Context Protocol (MCP) server plugin designed for Cocos Creator 3.8+, enabling AI assistants to interact with the Cocos Creator editor through standardized protocols.
 
-本文档详细介绍了所有可用的 MCP 工具及其使用方法。
+This document provides detailed information about all available MCP tools and their usage.
 
-## 工具分类
+## Tool Categories
 
-MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
+The MCP server provides **158 tools** organized into 13 main categories by functionality:
 
-1. [场景操作工具 (Scene Tools)](#1-场景操作工具-scene-tools)
-2. [节点操作工具 (Node Tools)](#2-节点操作工具-node-tools)
-3. [组件管理工具 (Component Tools)](#3-组件管理工具-component-tools)
-4. [预制体操作工具 (Prefab Tools)](#4-预制体操作工具-prefab-tools)
-5. [项目控制工具 (Project Tools)](#5-项目控制工具-project-tools)
-6. [调试工具 (Debug Tools)](#6-调试工具-debug-tools)
-7. [偏好设置工具 (Preferences Tools)](#7-偏好设置工具-preferences-tools)
-8. [服务器工具 (Server Tools)](#8-服务器工具-server-tools)
-9. [广播工具 (Broadcast Tools)](#9-广播工具-broadcast-tools)
-10. [高级资源工具 (Asset Advanced Tools)](#10-高级资源工具-asset-advanced-tools)
-11. [参考图像工具 (Reference Image Tools)](#11-参考图像工具-reference-image-tools)
-12. [高级场景工具 (Scene Advanced Tools)](#12-高级场景工具-scene-advanced-tools)
-13. [场景视图工具 (Scene View Tools)](#13-场景视图工具-scene-view-tools)
+1. [Scene Tools](#1-scene-tools)
+2. [Node Tools](#2-node-tools)
+3. [Component Management Tools](#3-component-management-tools)
+4. [Prefab Tools](#4-prefab-tools)
+5. [Project Control Tools](#5-project-control-tools)
+6. [Debug Tools](#6-debug-tools)
+7. [Preferences Tools](#7-preferences-tools)
+8. [Server Tools](#8-server-tools)
+9. [Broadcast Tools](#9-broadcast-tools)
+10. [Asset Advanced Tools](#10-asset-advanced-tools)
+11. [Reference Image Tools](#11-reference-image-tools)
+12. [Scene Advanced Tools](#12-scene-advanced-tools)
+13. [Scene View Tools](#13-scene-view-tools)
 
 ---
 
-## 1. 场景操作工具 (Scene Tools)
+## 1. Scene Tools
 
 ### 1.1 scene_get_current_scene
-获取当前场景信息
+Get current scene information
 
-**参数**: 无
+**Parameters**: None
 
-**返回**: 当前场景的名称、UUID、类型、激活状态和节点数量
+**Returns**: Current scene name, UUID, type, active status, and node count
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "scene_get_current_scene",
@@ -44,13 +44,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 1.2 scene_get_scene_list
-获取项目中所有场景列表
+Get all scenes in the project
 
-**参数**: 无
+**Parameters**: None
 
-**返回**: 项目中所有场景的列表，包括名称、路径和UUID
+**Returns**: List of all scenes in the project, including names, paths, and UUIDs
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "scene_get_scene_list",
@@ -59,12 +59,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 1.3 scene_open_scene
-通过路径打开场景
+Open a scene by path
 
-**参数**:
-- `scenePath` (string, 必需): 场景文件路径
+**Parameters**:
+- `scenePath` (string, required): Scene file path
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "scene_open_scene",
@@ -75,11 +75,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 1.4 scene_save_scene
-保存当前场景
+Save current scene
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "scene_save_scene",
@@ -88,13 +88,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 1.5 scene_create_scene
-创建新场景资源
+Create a new scene asset
 
-**参数**:
-- `sceneName` (string, 必需): 新场景的名称
-- `savePath` (string, 必需): 保存场景的路径
+**Parameters**:
+- `sceneName` (string, required): Name of the new scene
+- `savePath` (string, required): Path to save the scene
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "scene_create_scene",
@@ -106,12 +106,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 1.6 scene_save_scene_as
-将场景另存为新文件
+Save scene as a new file
 
-**参数**:
-- `path` (string, 必需): 保存场景的路径
+**Parameters**:
+- `path` (string, required): Path to save the scene
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "scene_save_scene_as",
@@ -122,11 +122,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 1.7 scene_close_scene
-关闭当前场景
+Close current scene
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "scene_close_scene",
@@ -135,12 +135,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 1.8 scene_get_scene_hierarchy
-获取当前场景的完整层级结构
+Get the complete hierarchy of current scene
 
-**参数**:
-- `includeComponents` (boolean, 可选): 是否包含组件信息，默认为 false
+**Parameters**:
+- `includeComponents` (boolean, optional): Whether to include component information, defaults to false
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "scene_get_scene_hierarchy",
@@ -152,23 +152,23 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 
 ---
 
-## 2. 节点操作工具 (Node Tools)
+## 2. Node Tools
 
 ### 2.1 node_create_node
-在场景中创建新节点
+Create a new node in the scene
 
-**参数**:
-- `name` (string, 必需): 节点名称
-- `parentUuid` (string, **强烈建议**): 父节点UUID。**重要**：强烈建议始终提供此参数。使用 `get_current_scene` 或 `get_all_nodes` 查找父节点UUID。如果不提供，节点将在场景根节点创建。
-- `nodeType` (string, 可选): 节点类型，可选值：`Node`、`2DNode`、`3DNode`，默认为 `Node`
-- `siblingIndex` (number, 可选): 同级索引，-1 表示添加到末尾，默认为 -1
+**Parameters**:
+- `name` (string, required): Node name
+- `parentUuid` (string, **strongly recommended**): Parent node UUID. **Important**: It is strongly recommended to always provide this parameter. Use `get_current_scene` or `get_all_nodes` to find parent node UUIDs. If not provided, the node will be created at the scene root.
+- `nodeType` (string, optional): Node type, options: `Node`, `2DNode`, `3DNode`, defaults to `Node`
+- `siblingIndex` (number, optional): Sibling index, -1 means append at end, defaults to -1
 
-**重要提示**: 为了确保节点创建在预期位置，请始终提供 `parentUuid` 参数。您可以通过以下方式获取父节点UUID：
-- 使用 `scene_get_current_scene` 获取场景根节点UUID
-- 使用 `node_get_all_nodes` 查看所有节点及其UUID
-- 使用 `node_find_node_by_name` 查找特定节点的UUID
+**Important Note**: To ensure the node is created at the expected location, always provide the `parentUuid` parameter. You can obtain parent node UUIDs by:
+- Using `scene_get_current_scene` to get the scene root node UUID
+- Using `node_get_all_nodes` to view all nodes and their UUIDs
+- Using `node_find_node_by_name` to find specific node UUIDs
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "node_create_node",
@@ -181,12 +181,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 2.2 node_get_node_info
-通过UUID获取节点信息
+Get node information by UUID
 
-**参数**:
-- `uuid` (string, 必需): 节点UUID
+**Parameters**:
+- `uuid` (string, required): Node UUID
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "node_get_node_info",
@@ -197,13 +197,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 2.3 node_find_nodes
-按名称模式查找节点
+Find nodes by name pattern
 
-**参数**:
-- `pattern` (string, 必需): 搜索的名称模式
-- `exactMatch` (boolean, 可选): 是否精确匹配，默认为 false
+**Parameters**:
+- `pattern` (string, required): Name pattern to search
+- `exactMatch` (boolean, optional): Whether to match exactly, defaults to false
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "node_find_nodes",
@@ -215,12 +215,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 2.4 node_find_node_by_name
-通过精确名称查找第一个节点
+Find the first node by exact name
 
-**参数**:
-- `name` (string, 必需): 要查找的节点名称
+**Parameters**:
+- `name` (string, required): Node name to find
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "node_find_node_by_name",
@@ -231,11 +231,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 2.5 node_get_all_nodes
-获取场景中所有节点及其UUID
+Get all nodes in the scene with their UUIDs
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "node_get_all_nodes",
@@ -244,14 +244,14 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 2.6 node_set_node_property
-设置节点属性值
+Set node property value
 
-**参数**:
-- `uuid` (string, 必需): 节点UUID
-- `property` (string, 必需): 属性名称（如 position、rotation、scale、active）
-- `value` (any, 必需): 属性值
+**Parameters**:
+- `uuid` (string, required): Node UUID
+- `property` (string, required): Property name (e.g., position, rotation, scale, active)
+- `value` (any, required): Property value
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "node_set_node_property",
@@ -264,12 +264,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 2.7 node_delete_node
-从场景中删除节点
+Delete a node from the scene
 
-**参数**:
-- `uuid` (string, 必需): 要删除的节点UUID
+**Parameters**:
+- `uuid` (string, required): UUID of the node to delete
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "node_delete_node",
@@ -280,14 +280,14 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 2.8 node_move_node
-将节点移动到新的父节点
+Move a node to a new parent
 
-**参数**:
-- `nodeUuid` (string, 必需): 要移动的节点UUID
-- `newParentUuid` (string, 必需): 新父节点UUID
-- `siblingIndex` (number, 可选): 新父节点中的同级索引，默认为 -1
+**Parameters**:
+- `nodeUuid` (string, required): UUID of the node to move
+- `newParentUuid` (string, required): New parent node UUID
+- `siblingIndex` (number, optional): Sibling index in the new parent, defaults to -1
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "node_move_node",
@@ -300,13 +300,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 2.9 node_duplicate_node
-复制节点
+Duplicate a node
 
-**参数**:
-- `uuid` (string, 必需): 要复制的节点UUID
-- `includeChildren` (boolean, 可选): 是否包含子节点，默认为 true
+**Parameters**:
+- `uuid` (string, required): UUID of the node to duplicate
+- `includeChildren` (boolean, optional): Whether to include child nodes, defaults to true
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "node_duplicate_node",
@@ -319,21 +319,21 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 
 ---
 
-## 3. 组件管理工具 (Component Tools)
+## 3. Component Management Tools
 
 ### 3.1 component_add_component
-向指定节点添加组件
+Add a component to a specific node
 
-**参数**:
-- `nodeUuid` (string, **必需**): 目标节点UUID。**重要**：必须指定要添加组件的确切节点。使用 `get_all_nodes` 或 `find_node_by_name` 获取所需节点的UUID。
-- `componentType` (string, 必需): 组件类型（如 cc.Sprite、cc.Label、cc.Button）
+**Parameters**:
+- `nodeUuid` (string, **required**): Target node UUID. **Important**: You must specify the exact node to add the component to. Use `get_all_nodes` or `find_node_by_name` to get the UUID of the desired node.
+- `componentType` (string, required): Component type (e.g., cc.Sprite, cc.Label, cc.Button)
 
-**重要提示**: 在添加组件之前，请确保：
-1. 先使用 `node_get_all_nodes` 或 `node_find_node_by_name` 找到目标节点的UUID
-2. 验证节点存在且UUID正确
-3. 选择合适的组件类型
+**Important Note**: Before adding a component, ensure:
+1. First use `node_get_all_nodes` or `node_find_node_by_name` to find the target node's UUID
+2. Verify the node exists and the UUID is correct
+3. Choose the appropriate component type
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "component_add_component",
@@ -345,13 +345,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 3.2 component_remove_component
-从节点移除组件
+Remove a component from a node
 
-**参数**:
-- `nodeUuid` (string, 必需): 节点UUID
-- `componentType` (string, 必需): 要移除的组件类型
+**Parameters**:
+- `nodeUuid` (string, required): Node UUID
+- `componentType` (string, required): Component type to remove
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "component_remove_component",
@@ -363,12 +363,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 3.3 component_get_components
-获取节点的所有组件
+Get all components of a node
 
-**参数**:
-- `nodeUuid` (string, 必需): 节点UUID
+**Parameters**:
+- `nodeUuid` (string, required): Node UUID
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "component_get_components",
@@ -379,13 +379,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 3.4 component_get_component_info
-获取特定组件信息
+Get specific component information
 
-**参数**:
-- `nodeUuid` (string, 必需): 节点UUID
-- `componentType` (string, 必需): 要获取信息的组件类型
+**Parameters**:
+- `nodeUuid` (string, required): Node UUID
+- `componentType` (string, required): Component type to get info for
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "component_get_component_info",
@@ -397,15 +397,15 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 3.5 component_set_component_property
-设置组件属性值
+Set component property value
 
-**参数**:
-- `nodeUuid` (string, 必需): 节点UUID
-- `componentType` (string, 必需): 组件类型
-- `property` (string, 必需): 属性名称
-- `value` (any, 必需): 属性值
+**Parameters**:
+- `nodeUuid` (string, required): Node UUID
+- `componentType` (string, required): Component type
+- `property` (string, required): Property name
+- `value` (any, required): Property value
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "component_set_component_property",
@@ -419,13 +419,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 3.6 component_attach_script
-向节点附加脚本组件
+Attach a script component to a node
 
-**参数**:
-- `nodeUuid` (string, 必需): 节点UUID
-- `scriptPath` (string, 必需): 脚本资源路径
+**Parameters**:
+- `nodeUuid` (string, required): Node UUID
+- `scriptPath` (string, required): Script asset path
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "component_attach_script",
@@ -437,12 +437,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 3.7 component_get_available_components
-获取可用组件类型列表
+Get list of available component types
 
-**参数**:
-- `category` (string, 可选): 组件类别过滤器，可选值：`all`、`renderer`、`ui`、`physics`、`animation`、`audio`，默认为 `all`
+**Parameters**:
+- `category` (string, optional): Component category filter, options: `all`, `renderer`, `ui`, `physics`, `animation`, `audio`, defaults to `all`
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "component_get_available_components",
@@ -454,17 +454,17 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 
 ---
 
-## 4. 预制体操作工具 (Prefab Tools)
+## 4. Prefab Tools
 
-**⚠️ 已知问题**: 使用标准 Cocos Creator API 进行预制体实例化时，可能无法正确恢复包含子节点的复杂预制体结构。虽然预制体创建功能可以正确保存所有子节点信息，但通过 `create-node` 配合 `assetUuid` 进行的实例化过程存在限制，可能导致实例化的预制体中缺少子节点。
+**⚠️ Known Issue**: When using standard Cocos Creator API for prefab instantiation, complex prefabs with child nodes may not be properly restored. While prefab creation functionality can correctly save all child node information, the instantiation process through `create-node` with `assetUuid` has limitations that may result in missing child nodes in the instantiated prefab.
 
 ### 4.1 prefab_get_prefab_list
-获取项目中所有预制体
+Get all prefabs in the project
 
-**参数**:
-- `folder` (string, 可选): 搜索文件夹路径，默认为 `db://assets`
+**Parameters**:
+- `folder` (string, optional): Search folder path, defaults to `db://assets`
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "prefab_get_prefab_list",
@@ -475,12 +475,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 4.2 prefab_load_prefab
-通过路径加载预制体
+Load a prefab by path
 
-**参数**:
-- `prefabPath` (string, 必需): 预制体资源路径
+**Parameters**:
+- `prefabPath` (string, required): Prefab asset path
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "prefab_load_prefab",
@@ -491,14 +491,14 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 4.3 prefab_instantiate_prefab
-在场景中实例化预制体
+Instantiate a prefab in the scene
 
-**参数**:
-- `prefabPath` (string, 必需): 预制体资源路径
-- `parentUuid` (string, 可选): 父节点UUID
-- `position` (object, 可选): 初始位置，包含 x、y、z 属性
+**Parameters**:
+- `prefabPath` (string, required): Prefab asset path
+- `parentUuid` (string, optional): Parent node UUID
+- `position` (object, optional): Initial position with x, y, z properties
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "prefab_instantiate_prefab",
@@ -510,17 +510,17 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 }
 ```
 
-**⚠️ 功能限制**: 包含子节点的复杂预制体可能无法正确实例化。由于 Cocos Creator API 在标准 `create-node` 方法中使用 `assetUuid` 的限制，可能只创建根节点，子节点可能会丢失。这是当前实现的已知问题。
+**⚠️ Functionality Limitation**: Complex prefabs with child nodes may not instantiate correctly. Due to Cocos Creator API limitations in the standard `create-node` method using `assetUuid`, only the root node may be created, and child nodes may be lost. This is a known issue with the current implementation.
 
 ### 4.4 prefab_create_prefab
-从节点创建预制体
+Create a prefab from a node
 
-**参数**:
-- `nodeUuid` (string, 必需): 源节点UUID
-- `savePath` (string, 必需): 保存预制体的路径
-- `prefabName` (string, 必需): 预制体名称
+**Parameters**:
+- `nodeUuid` (string, required): Source node UUID
+- `savePath` (string, required): Path to save the prefab
+- `prefabName` (string, required): Prefab name
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "prefab_create_prefab",
@@ -533,13 +533,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 4.5 prefab_create_prefab_from_node
-从节点创建预制体（create_prefab 的别名）
+Create a prefab from a node (alias for create_prefab)
 
-**参数**:
-- `nodeUuid` (string, 必需): 源节点UUID
-- `prefabPath` (string, 必需): 保存预制体的路径
+**Parameters**:
+- `nodeUuid` (string, required): Source node UUID
+- `prefabPath` (string, required): Path to save the prefab
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "prefab_create_prefab_from_node",
@@ -551,13 +551,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 4.6 prefab_update_prefab
-更新现有预制体
+Update an existing prefab
 
-**参数**:
-- `prefabPath` (string, 必需): 预制体资源路径
-- `nodeUuid` (string, 必需): 包含更改的节点UUID
+**Parameters**:
+- `prefabPath` (string, required): Prefab asset path
+- `nodeUuid` (string, required): Node UUID containing changes
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "prefab_update_prefab",
@@ -569,12 +569,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 4.7 prefab_revert_prefab
-将预制体实例恢复为原始状态
+Revert a prefab instance to its original state
 
-**参数**:
-- `nodeUuid` (string, 必需): 预制体实例节点UUID
+**Parameters**:
+- `nodeUuid` (string, required): Prefab instance node UUID
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "prefab_revert_prefab",
@@ -585,12 +585,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 4.8 prefab_get_prefab_info
-获取详细的预制体信息
+Get detailed prefab information
 
-**参数**:
-- `prefabPath` (string, 必需): 预制体资源路径
+**Parameters**:
+- `prefabPath` (string, required): Prefab asset path
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "prefab_get_prefab_info",
@@ -602,15 +602,15 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 
 ---
 
-## 5. 项目控制工具 (Project Tools)
+## 5. Project Control Tools
 
 ### 5.1 project_run_project
-在预览模式下运行项目
+Run the project in preview mode
 
-**参数**:
-- `platform` (string, 可选): 目标平台，可选值：`browser`、`simulator`、`preview`，默认为 `browser`
+**Parameters**:
+- `platform` (string, optional): Target platform, options: `browser`, `simulator`, `preview`, defaults to `browser`
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_run_project",
@@ -621,13 +621,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.2 project_build_project
-构建项目
+Build the project
 
-**参数**:
-- `platform` (string, 必需): 构建平台，可选值：`web-mobile`、`web-desktop`、`ios`、`android`、`windows`、`mac`
-- `debug` (boolean, 可选): 是否调试构建，默认为 true
+**Parameters**:
+- `platform` (string, required): Build platform, options: `web-mobile`, `web-desktop`, `ios`, `android`, `windows`, `mac`
+- `debug` (boolean, optional): Whether to build in debug mode, defaults to true
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_build_project",
@@ -639,11 +639,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.3 project_get_project_info
-获取项目信息
+Get project information
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_get_project_info",
@@ -652,12 +652,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.4 project_get_project_settings
-获取项目设置
+Get project settings
 
-**参数**:
-- `category` (string, 可选): 设置类别，可选值：`general`、`physics`、`render`、`assets`，默认为 `general`
+**Parameters**:
+- `category` (string, optional): Settings category, options: `general`, `physics`, `render`, `assets`, defaults to `general`
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_get_project_settings",
@@ -668,12 +668,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.5 project_refresh_assets
-刷新资源数据库
+Refresh the asset database
 
-**参数**:
-- `folder` (string, 可选): 要刷新的特定文件夹
+**Parameters**:
+- `folder` (string, optional): Specific folder to refresh
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_refresh_assets",
@@ -684,13 +684,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.6 project_import_asset
-导入资源文件
+Import an asset file
 
-**参数**:
-- `sourcePath` (string, 必需): 源文件路径
-- `targetFolder` (string, 必需): 资源中的目标文件夹
+**Parameters**:
+- `sourcePath` (string, required): Source file path
+- `targetFolder` (string, required): Target folder in assets
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_import_asset",
@@ -702,12 +702,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.7 project_get_asset_info
-获取资源信息
+Get asset information
 
-**参数**:
-- `assetPath` (string, 必需): 资源路径
+**Parameters**:
+- `assetPath` (string, required): Asset path
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_get_asset_info",
@@ -718,13 +718,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.8 project_get_assets
-按类型获取资源
+Get assets by type
 
-**参数**:
-- `type` (string, 可选): 资源类型过滤器，可选值：`all`、`scene`、`prefab`、`script`、`texture`、`material`、`mesh`、`audio`、`animation`，默认为 `all`
-- `folder` (string, 可选): 搜索文件夹，默认为 `db://assets`
+**Parameters**:
+- `type` (string, optional): Asset type filter, options: `all`, `scene`, `prefab`, `script`, `texture`, `material`, `mesh`, `audio`, `animation`, defaults to `all`
+- `folder` (string, optional): Search folder, defaults to `db://assets`
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_get_assets",
@@ -736,11 +736,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.9 project_get_build_settings
-获取构建设置
+Get build settings
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_get_build_settings",
@@ -749,11 +749,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.10 project_open_build_panel
-在编辑器中打开构建面板
+Open the build panel in the editor
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_open_build_panel",
@@ -762,11 +762,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.11 project_check_builder_status
-检查构建器工作进程是否就绪
+Check if the builder worker process is ready
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_check_builder_status",
@@ -775,12 +775,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.12 project_start_preview_server
-启动预览服务器
+Start the preview server
 
-**参数**:
-- `port` (number, 可选): 预览服务器端口，默认为 7456
+**Parameters**:
+- `port` (number, optional): Preview server port, defaults to 7456
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_start_preview_server",
@@ -791,11 +791,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.13 project_stop_preview_server
-停止预览服务器
+Stop the preview server
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_stop_preview_server",
@@ -804,14 +804,14 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.14 project_create_asset
-创建新的资源文件或文件夹
+Create a new asset file or folder
 
-**参数**:
-- `url` (string, 必需): 资源URL
-- `content` (string, 可选): 文件内容，null 表示创建文件夹
-- `overwrite` (boolean, 可选): 是否覆盖现有文件，默认为 false
+**Parameters**:
+- `url` (string, required): Asset URL
+- `content` (string, optional): File content, null means create folder
+- `overwrite` (boolean, optional): Whether to overwrite existing file, defaults to false
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_create_asset",
@@ -824,14 +824,14 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.15 project_copy_asset
-复制资源到另一个位置
+Copy an asset to another location
 
-**参数**:
-- `source` (string, 必需): 源资源URL
-- `target` (string, 必需): 目标位置URL
-- `overwrite` (boolean, 可选): 是否覆盖现有文件，默认为 false
+**Parameters**:
+- `source` (string, required): Source asset URL
+- `target` (string, required): Target location URL
+- `overwrite` (boolean, optional): Whether to overwrite existing file, defaults to false
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_copy_asset",
@@ -844,14 +844,14 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.16 project_move_asset
-移动资源到另一个位置
+Move an asset to another location
 
-**参数**:
-- `source` (string, 必需): 源资源URL
-- `target` (string, 必需): 目标位置URL
-- `overwrite` (boolean, 可选): 是否覆盖现有文件，默认为 false
+**Parameters**:
+- `source` (string, required): Source asset URL
+- `target` (string, required): Target location URL
+- `overwrite` (boolean, optional): Whether to overwrite existing file, defaults to false
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_move_asset",
@@ -864,12 +864,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.17 project_delete_asset
-删除资源
+Delete an asset
 
-**参数**:
-- `url` (string, 必需): 要删除的资源URL
+**Parameters**:
+- `url` (string, required): Asset URL to delete
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_delete_asset",
@@ -880,13 +880,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.18 project_save_asset
-保存资源内容
+Save asset content
 
-**参数**:
-- `url` (string, 必需): 资源URL
-- `content` (string, 必需): 资源内容
+**Parameters**:
+- `url` (string, required): Asset URL
+- `content` (string, required): Asset content
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_save_asset",
@@ -898,12 +898,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.19 project_reimport_asset
-重新导入资源
+Reimport an asset
 
-**参数**:
-- `url` (string, 必需): 要重新导入的资源URL
+**Parameters**:
+- `url` (string, required): Asset URL to reimport
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_reimport_asset",
@@ -914,12 +914,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.20 project_query_asset_path
-获取资源磁盘路径
+Get asset disk path
 
-**参数**:
-- `url` (string, 必需): 资源URL
+**Parameters**:
+- `url` (string, required): Asset URL
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_query_asset_path",
@@ -930,12 +930,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.21 project_query_asset_uuid
-从URL获取资源UUID
+Get asset UUID from URL
 
-**参数**:
-- `url` (string, 必需): 资源URL
+**Parameters**:
+- `url` (string, required): Asset URL
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_query_asset_uuid",
@@ -946,12 +946,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 5.22 project_query_asset_url
-从UUID获取资源URL
+Get asset URL from UUID
 
-**参数**:
-- `uuid` (string, 必需): 资源UUID
+**Parameters**:
+- `uuid` (string, required): Asset UUID
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "project_query_asset_url",
@@ -963,16 +963,16 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 
 ---
 
-## 6. 调试工具 (Debug Tools)
+## 6. Debug Tools
 
 ### 6.1 debug_get_console_logs
-获取编辑器控制台日志
+Get editor console logs
 
-**参数**:
-- `limit` (number, 可选): 要检索的最新日志数量，默认为 100
-- `filter` (string, 可选): 按类型过滤日志，可选值：`all`、`log`、`warn`、`error`、`info`，默认为 `all`
+**Parameters**:
+- `limit` (number, optional): Number of latest logs to retrieve, defaults to 100
+- `filter` (string, optional): Filter logs by type, options: `all`, `log`, `warn`, `error`, `info`, defaults to `all`
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_get_console_logs",
@@ -984,11 +984,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 6.2 debug_clear_console
-清空编辑器控制台
+Clear the editor console
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_clear_console",
@@ -997,12 +997,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 6.3 debug_execute_script
-在场景上下文中执行JavaScript代码
+Execute JavaScript code in scene context
 
-**参数**:
-- `script` (string, 必需): 要执行的JavaScript代码
+**Parameters**:
+- `script` (string, required): JavaScript code to execute
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_execute_script",
@@ -1013,13 +1013,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 6.4 debug_get_node_tree
-获取用于调试的详细节点树
+Get detailed node tree for debugging
 
-**参数**:
-- `rootUuid` (string, 可选): 根节点UUID，如果不提供则使用场景根节点
-- `maxDepth` (number, 可选): 最大树深度，默认为 10
+**Parameters**:
+- `rootUuid` (string, optional): Root node UUID, if not provided uses scene root node
+- `maxDepth` (number, optional): Maximum tree depth, defaults to 10
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_get_node_tree",
@@ -1031,11 +1031,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 6.5 debug_get_performance_stats
-获取性能统计信息
+Get performance statistics
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_get_performance_stats",
@@ -1044,13 +1044,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 6.6 debug_validate_scene
-验证当前场景是否有问题
+Validate if the current scene has issues
 
-**参数**:
-- `checkMissingAssets` (boolean, 可选): 检查缺失的资源引用，默认为 true
-- `checkPerformance` (boolean, 可选): 检查性能问题，默认为 true
+**Parameters**:
+- `checkMissingAssets` (boolean, optional): Check for missing asset references, defaults to true
+- `checkPerformance` (boolean, optional): Check for performance issues, defaults to true
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_validate_scene",
@@ -1062,11 +1062,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 6.7 debug_get_editor_info
-获取编辑器和环境信息
+Get editor and environment information
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_get_editor_info",
@@ -1075,14 +1075,14 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 6.8 debug_get_project_logs
-从 temp/logs/project.log 文件获取项目日志
+Get project logs from temp/logs/project.log file
 
-**参数**:
-- `lines` (number, 可选): 从日志文件末尾读取的行数，默认值为100，范围：1-10000
-- `filterKeyword` (string, 可选): 按指定关键词过滤日志
-- `logLevel` (string, 可选): 按日志级别过滤，选项：`ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`，默认为 `ALL`
+**Parameters**:
+- `lines` (number, optional): Number of lines to read from the end of the log file, default is 100, range: 1-10000
+- `filterKeyword` (string, optional): Filter logs by specific keyword
+- `logLevel` (string, optional): Filter by log level, options: `ERROR`, `WARN`, `INFO`, `DEBUG`, `TRACE`, `ALL`, defaults to `ALL`
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_get_project_logs",
@@ -1095,13 +1095,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 6.9 debug_get_log_file_info
-获取项目日志文件信息
+Get project log file information
 
-**参数**: 无
+**Parameters**: None
 
-**返回**: 文件大小、最后修改时间、行数和文件路径信息
+**Returns**: File size, last modified time, line count, and file path information
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_get_log_file_info",
@@ -1110,14 +1110,14 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 6.10 debug_search_project_logs
-在项目日志中搜索特定模式或错误
+Search for specific patterns or errors in project logs
 
-**参数**:
-- `pattern` (string, 必需): 搜索模式（支持正则表达式）
-- `maxResults` (number, 可选): 最大匹配结果数量，默认为20，范围：1-100
-- `contextLines` (number, 可选): 匹配结果周围显示的上下文行数，默认为2，范围：0-10
+**Parameters**:
+- `pattern` (string, required): Search pattern (supports regex)
+- `maxResults` (number, optional): Maximum number of matching results, defaults to 20, range: 1-100
+- `contextLines` (number, optional): Number of context lines to show around each match, defaults to 2, range: 0-10
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "debug_search_project_logs",
@@ -1131,15 +1131,15 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 
 ---
 
-## 7. 偏好设置工具 (Preferences Tools)
+## 7. Preferences Tools
 
 ### 7.1 preferences_get_preferences
-获取编辑器偏好设置
+Get editor preferences
 
-**参数**:
-- `key` (string, 可选): 要获取的特定偏好设置键
+**Parameters**:
+- `key` (string, optional): Specific preference key to get
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "preferences_get_preferences",
@@ -1150,13 +1150,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 7.2 preferences_set_preferences
-设置编辑器偏好设置
+Set editor preferences
 
-**参数**:
-- `key` (string, 必需): 要设置的偏好设置键
-- `value` (any, 必需): 要设置的偏好设置值
+**Parameters**:
+- `key` (string, required): Preference key to set
+- `value` (any, required): Preference value to set
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "preferences_set_preferences",
@@ -1168,12 +1168,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 7.3 preferences_get_global_preferences
-获取全局编辑器偏好设置
+Get global editor preferences
 
-**参数**:
-- `key` (string, 可选): 要获取的全局偏好设置键
+**Parameters**:
+- `key` (string, optional): Global preference key to get
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "preferences_get_global_preferences",
@@ -1184,13 +1184,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 7.4 preferences_set_global_preferences
-设置全局编辑器偏好设置
+Set global editor preferences
 
-**参数**:
-- `key` (string, 必需): 要设置的全局偏好设置键
-- `value` (any, 必需): 要设置的全局偏好设置值
+**Parameters**:
+- `key` (string, required): Global preference key to set
+- `value` (any, required): Global preference value to set
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "preferences_set_global_preferences",
@@ -1202,11 +1202,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 7.5 preferences_get_recent_projects
-获取最近打开的项目
+Get recently opened projects
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "preferences_get_recent_projects",
@@ -1215,11 +1215,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 7.6 preferences_clear_recent_projects
-清除最近打开的项目列表
+Clear the list of recently opened projects
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "preferences_clear_recent_projects",
@@ -1229,14 +1229,14 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 
 ---
 
-## 8. 服务器工具 (Server Tools)
+## 8. Server Tools
 
 ### 8.1 server_get_server_info
-获取服务器信息
+Get server information
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "server_get_server_info",
@@ -1245,13 +1245,13 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 8.2 server_broadcast_custom_message
-广播自定义消息
+Broadcast a custom message
 
-**参数**:
-- `message` (string, 必需): 消息名称
-- `data` (any, 可选): 消息数据
+**Parameters**:
+- `message` (string, required): Message name
+- `data` (any, optional): Message data
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "server_broadcast_custom_message",
@@ -1263,11 +1263,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 8.3 server_get_editor_version
-获取编辑器版本信息
+Get editor version information
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "server_get_editor_version",
@@ -1276,11 +1276,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 8.4 server_get_project_name
-获取当前项目名称
+Get current project name
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "server_get_project_name",
@@ -1289,11 +1289,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 8.5 server_get_project_path
-获取当前项目路径
+Get current project path
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "server_get_project_path",
@@ -1302,11 +1302,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 8.6 server_get_project_uuid
-获取当前项目UUID
+Get current project UUID
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "server_get_project_uuid",
@@ -1315,11 +1315,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 8.7 server_restart_editor
-请求重启编辑器
+Request to restart the editor
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "server_restart_editor",
@@ -1328,11 +1328,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 8.8 server_quit_editor
-请求退出编辑器
+Request to quit the editor
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "server_quit_editor",
@@ -1342,16 +1342,16 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 
 ---
 
-## 9. 广播工具 (Broadcast Tools)
+## 9. Broadcast Tools
 
 ### 9.1 broadcast_get_broadcast_log
-获取最近的广播消息日志
+Get recent broadcast message log
 
-**参数**:
-- `limit` (number, 可选): 要返回的最新消息数量，默认为 50
-- `messageType` (string, 可选): 按消息类型过滤
+**Parameters**:
+- `limit` (number, optional): Number of latest messages to return, defaults to 50
+- `messageType` (string, optional): Filter by message type
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "broadcast_get_broadcast_log",
@@ -1363,12 +1363,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 9.2 broadcast_listen_broadcast
-开始监听特定广播消息
+Start listening for specific broadcast messages
 
-**参数**:
-- `messageType` (string, 必需): 要监听的消息类型
+**Parameters**:
+- `messageType` (string, required): Message type to listen for
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "broadcast_listen_broadcast",
@@ -1379,12 +1379,12 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 9.3 broadcast_stop_listening
-停止监听特定广播消息
+Stop listening for specific broadcast messages
 
-**参数**:
-- `messageType` (string, 必需): 要停止监听的消息类型
+**Parameters**:
+- `messageType` (string, required): Message type to stop listening for
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "broadcast_stop_listening",
@@ -1395,11 +1395,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 9.4 broadcast_clear_broadcast_log
-清除广播消息日志
+Clear broadcast message log
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "broadcast_clear_broadcast_log",
@@ -1408,11 +1408,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 ```
 
 ### 9.5 broadcast_get_active_listeners
-获取活动广播监听器列表
+Get list of active broadcast listeners
 
-**参数**: 无
+**Parameters**: None
 
-**示例**:
+**Example**:
 ```json
 {
   "tool": "broadcast_get_active_listeners",
@@ -1422,11 +1422,11 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
 
 ---
 
-## 使用须知
+## Usage Guidelines
 
-### 1. 工具调用格式
+### 1. Tool Call Format
 
-所有工具调用都使用 JSON-RPC 2.0 格式：
+All tool calls use JSON-RPC 2.0 format:
 
 ```json
 {
@@ -1435,31 +1435,31 @@ MCP 服务器提供了 **158 个工具**，按功能分为 13 个主要类别：
   "params": {
     "name": "tool_name",
     "arguments": {
-      // 工具参数
+      // Tool parameters
     }
   },
   "id": 1
 }
 ```
 
-### 2. 常见UUID获取方法
+### 2. Common UUID Retrieval Methods
 
-- 使用 `node_get_all_nodes` 获取所有节点UUID
-- 使用 `node_find_node_by_name` 按名称查找节点UUID
-- 使用 `scene_get_current_scene` 获取场景UUID
-- 使用 `prefab_get_prefab_list` 获取预制体信息
+- Use `node_get_all_nodes` to get all node UUIDs
+- Use `node_find_node_by_name` to find node UUIDs by name
+- Use `scene_get_current_scene` to get scene UUID
+- Use `prefab_get_prefab_list` to get prefab information
 
-### 3. 资源路径格式
+### 3. Asset Path Format
 
-Cocos Creator 使用 `db://` 前缀的资源URL格式：
-- 场景：`db://assets/scenes/GameScene.scene`
-- 预制体：`db://assets/prefabs/Player.prefab`
-- 脚本：`db://assets/scripts/GameManager.ts`
-- 纹理：`db://assets/textures/player.png`
+Cocos Creator uses `db://` prefixed asset URL format:
+- Scenes: `db://assets/scenes/GameScene.scene`
+- Prefabs: `db://assets/prefabs/Player.prefab`
+- Scripts: `db://assets/scripts/GameManager.ts`
+- Textures: `db://assets/textures/player.png`
 
-### 4. 错误处理
+### 4. Error Handling
 
-如果工具调用失败，会返回错误信息：
+If a tool call fails, an error message will be returned:
 
 ```json
 {
@@ -1469,31 +1469,31 @@ Cocos Creator 使用 `db://` 前缀的资源URL格式：
     "code": -32000,
     "message": "Tool execution failed",
     "data": {
-      "error": "详细错误信息"
+      "error": "Detailed error message"
     }
   }
 }
 ```
 
-### 5. 最佳实践
+### 5. Best Practices
 
-1. **先查询再操作**：在修改节点或组件之前，先使用查询工具获取当前状态
-2. **使用UUID**：尽量使用UUID而不是名称来引用节点和资源
-3. **错误检查**：始终检查工具调用的返回值，确保操作成功
-4. **资源管理**：在删除或移动资源前，确保没有其他地方引用它们
-5. **性能考虑**：避免在循环中频繁调用工具，考虑批量操作
-
----
-
-## 技术支持
-
-如果您在使用过程中遇到问题，可以：
-
-1. 使用 `debug_get_console_logs` 查看详细的错误日志
-2. 使用 `debug_validate_scene` 检查场景是否有问题
-3. 使用 `debug_get_editor_info` 获取环境信息
-4. 检查 MCP 服务器的运行状态和日志
+1. **Query First, Then Operate**: Before modifying nodes or components, first use query tools to get current state
+2. **Use UUIDs**: Prefer using UUIDs over names when referencing nodes and assets
+3. **Error Checking**: Always check the return value of tool calls to ensure operations succeed
+4. **Asset Management**: Before deleting or moving assets, ensure they are not referenced elsewhere
+5. **Performance Considerations**: Avoid frequent tool calls in loops, consider batch operations
 
 ---
 
-*此文档基于 Cocos Creator MCP 服务器 v1.3.0 编写，如有更新请参考最新版本文档。*
+## Technical Support
+
+If you encounter issues during use, you can:
+
+1. Use `debug_get_console_logs` to view detailed error logs
+2. Use `debug_validate_scene` to check if the scene has issues
+3. Use `debug_get_editor_info` to get environment information
+4. Check the MCP server's running status and logs
+
+---
+
+*This document is based on Cocos Creator MCP Server v1.3.0. Please refer to the latest version documentation for updates.*

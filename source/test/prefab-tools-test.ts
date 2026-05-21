@@ -1,6 +1,6 @@
 import { PrefabTools } from '../tools/prefab-tools';
 
-// 预制体工具测试
+// Prefab tools test
 export class PrefabToolsTest {
     private prefabTools: PrefabTools;
 
@@ -9,64 +9,64 @@ export class PrefabToolsTest {
     }
 
     async runAllTests() {
-        console.log('开始预制体工具测试...');
+        console.log('Starting prefab tools test...');
         
         try {
-            // 测试1: 获取工具列表
+            // Test 1: Get the tool list
             await this.testGetTools();
             
-            // 测试2: 获取预制体列表
+            // Test 2: Get the prefab list
             await this.testGetPrefabList();
             
-            // 测试3: 测试预制体创建（模拟）
+            // Test 3: Test prefab creation (simulated)
             await this.testCreatePrefab();
             
-            // 测试3.5: 测试预制体实例化（模拟）
+            // Test 3.5: Test prefab instantiation (simulated)
             await this.testInstantiatePrefab();
             
-            // 测试4: 测试预制体验证
+            // Test 4: Test prefab validation
             await this.testValidatePrefab();
             
-            console.log('所有测试完成！');
+            console.log('All tests completed!');
         } catch (error) {
-            console.error('测试过程中发生错误:', error);
+            console.error('An error occurred during testing:', error);
         }
     }
 
     private async testGetTools() {
-        console.log('测试1: 获取工具列表');
+        console.log('Test 1: Get tool list');
         const tools = this.prefabTools.getTools();
-        console.log(`找到 ${tools.length} 个工具:`);
+        console.log(`Found ${tools.length} tools:`);
         tools.forEach(tool => {
             console.log(`  - ${tool.name}: ${tool.description}`);
         });
-        console.log('测试1完成\n');
+        console.log('Test 1 completed\n');
     }
 
     private async testGetPrefabList() {
-        console.log('测试2: 获取预制体列表');
+        console.log('Test 2: Get prefab list');
         try {
             const result = await this.prefabTools.execute('get_prefab_list', { folder: 'db://assets' });
             if (result.success) {
-                console.log(`找到 ${result.data?.length || 0} 个预制体`);
+                console.log(`Found ${result.data?.length || 0} prefabs`);
                 if (result.data && result.data.length > 0) {
                     result.data.slice(0, 3).forEach((prefab: any) => {
                         console.log(`  - ${prefab.name}: ${prefab.path}`);
                     });
                 }
             } else {
-                console.log('获取预制体列表失败:', result.error);
+                console.log('Failed to get prefab list:', result.error);
             }
         } catch (error) {
-            console.log('获取预制体列表时发生错误:', error);
+            console.log('Error getting prefab list:', error);
         }
-        console.log('测试2完成\n');
+        console.log('Test 2 completed\n');
     }
 
     private async testCreatePrefab() {
-        console.log('测试3: 测试预制体创建（模拟）');
+        console.log('Test 3: Test prefab creation (simulated)');
         try {
-            // 模拟创建预制体
+            // Simulate creating a prefab
             const mockArgs = {
                 nodeUuid: 'mock-node-uuid',
                 savePath: 'db://assets/test',
@@ -74,17 +74,17 @@ export class PrefabToolsTest {
             };
             
             const result = await this.prefabTools.execute('create_prefab', mockArgs);
-            console.log('创建预制体结果:', result);
+            console.log('Prefab creation result:', result);
         } catch (error) {
-            console.log('创建预制体时发生错误:', error);
+            console.log('Error creating prefab:', error);
         }
-        console.log('测试3完成\n');
+        console.log('Test 3 completed\n');
     }
 
     private async testInstantiatePrefab() {
-        console.log('测试3.5: 测试预制体实例化（模拟）');
+        console.log('Test 3.5: Test prefab instantiation (simulated)');
         try {
-            // 模拟实例化预制体
+            // Simulate instantiating a prefab
             const mockArgs = {
                 prefabPath: 'db://assets/prefabs/TestPrefab.prefab',
                 parentUuid: 'canvas-uuid',
@@ -92,46 +92,46 @@ export class PrefabToolsTest {
             };
             
             const result = await this.prefabTools.execute('instantiate_prefab', mockArgs);
-            console.log('实例化预制体结果:', result);
+            console.log('Prefab instantiation result:', result);
             
-            // 测试API参数构建
+            // Test API parameter construction
             this.testCreateNodeAPIParams();
         } catch (error) {
-            console.log('实例化预制体时发生错误:', error);
+            console.log('Error instantiating prefab:', error);
         }
-        console.log('测试3.5完成\n');
+        console.log('Test 3.5 completed\n');
     }
 
     private testCreateNodeAPIParams() {
-        console.log('测试 create-node API 参数构建...');
+        console.log('Testing create-node API parameter construction...');
         
-        // 模拟 assetUuid
+        // Mock assetUuid
         const assetUuid = 'mock-prefab-uuid';
         
-        // 测试基本参数
+        // Test basic parameters
         const basicOptions = {
             assetUuid: assetUuid,
             name: 'TestPrefabInstance'
         };
-        console.log('基本参数:', basicOptions);
+        console.log('Basic parameters:', basicOptions);
         
-        // 测试带父节点的参数
+        // Test parameters with a parent node
         const withParentOptions = {
             ...basicOptions,
             parent: 'parent-node-uuid'
         };
-        console.log('带父节点参数:', withParentOptions);
+        console.log('Parameters with parent node:', withParentOptions);
         
-        // 测试带位置的参数
+        // Test parameters with a position
         const withPositionOptions = {
             ...basicOptions,
             dump: {
                 position: { x: 100, y: 200, z: 0 }
             }
         };
-        console.log('带位置参数:', withPositionOptions);
+        console.log('Parameters with position:', withPositionOptions);
         
-        // 测试完整参数
+        // Test full parameters
         const fullOptions = {
             assetUuid: assetUuid,
             name: 'TestPrefabInstance',
@@ -142,26 +142,26 @@ export class PrefabToolsTest {
             keepWorldTransform: false,
             unlinkPrefab: false
         };
-        console.log('完整参数:', fullOptions);
+        console.log('Full parameters:', fullOptions);
     }
 
     private async testValidatePrefab() {
-        console.log('测试4: 测试预制体验证');
+        console.log('Test 4: Test prefab validation');
         try {
-            // 测试验证一个不存在的预制体
+            // Test validation against a nonexistent prefab
             const result = await this.prefabTools.execute('validate_prefab', { 
                 prefabPath: 'db://assets/nonexistent.prefab' 
             });
-            console.log('验证预制体结果:', result);
+            console.log('Prefab validation result:', result);
         } catch (error) {
-            console.log('验证预制体时发生错误:', error);
+            console.log('Error validating prefab:', error);
         }
-        console.log('测试4完成\n');
+        console.log('Test 4 completed\n');
     }
 
-    // 测试预制体数据结构生成
+    // Test prefab data structure generation
     testPrefabDataGeneration() {
-        console.log('测试预制体数据结构生成...');
+        console.log('Testing prefab data structure generation...');
         
         const mockNodeData = {
             name: 'TestNode',
@@ -184,19 +184,19 @@ export class PrefabToolsTest {
         const prefabUuid = this.prefabTools['generateUUID']();
         const prefabData = this.prefabTools['createPrefabData'](mockNodeData, 'TestPrefab', prefabUuid);
         
-        console.log('生成的预制体数据结构:');
+        console.log('Generated prefab data structure:');
         console.log(JSON.stringify(prefabData, null, 2));
         
-        // 验证数据结构
+        // Validate the data structure
         const validationResult = this.prefabTools['validatePrefabFormat'](prefabData);
-        console.log('验证结果:', validationResult);
+        console.log('Validation result:', validationResult);
         
-        console.log('预制体数据结构生成测试完成\n');
+        console.log('Prefab data structure generation test completed\n');
     }
 
-    // 测试UUID生成
+    // Test UUID generation
     testUUIDGeneration() {
-        console.log('测试UUID生成...');
+        console.log('Testing UUID generation...');
         
         const uuids = [];
         for (let i = 0; i < 5; i++) {
@@ -205,16 +205,16 @@ export class PrefabToolsTest {
             console.log(`UUID ${i + 1}: ${uuid}`);
         }
         
-        // 检查UUID格式
+        // Check the UUID format
         const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         const validUuids = uuids.filter(uuid => uuidPattern.test(uuid));
         
-        console.log(`UUID格式验证: ${validUuids.length}/${uuids.length} 个有效`);
-        console.log('UUID生成测试完成\n');
+        console.log(`UUID format validation: ${validUuids.length}/${uuids.length} valid`);
+        console.log('UUID generation test completed\n');
     }
 }
 
-// 如果直接运行此文件
+// If this file is run directly
 if (typeof module !== 'undefined' && module.exports) {
     const test = new PrefabToolsTest();
     test.runAllTests();

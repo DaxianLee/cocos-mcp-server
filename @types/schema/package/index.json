@@ -1,11 +1,11 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
-    "description": "插件定义文件 / Extension definition file",
+    "description": "Extension definition file",
     "properties": {
         "author": {
             "type": "string",
-            "description": "作者 / Author",
+            "description": "Author",
             "default": "Cocos Creator Developer"
         },
         "contributions": {
@@ -13,33 +13,33 @@
         },
         "dependencies": {
             "type": "object",
-            "description": "发布时所需的依赖库 / Dependencies required for publishing"
+            "description": "Dependencies required for publishing"
         },
         "description": {
             "type": "string",
-            "description": "简要介绍扩展关键特性、用途，支持 i18n / Brief introduction of the key features and uses of the extension, supporting i18n"
+            "description": "Brief summary of the extension's key features and purpose. Supports i18n."
         },
         "devDependencies": {
             "type": "object",
-            "description": "开发时所需的依赖库 / Dependencies required for development"
+            "description": "Dependencies required for development"
         },
         "editor": {
             "type": "string",
-            "description": "支持的 Cocos Creator 编辑器版本，支持 semver 格式 / Supported Cocos Creator editor version, supporting semver format"
+            "description": "Supported Cocos Creator editor version. Uses semver format."
         },
         "main": {
             "type": "string",
-            "description": "入口函数 / Entry function",
+            "description": "Entry point",
             "default": "./dist/index.js"
         },
         "name": {
             "type": "string",
-            "description": "不能以 _ 或 . 开头、不能含有大写字母，也不能含有 URL 的非法字符例如 .、' 和 ,。 / Cannot start with _ or., cannot contain uppercase letters, and cannot contain URL illegal characters such as.,'and,",
+            "description": "Cannot start with _ or ., cannot contain uppercase letters, and cannot contain characters that are invalid in URLs, such as ., ' and ,.",
             "default": "Custom Extension"
         },
         "package_version": {
             "type": "number",
-            "description": "扩展系统预留版本号 / Extension system reserved version number",
+            "description": "Reserved version number for the extension system",
             "default": 2
         },
         "panels": {
@@ -47,11 +47,11 @@
         },
         "scripts": {
             "type": "object",
-            "description": "NPM 脚本 / NPM scripts"
+            "description": "NPM scripts"
         },
         "version": {
             "type": "string",
-            "description": "版本号字符串 / Version number string",
+            "description": "Version string",
             "default": "1.0.0"
         }
     },

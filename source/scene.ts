@@ -258,7 +258,7 @@ export const methods: { [key: string]: (...any: any) => any } = {
                 return { success: false, error: `Node with UUID ${nodeUuid} not found` };
             }
 
-            // 设置属性
+            // Set the property.
             if (property === 'position') {
                 node.setPosition(value.x || 0, value.y || 0, value.z || 0);
             } else if (property === 'rotation') {
@@ -270,7 +270,7 @@ export const methods: { [key: string]: (...any: any) => any } = {
             } else if (property === 'name') {
                 node.name = value;
             } else {
-                // 尝试直接设置属性
+                // Try setting the property directly.
                 (node as any)[property] = value;
             }
 
@@ -339,8 +339,9 @@ export const methods: { [key: string]: (...any: any) => any } = {
                 return { success: false, error: `Node with UUID ${nodeUuid} not found` };
             }
 
-            // 注意：这里只是一个模拟实现，因为运行时环境下无法直接创建预制体文件
-            // 真正的预制体创建需要Editor API支持
+            // Note: this is only a simulated implementation because prefab files
+            // cannot be created directly in the runtime environment.
+            // Real prefab creation requires Editor API support.
             return {
                 success: true,
                 data: {
@@ -376,22 +377,22 @@ export const methods: { [key: string]: (...any: any) => any } = {
             if (!component) {
                 return { success: false, error: `Component ${componentType} not found on node` };
             }
-            // 针对常见属性做特殊处理
+            // Handle common properties with dedicated logic.
             if (property === 'spriteFrame' && componentType === 'cc.Sprite') {
-                // 支持 value 为 uuid 或资源路径
+                // Support either a UUID or an asset path in value.
                 if (typeof value === 'string') {
-                    // 先尝试按 uuid 查找
+                    // Try resolving by UUID first.
                     const assetManager = require('cc').assetManager;
                     assetManager.resources.load(value, require('cc').SpriteFrame, (err: any, spriteFrame: any) => {
                         if (!err && spriteFrame) {
                             component.spriteFrame = spriteFrame;
                         } else {
-                            // 尝试通过 uuid 加载
+                            // Try loading via UUID.
                             assetManager.loadAny({ uuid: value }, (err2: any, asset: any) => {
                                 if (!err2 && asset) {
                                     component.spriteFrame = asset;
                                 } else {
-                                    // 直接赋值（兼容已传入资源对象）
+                                    // Assign directly to support already-loaded asset objects.
                                     component.spriteFrame = value;
                                 }
                             });
@@ -401,7 +402,7 @@ export const methods: { [key: string]: (...any: any) => any } = {
                     component.spriteFrame = value;
                 }
             } else if (property === 'material' && (componentType === 'cc.Sprite' || componentType === 'cc.MeshRenderer')) {
-                // 支持 value 为 uuid 或资源路径
+                // Support either a UUID or an asset path in value.
                 if (typeof value === 'string') {
                     const assetManager = require('cc').assetManager;
                     assetManager.resources.load(value, require('cc').Material, (err: any, material: any) => {
@@ -425,7 +426,7 @@ export const methods: { [key: string]: (...any: any) => any } = {
             } else {
                 component[property] = value;
             }
-            // 可选：刷新 Inspector
+            // Optional: refresh the Inspector.
             // Editor.Message.send('scene', 'snapshot');
             return { success: true, message: `Component property '${property}' updated successfully` };
         } catch (error: any) {

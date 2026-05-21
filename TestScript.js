@@ -31,17 +31,17 @@ let TestScript = class TestScript extends cc_1.Component {
 exports.TestScript = TestScript;
 __decorate([
     property({
-        displayName: "测试字符串"
+        displayName: "Test String"
     })
 ], TestScript.prototype, "testString", void 0);
 __decorate([
     property({
-        displayName: "测试数字"
+        displayName: "Test Number"
     })
 ], TestScript.prototype, "testNumber", void 0);
 __decorate([
     property({
-        displayName: "测试布尔值"
+        displayName: "Test Boolean"
     })
 ], TestScript.prototype, "testBoolean", void 0);
 __decorate([
