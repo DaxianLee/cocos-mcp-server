@@ -1,43 +1,47 @@
 # Cocos Creator MCP 服务器插件
 
-**[📖 English](README.EN.md)**  **[📖 中文](README.md)**
+🌐 **简体中文** · [English](README.EN.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md) · [Português](README.pt.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [Tiếng Việt](README.vi.md)
 
 一个适用于 Cocos Creator 3.8+ 的综合性 MCP（模型上下文协议）服务器插件，使 AI 助手能够通过标准化协议与 Cocos Creator 编辑器进行交互。一键安装和使用，省去所有繁琐环境和配置。已经测试过Claude客户端Claude CLI和Cursor，其他的编辑器理论上也完美支持。
 
 **🚀 现在提供 50 个强力融合工具，实现99%的编辑器控制！**
 
-## V1.6.0 PRO 版本视频演示和教学
+## PRO版本已经更新到了1.7.8
 
 | 类型 | 链接 |
 |------|------|
 | **视频预览** | [Bilibili 视频](https://www.bilibili.com/video/BV1rTAXzuEH3/) |
-| **免费体验** | [vberai 体验地址](https://www.vberai.com/game-engines/cocos) |
+| **免费体验** | [vberai cocos creator 3.x版本 mcp  Pro 体验地址](https://www.vberai.com/game-engines/cocos) |
+| **免费体验** | [vberai cocos creator 2.x版本 mcp  Pro 体验地址](https://www.vberai.com/game-engines/cocos2x) |
+| **AI 设计画布** | [VberAI Studio —— 全球首个游戏 AI 原生设计平台](https://studio.vberai.com) |
+| **官网** | [VberAI 官网 vberai.com](https://www.vberai.com) |
 
-## V1.6.0 PRO 版本特性
+## Cocos MCP 3.x Pro 版本特性
 
-适用于 Cocos Creator 3.8+ 的 MCP（模型上下文协议）服务器插件，让 AI 助手通过标准化协议直接控制 Cocos Creator 编辑器。**13 个意图级工具**覆盖 **150+** 编辑器操作，支持一键配置主流 AI 客户端。
+> 🚀 Pro 版由 **VberAI** 打造并持续维护 —— [立即体验 Pro 版](https://www.vberai.com/game-engines/cocos) ｜ [观看视频演示](https://www.bilibili.com/video/BV1rTAXzuEH3/)
 
-### 核心特性
+专为 **Cocos Creator 3.8.6+** 打造的专业级 MCP（模型上下文协议）插件，让 AI 助手通过标准化协议直接操控编辑器。**16 个意图级工具**覆盖 **231 项操作**，横跨 **12 大能力模块**，贯穿 Cocos Creator 3.x 开发全流程。采用 **Streamable HTTP** 协议，配合 Token 优化设计，更省 Token、调用更稳定，支持一键配置主流 AI 客户端（Cursor、Claude、Windsurf 等）。
 
-- **13 个意图级 MCP 工具**：所有工具以 `cocos_` 前缀暴露，采用 action 操作码分发，一个工具覆盖一个领域。
+| 意图级工具 | 覆盖操作 | 覆盖模块 | 通信协议 |
+|:---:|:---:|:---:|:---:|
+| **16** | **231** | **12 大模块** | **Streamable HTTP** |
 
-#### 工具一览
+### 十二大能力模块
 
-| 工具 | 说明 | 操作数 |
-|------|------|--------|
-| `cocos_scene` | 场景管理 — 打开/保存/创建场景、层级查询、脚本执行、undo | 22 |
-| `cocos_node` | 节点操作 — 查找/创建/修改/移动/复制/脚本挂载，智能路径解析 | 16 |
-| `cocos_component` | 组件管理 — 增/删/查/属性设置/点击事件配置 | 7 |
-| `cocos_prefab` | 预制体 — 创建/实例化/编辑模式/apply/revert | 12 |
-| `cocos_asset` | 资源管理 — 查询/搜索/创建/复制/移动/删除/依赖分析 | 17 |
-| `cocos_editor` | 编辑器 — 项目/构建/预览/控制台/日志/偏好设置/服务器信息 | 28 |
-| `cocos_view` | 场景视图 — Gizmo/相机/网格/2D-3D 切换/参考图片 | 29 |
-| `cocos_composite` | 高级组合 — 一键创建按钮/标签/图片、Widget 配置、批量操作 | 6 |
-| `cocos_knowledge` | 知识库 — 组件属性表/UI 设计规范/布局模式/工具使用指南 | 6 |
-| `cocos_validate` | 场景验证 — 布局检查/引用检查/层级分析 | 3 |
-| `cocos_template` | UI 模板 — 对话框/滚动列表/导航栏/设置页 | 2 |
-| `cocos_capture` | 场景快照 — 完整场景结构/单节点详情（JSON 格式） | 2 |
-| `cocos_builder` | 场景构建器 — 从 JSON 树一次性构建完整节点层级 | 1 |
+| 模块 | 操作数 | 说明 |
+| ------------- | -----: | ------------------------------------------------------------ |
+| 场景管理      |     24 | 场景的打开、保存、创建与切换，层级查询与快照，支持撤销操作和脚本执行。 |
+| 节点操作      |     18 | 节点的完整 CRUD，支持批量修改、脚本挂载、节点类型检测和剪贴板操作。 |
+| 组件系统      |      8 | 组件的增删查改和属性设置，支持点击事件绑定和批量事件配置。   |
+| 预制体系统    |     13 | 预制体的创建、实例化、编辑模式切换，支持应用/还原变更和预制体验证。 |
+| 资源管理      |     19 | 资源的查询、搜索、CRUD 与导入，支持依赖分析、UUID 与路径转换。 |
+| 编辑器控制    |     33 | 工程设置、日志、偏好、构建与预览等编辑器级操作。             |
+| 场景视图      |     32 | Gizmo、相机、网格与参考图，提供视口上下文与边界感知控制。    |
+| UI 与模板构建 |     13 | 一键创建 UI 组件，JSON 树构建完整节点层级，内置多种 UI 模板。 |
+| 动画系统      |     39 | 关键帧编辑、曲线调整、动画事件、预设应用，及 Spine 骨骼动画管理。 |
+| 知识库查询    |      8 | 内置组件属性、UI 设计规则、布局模式和最佳实践知识库，AI 精准辅助开发。 |
+| 验证与快照    |      6 | 场景布局检查、资源引用验证、层级分析，配合场景快照回归校验。 |
+| 字体与 Label  |      9 | 字体资源管理与富文本 Label 操作，覆盖文字排版设置。          |
 
 #### 智能特性
 
@@ -49,6 +53,59 @@
 - **参考图片系统** — 在场景视图叠加 UI 设计稿，AI 看着设计图搭界面
 - **节点树缓存** — 2 秒 TTL 缓存避免重复查询，变更操作后自动失效
 - **原子化操作** — builder/composite 使用 snapshot 机制，失败时自动回滚
+
+### Pro 版 vs 开源版
+
+| 功能 | 开源版 | Pro 版 |
+|------|:---:|:---:|
+| 通信协议 | HTTP 协议 | **Streamable HTTP** |
+| Token 优化 | 基础设计 | 优化设计，更省 Token 更稳定 |
+| 操作码方法 | ✕ | ✅ |
+| 一键配置 | ✕ | ✅ |
+| 工具自定义 | ✕ | ✅ |
+| 意图级工具 | 基础工具 | 16 种，覆盖 231 项操作 |
+| 一次性创建场景 | ✕ | ✅ |
+| 内置知识库 | ✕ | ✅ |
+| 动画 / Spine 系统 | ✕ | ✅ 39 项动画操作 |
+
+---
+
+## 🌐 关于 VberAI —— AI 原生游戏生产力平台
+
+**VberAI** 是面向游戏开发者、美术团队与内容团队的 **AI 原生游戏生产力平台**，也是本 Cocos MCP 插件 Pro 版的开发与维护方。VberAI 是目前**唯一同时为 Unity、Godot、Cocos Creator 三大主流引擎提供 MCP 插件**的厂商，围绕「让 AI 真正融入游戏生产管线」打造三条产品线：
+
+- **🎮 游戏引擎 MCP 插件** —— 在引擎编辑器内运行 MCP 服务，让 Claude Desktop、Claude Code、Cursor、Windsurf、Cline 等 AI 客户端直接读取并操作场景、组件、资源、动画与脚本。
+- **🎨 AI Studio** —— AI 原生游戏设计画布，一端导入 PSD / Figma / 引擎项目，另一端导出 Unity / Cocos / Godot 场景与预制体。
+- **✂️ AI 超强抠图（AI Super Matting）** —— 浏览器端一键抠图，发丝级精度 + 真实 Alpha 通道输出，按量计费。
+
+### 引擎 MCP 插件家族
+
+| 插件 | 说明 |
+|------|------|
+| **Unity MCP** | 企业级 MCP 插件，覆盖场景 / GameObject / 组件 / 预制体 / 材质 / 动画 / Shader，支持 Unity 2022.3+ 与 Unity 6 |
+| **Cocos MCP 3.x Pro** | 本项目 Pro 版，16 个意图级工具 / 231 项操作，Cocos Creator 3.8.6+，Streamable HTTP |
+| **Cocos MCP 2.x Pro** | 面向 Cocos Creator 2.4.x+ 老项目（仍在运营的 2.x 线上项目）量身打造 |
+| **Godot MCP** | 完全免费、MIT 开源，100+ 工具命令覆盖 21 个系统，Godot 4.x，兼容 GDScript 与 C# |
+
+
+---
+
+## 🎨 VberAI Studio —— 全球首个游戏 AI 原生设计平台
+
+> **为游戏而生的 AI 原生设计平台。** 从底层开始兼容 Unity、Cocos、Godot 引擎，超多高频 AI 工具与自动化流程，让美术生成、一键换皮、资产管理、设计稿到引擎一体化交付，再加上引擎反向回流，彻底打通「AI 设计 → 游戏引擎 AI」全开发链路。
+>
+> 👉 **[立即进入 AI Studio](https://studio.vberai.com)** ｜ [了解更多](https://www.vberai.com/studio)
+
+
+### 完整生产链路
+
+**导入设计与项目资产 → AI 高频生成与编辑 → 组件化引擎交付 → 通过 Engine MCP 实时同步到引擎 → 引擎反向回流**
+
+配合本 Cocos MCP 插件，AI Studio 把场景、预制体、组件与美术资源回写到工程后，Engine MCP 让 AI 在 Cocos Creator 中继续完成脚本、组件配置、资源管理与调试，形成端到端的开发闭环 —— 大幅提升团队效率，甚至让一个人就是一支队伍。
+
+**🔗 相关链接**：[VberAI 官网](https://www.vberai.com) ｜ [AI Studio](https://studio.vberai.com) ｜ [AI 超强抠图](https://www.vberai.com/ai-studio/bg-removal) ｜ [平台定价](https://www.vberai.com/pricing) ｜ 联系支持：support@vberai.com
+
+---
 
 
 ## 开源版本更新日志
@@ -298,6 +355,13 @@ claude mcp add --transport http cocos-creator http://127.0.0.1:3000/mcp（使用
 - **AI友好**: 参数清晰、文档完善、调用简单
 - **性能优化**: 降低50% token消耗，提升AI调用成功率
 - **完全兼容**: 与Cocos Creator官方API 100%对齐
+
+## ⚠️ 安装前必读（重要）
+
+> **首次安装或升级前，请务必删除当前项目 `settings/` 目录下的 `mcp-server.json` 和 `tool-manager.json` 两个文件，否则插件的工具列表显示会出现异常！**
+>
+> 文件路径：`你的项目/settings/mcp-server.json` 与 `你的项目/settings/tool-manager.json`
+> 删除这两个文件后，重新打开插件面板即可恢复正常。
 
 ## 安装说明
 
