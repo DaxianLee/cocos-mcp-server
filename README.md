@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/daxianlee-cocos-mcp-server-badge.png)](https://mseep.ai/app/daxianlee-cocos-mcp-server)
+
 # Cocos Creator MCP 服务器插件
 
 🌐 **简体中文** · [English](README.EN.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md) · [Português](README.pt.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [Tiếng Việt](README.vi.md)
